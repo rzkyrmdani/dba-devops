@@ -1,0 +1,129 @@
+--#CEK ROW LOCK
+> SELECT   b.inst_id, a.session_id, b.serial#, a.oracle_username,
+            c.object_name, f.spid,
+            DECODE (d.TYPE,
+                    'MR', 'Media Recovery',
+                    'RT', 'Redo Thread',
+                    'UN', 'User Name',
+                    'TX', 'Transaction',
+                    'TM', 'DML',
+                    'UL', 'PL/SQL User Lock',
+                    'DX', 'Distrib Xaction',
+                    'CF', 'Control File',
+                    'IS', 'Instance State',
+                    'FS', 'File Set',
+                    'IR', 'Instance Recovery',
+                    'ST', 'Disk Space Transaction',
+                    'TS', 'Temp Segment',
+                    'IV', 'Library Cache Invalidation',
+                    'LS', 'Log Start or Switch',
+                    'RW', 'Row Wait',
+                    'SQ', 'Sequence Number',
+                    'TE', 'Extend Table',
+                    'TT', 'Temp Table',
+                    'JQ', 'Job queue',
+                    'WL', 'Being-written redo log instance',
+                    'CU', 'Cursor bind',
+                    'SM', 'SMON',
+                    'PS', 'Parallel operation',
+                    d.TYPE
+                   ) lock_type,
+            DECODE (d.lmode,
+                    0, 'None',                       /* Mon Lock equivalent */
+                    1, 'Null',                                         /* N */
+                    2, 'Row-S (SS)',                                   /* L */
+                    3, 'Row-X (SX)',                                   /* R */
+                    4, 'Share',                                        /* S */
+                    5, 'S/Row-X (SSX)',                                /* C */
+                    6, 'Exclusive',
+                    TO_CHAR (d.lmode)
+                   ) mode_held,
+            e.event, e.seconds_in_wait "Wait(Seconds)"
+       FROM                                                     -- sys.obj$ c,
+            dba_objects c,
+            -- v$session b,
+            gv$session b,
+            -- v$locked_object a,
+            gv$locked_object a,
+            -- sys.v_$lock d,
+            gv$lock d,
+            --v$session_wait e,
+            gv$session_wait e,
+            --v$process f
+            gv$process f
+                                                                           --,
+      -- gv$instance i
+   WHERE    a.session_id = b.SID
+        AND a.inst_id = b.inst_id
+        AND b.paddr = f.addr
+        AND b.inst_id = f.inst_id
+        AND b.SID = e.SID
+        AND b.inst_id = e.inst_id
+        AND c.object_id = a.object_id
+        AND a.object_id = d.id1
+        AND b.SID = d.SID
+	--AND b.EVENT='enq: TX - row lock contention'
+   ORDER BY e.seconds_in_wait DESC;
+   
+   
+   
+--#KILL SESSION ROW LOCK
+> SELECT	'alter system kill session '
+		|| ''''
+		|| s.SID
+		|| ','
+		|| SERIAL#
+		|| ','
+		|| '@'
+		|| s.INST_ID
+		|| ''''
+		|| ' immediate;'
+FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+WHERE event='enq: TX - row lock contention';
+ 
+ 
+--#KILL SESSION SID & INST_ID
+> SELECT	'alter system kill session '
+		|| ''''
+		|| s.SID
+		|| ','
+		|| SERIAL#
+		|| ','
+		|| '@'
+		|| s.INST_ID
+		|| ''''
+		|| ' immediate;'
+FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+WHERE sid=2421 and s.inst_id=1;
+ 
+ 
+--#KILL SESSION FOR USERNAME
+> SELECT	'alter system kill session '
+		|| ''''
+		|| s.SID
+		|| ','
+		|| SERIAL#
+		|| ','
+		|| '@'
+		|| s.INST_ID
+		|| ''''
+		|| ' immediate;'
+FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+WHERE username='ARIDWAN';
+
+
+--#KILL SESSION FOR SQL_ID
+> SELECT	'alter system kill session '''|| SID || ',' || SERIAL# || ''' immediate ;'
+FROM v$session
+WHERE sql_id = '&sql_id';
+
+-- IN RAC
+> SELECT 'alter system kill session '''|| SID|| ','|| SERIAL#|| ',@'|| inst_id|| ''' immediate ;'
+FROM gv$session
+WHERE sql_id = '&sql_id'
+
+-- NEW SCRIPT
+SELECT 'alter system kill session ' || '''' || s.SID || ',' || SERIAL# ||','|| '@' ||s.INST_ID|| '''' || ' immediate;' FROM GV$SESSION s join
+  gv$instance i on (i.inst_id=s.inst_id)
+WHERE  s.EVENT='enq: TX - row lock contention'
+

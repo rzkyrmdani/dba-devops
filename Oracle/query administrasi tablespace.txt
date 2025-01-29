@@ -1,0 +1,97 @@
+* QUERY ADMIN TABLESPACE
+
+- buat folder tablespace dulu di user root
+mkdir /tablespace
+chown -R oracle:oinstall tablespace/ -> berikan hak akese ke user oracle
+
+*UNDO TABLESPACE
+
+- MEMBUAT UNDO TABLESPACE
+create undo tablespace (nama undo tablespace) ‘/(nama direktori/nama file)’ besaran ukuran file;
+create undo tablespace undotbs_latihan ‘/tablespace/undotablespace.dbf’ size 10m;
+
+- UTK MELIHAT DATAFILE DAN SIZE DARI TABLESPACE YANG DIBUAT
+select file_name,bytes from dba_data_files where tablespace_name='(Nama UndoTablespace)';
+select file_name,bytes from dba_data_files where tablespace_name='TS_GANTENG';
+
+- MENGUBAH UKURAN UNDO TABLESPACE
+Alter database datafile ‘/(nama direktori/nama file)’ ukuran yg ingin diubah;
+Alter database datafile ‘/tablespace/undotbs_latihan.dbf’ resize 15m;
+
+- MELIHAT DEFAULT UNDO TABLESPACE YG DIPAKAI
+show parameter undo_tablespace;
+
+- MENGUBAH DEFAULT UNDO TABLESPACE LAMA KE BARU
+alter system set undo_tablespace=(nama undotablespace);
+alter system set undo_tablespace=UNDOTBS_LATIHAN;
+
+* TEMPORARY TABLESPACE
+
+- MEMBUAT TEMPORARY TABLESPACE
+create temporary tablespace (nama temporary TABLESPACE) tempfile '(nama direktori/nama file)' besar ukuran;
+create temporary tablespace temp_latihan tempfile '/tablespace/latihan_temp.dbf' size 10m;
+
+- MENGUBAH UKURAN TEMPORARY TABLESPACE
+alter database tempfile '/(nama direktori/nama file' ukuran yg ingin diubah;
+alter database tempfile '/tablespace/latihan_temp.dbf' resize 25m;
+
+- MELIHAT DEFAULT TEMPORARY TABLESPACE
+select property_value from database_properties where property_name='DEFAULT_TEMP_TABLESPACE';
+
+- MENGUBAH DEFAULT TEMPORARY TABLESPACE
+alter database default temporary tablespace (nama temporary tablespace);
+alter database default temporary tablespace temp_latihan;
+
+* PERMANENT TABLESPACE
+
+- MEMBUAT PERMANENT TABLESPACE
+create tablespace (nama tablespace) datafile '(nama path direktori/nama file) besar ukuran yg dibuat;
+create tablespace HR_HISTO datafile '/home/oracle/tablespace/hr_histo.dbf' size 10m;
+
+- MEMBUAT DATAFILE PADA SATU TABLESPACE
+alter tablespace (nama tablespace sebelumnya dibuat) add datafile '(nama direktori/nama file)' besar ukuran;
+alter tablespace TS_BELAJAR add datafile '/tablespace/ts_belajar2.dbf' size 10m;
+
+- MENGHAPUS DATAFILE PADA SATU TABLESPACE
+alter tablespace (nama tablespace) drop datafile '/(nama direktori/nama file)';
+alter tablespace TS_BELAJAR drop datafile '/tablespace/ts_belajar22.dbf';
+
+- MELIHAT TABLESPACE PERMANENT
+select tablespace_name from dba_tablespaces;
+
+- MELIHAT DEFAULT PERMANENT TABLESPACE YG DIPAKAI
+select property_value from database_properties where property_name='DEFAULT_PERMANENT_TABLESPACE';
+
+- MENGUBAH DEFAULT PERMANENT TABLESPACE yg DIPAKAI
+alter database default tablespace (nama tablespace);
+alter database default tablespace TS_BELAJAR;
+
+- UNTUK MELIHAT STATUS ONLINE/OFFLINE PADA TABLESPACE
+select tablespace_name status from dba_tablespaces;
+
+- MENGUBAH UKURAN TABLESPACE
+alter database datafile '/(nama direktori/nama file)' ukuran yg ingin diubah;
+alter database datafile '/tablespace/ts_belajar.dbf' resize 20m;
+
+- MELIHAT FREE SPACE (STORAGE YG KOSONG) PADA TEMPORARY TABLESPACE
+select a.name, sum(b.bytes) from v$datafile a, dba_free_space b where a.file#=b.file_id and b.TABLESPACE_NAME='(nama tablespace)' group by a.name;
+select a.name, sum(b.bytes) from v$datafile a, dba_free_space b where a.file#=b.file_id and b.TABLESPACE_NAME='TS_BELAJAR' group by a.name;
+
+- MENGHAPUS TABLESPACE
+drop TABLESPACE (nama_TABLESPACE);
+drop TABLESPACE ts_latihan;
+
+- MELIHAT DATAFILE TABLESPACE
+select FILE_NAME, TABLESPACE_NAME, BLOCKS from dba_data_files;
+
+- menghapus TABLESPACE beserta file dan data-datanya
+drop TABLESPACE (nama_TABLESPACE) including contents and datafiles;
+drop tablespace TS_HURAHURA including contents and datafiles;
+
+- mengganti sistem undo TABLESPACE lama ke yg baru
+alter system set undo_TABLESPACE=(nama undoTABLESPACE);
+alter system set undo_TABLESPACE=UNDOTBS_LATIHAN;
+
+- UTK MELIHAT DATAFILE DAN SIZE DARI TABLESPACE
+select * from dba_data_files;
+

@@ -1,0 +1,185 @@
+ADMINISTRASI USER ORACLE
+===
+	CARA KILL/DISCONNECT PADA USER YG SEDANG LOGIN = JWB DIBWAH
+	=======
+	
+CARA KILL/DISCONNECT PADA USER YG SEDANG LOGIN DAN UPDATE PROFILE DAN ROLE = JWB DIBAWAH
+===
+
+- LOGIN USER
+sqlplus /  as sysdba
+sqlplus (nama_user) rizky
+sqlplus (nama_user) rizky /(password) admin12345
+sqlplus sys as sysdba
+
+- UTK BUAT USER BARU
+
+create user (nama_user) identified by (password);
+create user rizky identified by werty123; 
+
+- UTK MELIHAT USER YG DIBUAT
+
+select username from dba_users;
+
+- MEMBERIKAN KONEKSI KE USER BARU DIBUAT
+
+grant connect to (nama_user);
+grant connect to rizky; 
+
+- UTK GANTI PASSWORD BARU
+
+alter user (name_user) identified by (password baru);
+alter user DBSNMP identified by welcome1 account unlock;
+
+alter user HR default tablespace USERS;
+
+- UTK HAPUS USER
+
+drop user (nama_user);
+drop user rizky; 
+
+- UTK BUAT USER BARU DAN PD SAAT LOGIN MEMINTA REQUEST GANTI PASSWORD
+
+create user (nama_user) identified by (password) password expire;
+create user rizky identified by apaaja password expire;
+
+- UTK BUAT USER BARU DAN SEKALIGUS MEMBERIKAN AKSES LOGIN
+
+grant connect to (nama_user) identified by (password);
+grant connect to halim identified by qwerty123;
+
+- UTK MELIHAT DEFAULT TABLESPACE YG DIPAKAI PADA USER
+
+select username,default_tablespace from dba_users where username='(NAMA_USER)';
+select username,default_tablespace from dba_users where username='DBA_ONI';
+
+- UTK MENGUBAH DEFAULT TABLESPACE YG DIPAKAI
+
+alter user (nama user) default tablespace (nama tablespace);
+alter user rizky default tablespace TS_LEARNING;
+
+- UTK MENUTUP (LOCK) AKSES KE DATABASE PD USER
+
+alter user (nama user) account lock;
+alter user rizky account lock;
+
+- UTK MEMBUKA (UNLOCK) AKSES KE DATABASE PD USER
+
+alter user (nama user) account unlock;
+alter user rizky account unlock;
+
+- UTK MEMBERI SEMUA AKSES
+
+grant all privileges to (nama user) ;
+
+- UTK PINDAH/SWITCH USER KETIKA LOGIN
+
+conn (nama user); enter masukkan password
+conn rizky
+
+- UTK MELIHAT ID USERNAME DAN DARI USERNAME
+
+select user#, name from sys.user$ where name='(name user)';
+select user#, name from sys.user$ where name='RIZKY';
+
+- UTK MELIHAT SEMUA USERNAME YG TERDAFTAR OLEH PENGGUNA SAAT INI
+
+select * from all_users;
+
+- UTK MELIHAT SEMUA USERNAME YG TERDAFTAR DI DATABASE
+
+select * from dba_users where name='DBA_ONI';
+
+- UTK MELIHAT INFROMASI USERNAME LOGIN SAAT INI
+
+select * from user_users;
+
+- UTK BUAT USER DENGAN MEMBERIKAN DEFAULT TABLESPACE
+
+create user (nama user) identified by (passwd) default tablespace (nama tablespace);
+create user MGR_BAJU identified by 123 default tablespace TS_PENJUALAN;
+
+- UTK MENGHAPUS USER YANG DIBERIKAN AKSES RESOURCE ATAU ERROR CASCADE
+
+drop user (nama user) CASCADE;
+drop user rizky CASCADE
+
+- UTK BUAT USER MASUK PADA TABLESPACE
+alter user (nama user) default tablespace (nama tablespace);
+alter user rizky default tablespace TS_BELAJAR;
+
+- UTK MEMBERIKAN KOUTA PADA TABLESPACE
+alter user (nama user) qouta unlimited on (nama tablespace);
+alter user DBA_ONI quota unlimited on TS_BELAJAR;
+
+- UTK MELIHAT STATUS AKUN USERNAME YANG OPEN,LOCKED,EXPIRED
+select username, account_status from dba_users where USERNAME='MUHAMMADANSHOR';
+
+- UTK MELIHAT STATUS AKUN USERNAME YANG EXPIRED DAN LOCKED
+select username, account_status from dba_users where lock_date is not null;
+
+
+- UTK CEK/MELIHAT USERNAME BESERTA PASSWORD
+select USER#,NAME,PASSWORD FROM user$;
+
+
+- CARA GANTI PASSWORD DENGAN KONDISI YG SAMA
+select spare4 from sys.user$ where name='ONI';
+alter user ONI identified by values 'S:45D71F6BBB4896B9154C5362F967CCA94A28F7F91F59FC75C71182987359';
+
+- CARA KILL/DISCONNECT PADA USER YG SEDANG LOGIN
+1. buat 2 user dulu 
+	--> create user JONI identified by joni123;
+	--> create user JONO identified by jono123;
+2. kasih hak ases login
+	--> grant create session to JONI;
+	--> grant create session to JONO;
+3. kasih akses sistem pada user JONI
+	--> grant alter system to JONI;
+4. Cek ID user dari user SYSADMIN
+	--> select sid, serial#, status, username from v$session WHERE username IS NOT NULL ORDER by username ASC;
+5. setelah dapat ID lakukan di user JONI
+	--> loign user JONI
+	--> alter system disconnect session '<SID>, <SERIAL>' immediate;
+	--> atau ALTER SYSTEM KILL SESSION '<SID>, <SERIAL>' 
+	
+
+
+CARA USER 1 KILL/DISCONNECT USER 2 DAN USER 2 UPDATE ROLE DAN PROFILE
+1. buat 2 user
+	--> create user QUSAY identified by qusay123; (user 1)
+	--> create user BAGAS identified by bagas123; (user 2)
+2. kasih hak akses login
+	--> grant create session to BAGAS, QUSAY;
+3. buat role di sys
+	--> create role COBA_ROLE;
+4. kasih role ke user 2 (BAGAS) di user SYS
+	--> grant COBA_ROLE to BAGAS;
+5. kasih akses buat table pada role di user SYS
+	--> grant create table to COBA_ROLE with admin option;
+6. Cek/Melihat akses apa yg diberikan utk ROLE
+	--> select * from role_sys_privs where role='COBA_ROLE' order by 1;
+7. login user 2 (BAGAS) dan coba buat table
+	--> create table KARYAWAN (id varchar(10), nama varchar(20), kota varchar(25), email varchar(25));
+	--> insert into KARYAWAN(id, nama, kota, email) values('1', 'beni', 'solo', 'beni@mail.com');
+	--> select * from KARYAWAN
+8. di user 2 (bagas) cabut hak akses buat table pada role
+	--> revoke create table from COBA_ROLE;
+	--> coba buat table kembali
+9. sekarang utk update profile pada user 2(bagas). Buat profile di sys
+	--> create profile BENI_PROFILE limit failed_login_attempts 2;
+10. barikan akses update ke user 2 (bagas) dari sys
+	--> grant alter profile to BAGAS;
+11. di user bagas lakukan update profile
+	--> alter profile BENI_PROFILE limit failed_login_attempts 1;
+	
+CARA USER 1 KILL/DISCONNECT USER 2
+
+
+
+====== MEMPERBARUI PASSWORD EXPIRED =====================
+
+SELECT 'ALTER USER "'||D.USERNAME||'" IDENTIFIED BY VALUES '''||U.PASSWORD||''';' C
+FROM DBA_USERS D, SYS.USER$ U
+WHERE D.USERNAME = 'MJAYENG_RZKY'
+AND U.USER# = D.USER_ID
