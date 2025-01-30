@@ -1,0 +1,120 @@
+================= DOCKER =============================
+				
+
+========================= VM BELAJAR ==========================================
+
+docker run -d --name ecofr \
+ --restart unless-stopped \
+ --memory="8g" \
+ -p 14045:1521 \
+ -e ENABLE_ARCHIVELOG=true \
+ -v /Docker/Volume/Belajar/DB_bpbl/:/opt/oracle/oradata \
+container-registry.oracle.com/database/enterprise:12.2.0.1
+
+
+docker run --memory="8g" --name icofr -e MYSQL_ROOT_PASSWORD=mypass -p 3306:3306 -d docker.io/library/mariadb:10.3
+
+#docker run --memory="8g" --name icofr -e MYSQL_ROOT_PASSWORD=mypass -p 3306:3306 -v mariadbdata:/Docker/Volume/Belajar/icofr -d mmariadb:10.4 --restart unless-stopped
+
+2eb714083584
+
+docker run -d \
+  -p 3000:3000 \
+  --name=grafana \
+  -e "GF_SECURITY_ADMIN_USER=admin" \
+  -e "GF_SECURITY_ADMIN_PASSWORD=admin" \
+  -v grafana-data:/var/lib/grafana \
+  grafana/grafana
+
+========================= VM OPREK" (DB BPBL) =================================
+
+-run image docker
+
+docker run -d --name BPBL_DB \
+ --restart unless-stopped \
+ --memory="8g" \
+ -p 14045:1521 \
+ -e ENABLE_ARCHIVELOG=true \
+ -v /Docker/Volume/Restore_DB/Maret_2023/restore_dbbpbl/:/opt/oracle/oradata \
+container-registry.oracle.com/database/enterprise:12.2.0.1
+
+-check log docker
+
+docker logs a45400261bf7 -f
+
+-copy dari os ke docker container
+
+docker cp /Restore_DB/Maret_2023/restore_db_bpbl/backup a45400261bf7:/home/oracle/backup/
+
+docker cp /root/test a45400261bf7:/home/oracle/backup/
+
+-login ke os docker container
+
+docker exec -it BPBLDB bash -c "source /home/oracle/.bashrc; sqlplus / as sysdba"
+
+docker exec -it BPBLDB bash
+
+docker exec -it -u root BPBLDB bash
+
+welcome1
+
+============================================
+
+docker run -d --name DBARENA \
+ --restart unless-stopped \
+ --memory="8g" \
+ -p 14022:1521 \
+ -e ENABLE_ARCHIVELOG=true \
+ -v /Docker/Volume/Restore/restore_dbarena/:/opt/oracle/oradata \
+oracle-11g
+
+
+docker run -d --name DBARENA \
+ --restart unless-stopped \
+ --memory="8g" \
+ -p 14045:1521 \
+ -e ENABLE_ARCHIVELOG=true \
+ -v /Docker/Volume/Restore_DB/Maret_2023/restore_dbbpbl/:/opt/oracle/oradata \
+container-registry.oracle.com/database/enterprise:12.2.0.1
+
+
+docker cp /Restore_DB/Maret_2023/restore_dbarena/cf/ f7c54c1ceff8:/home/oracle/backup/
+
+
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=welcome123" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-GA-ubuntu
+
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Icon@thn2025!' --env MSSQL_AGENT_ENABLED=True -p 6969:1433 --name sqlserver2019 -d mcr.microsoft.com/mssql/server:2019-latest
+
+# docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Icon@thn2025!' --env MSSQL_AGENT_ENABLED=True -p 6969:1433 --name sqlserver2019 -d sqlserver-custom:latest
+
+/opt/mssql-tools/bin/sqlcmd -S localhost,6969 -U SA -P 'Icon@thn2025!'
+
+/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Icon@thn2025!' -Q "SELECT @@VERSION"
+
+
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=YourPassword123!' -p 6969:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+
+
+sudo docker pull mcr.microsoft.com/mssql/server:2022-RTM-GDR1-ubuntu-20.04
+
+
+docker run --memory="8g" --name icofr -e MYSQL_ROOT_PASSWORD=mypass -p 3306:3306 -v mariadbdata:/Docker/Volume/Restore_DB/may_2023/restoredb_icofr/ -d mariadb:10.1.43-bionic --restart unless-stopped
+
+
+docker cp /Restore_DB/may_2023/restoredb_icofr/ 2c3a50f9aef9:/restore_dbicofr_202305
+
+mysql -u root -p icofr < /restore_dbicofr_202305/restoredb_icofr/backup_icofrpln_20230517_0100.sql
+
+select current_timestamp();
+
+/home/icofr/backup_db/log_backup_icofrpln_20230517_0100.log
+
+===== buat zip docker =======
+
+docker save -o sqlservercustom2019.tar sqlserver-custom:latest
+
+docker save -o mssql-server-2019.tar mcr.microsoft.com/mssql/server:2019-latest
+
+=== buat unzip file images docker ===
+
+docker load -i (file images zip)
