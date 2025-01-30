@@ -1,0 +1,342 @@
+
+================================================ analyze all table database postgres =======================
+
+SELECT 'ANALYZE' ||' '|| oid::regclass ||';'
+  FROM pg_class
+  WHERE relkind = 'r'
+  ORDER BY pg_total_relation_size(oid) DESC
+
+
+================================================ kill session ===================================
+
+SELECT
+	pg_terminate_backend(pg_stat_activity.pid)
+FROM
+	pg_stat_activity
+WHERE
+	pg_stat_activity.datname = 'plnpusat'
+	AND pid <> pg_backend_pid();
+
+
+----- query session kill yg lebih dari 5 menit -------
+
+Select 'SELECT pg_cancel_backend('||pid||')'||';' from pg_stat_activity where pid in
+(SELECT pid FROM pg_stat_activity
+WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes'
+order by (now() - pg_stat_activity.query_start) desc);
+
+------------------------------------------------------
+
+	
+SELECT 
+pg_terminate_backend(3739600);
+
+=============================================== cek session ==================================================================================
+
+select pid, usename, application_name, backend_start, state_change, state,substr(query,1,100) from pg_stat_activity where pid in (select pid from pg_locks where mode like '%Exclusive%');
+
+select current_time; select count(*), usename, state, client_addr, application_name from pg_stat_activity group by usename, state, client_addr, application_name order by count(*) desc;
+
+select pid, state, usename, query, query_start 
+from pg_stat_activity 
+where pid in (
+  select pid from pg_locks l 
+  join pg_class t on l.relation = t.oid 
+  and t.relkind = 'r' 
+  where t.relname = 'api_customtoken'
+);
+	
+
+SELECT
+pid,
+now() - pg_stat_activity.query_start AS duration,
+application_name,
+client_addr,
+query,
+state
+FROM pg_stat_activity
+WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes'
+order by duration desc;
+
+
+--- ( Buat Ngecek Proses Query Di Postgres) --------
+
+SELECT
+    pid,
+    usename,
+    datname,
+    state,
+    substr(query, 1, 50) AS query_snippet,
+    query_start + INTERVAL '7 hours' AS adjusted_query_start
+FROM
+    pg_stat_activity
+WHERE
+    state != 'idle'
+ORDER BY
+    query_start;
+
+
+SELECT
+    pid,
+    usename,
+    datname,
+    state,
+    substr(query, 1, 50) AS query,
+    query_start
+FROM
+    pg_stat_activity ORDER BY
+    query_start;
+
+
+================================================= cek session aktif cluster / sedang mengakses cluster  =========================================
+
+SELECT usename, client_hostname, client_addr, datname FROM pg_stat_activity;
+
+
+============================================= user dan grant postgres =====================================
+
+---- buat user:
+
+create user erbas_apps with password 'plnpusat@2024!';
+
+--- memberikan akses ke user:
+
+alter user erbas_apps with Superuser; 
+
+--- cek list user:
+
+\du+
+
+--- memberikan user akses owner pada database
+
+alter database erbas_db owner to erbas_apps;
+
+--- hak akses user untuk melihat database pada schema tertentu di postgresql
+
+GRANT USAGE ON SCHEMA nama_skema TO nama_pengguna;
+GRANT SELECT ON ALL TABLES IN SCHEMA nama_skema TO nama_pengguna;
+
+GRANT USAGE ON SCHEMA public TO ilham_sejati;
+GRANT INSERT ON ALL TABLES IN SCHEMA public TO ilham_sejati;
+GRANT UPDATE ON ALL TABLES IN SCHEMA public TO ilham_sejati;
+
+ic0Nplu5@2023!
+
+alter user rizky_ramdani with password 'ic0Nplu5@2023!';
+
+
+
+---- rename database -----
+
+ALTER DATABASE "STAGING_BAG" RENAME to "STAGING_BAG_OLD";
+
+create database STAGING_BAG;
+
+========================================================== backup & restore ====================================================================
+
+pg_restore -U postgres -d dms < /root/dms_db_20240126_0100AM.bak --verbose 2> /root/log_restore_dbdms_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d dms </Restore_DB/januari_2024/eic/dms_db_20240126_0100AM.bak 2> /Restore_DB/januari_2024/eic/log_restore_dbdms_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d csms </var/lib/postgresql/csms_db_20240317_1200AM.bak 2> /var/lib/postgresql/log_restore_csms_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+pg_dump -Fp -p 5432 plndaily > /backup/backup_plndaily_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/logs/log_bak_plndaily_full_$(date +\%Y\%m\%d_%I\%M\%p).log
+
+pg_dump -Fp -p 5432 BAG_PROD_NEW > /backup/backup_piece/backup_full_CRMBAG_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/backup_log/log_bak_CRMBAG_$(date +\%Y\%m\%d_%I\%M\%p).log
+
+
+pg_dump -Fp -p 5432 vcubicle_training > /var/lib/postgresql/backup_full_vcc_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /var/lib/postgresql/log_bak_vcc_$(date +\%Y\%m\%d_%I\%M\%p).log
+
+psql -U postgres -d vcubicle_dev > /var/lib/postgresql/vcubicle_full_2_23082024.dump
+
+pg_dump -U postgres -d vcubicle_training -F c -f /var/lib/postgresql/vcubicle_full_2_23082024.dump
+
+
+
+pg_dump -U postgres -d vcubicle_training > /var/lib/postgresql/vcubicle_fullfix_23082024.dump
+
+psql -U postgres -d vcubicle_dev < /var/lib/postgresql/vcubicle_fullfix_23082024.dump
+
+
+
+
+pg_dump my_database_name > mydatabase.sql
+
+/backup/backup_piece/backup_full_CRMBAG_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/backup_log/log_backup_full_CRMBAG_$(date +\%Y\%m\%d_%I\%M\%p).log
+
+
+
+------------- Restore -------------
+
+psql -U postgres -d back1 </home/postgres/restore/backup_back1_full_20240322_0207PM.bak 2> /home/postgres/restore/log_restore_back1_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d kong </home/postgres/restore/backup_kong_full_20240322_0213PM.bak 2> /home/postgres/restore/log_restore_kong_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d konga </home/postgres/restore/backup_konga_full_20240322_0219PM.bak 2> /home/postgres/restore/log_restore_konga_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d kong-travel </home/postgres/restore/backup_kongtravel_full_20240322_0217PM.bak 2> /home/postgres/restore/log_restore_kong_travel_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d konga-travel </home/postgres/restore/backup_kongatravel_full_20240322_0220PM.bak 2> /home/postgres/restore/log_restore_konga_travel_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d volvox </home/postgres/restore/backup_esppd_full_20240323_1000PM.bak 2> /home/postgres/restore/log_restore_esppd_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d hasura </home/postgres/restore/backup_hasura_full_20240322_0210PM.bak 2> /home/postgres/restore/log_restore_hasura_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+pg_restore -U postgres -d newvcmigrate </media/newvc/newvc_migrate_11062024.dump 2> /media/newvc/log_restore_newvcmigrate_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d csms </home/postgres/csms_db_20240317_1200AM.bak 2> /home/postgres/log_restore_csms_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d csms </home/postgres/csms_db_20240317_1200AM.bak 2> /home/postgres/log_restore_csms_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres -d "STAGING_BAG" </var/lib/postgresql/backup_bag_dbprod_20240720_1138AM.bak > /var/lib/postgresql/log_restore_oddo$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+psql -U postgres --clean --create -d postgres -F c </home/postgres/backup_esppd_full_20240814_1000PM.bak
+
+psql -U postgres -C </home/postgres/backup_esppd_full_20240814_1000PM.bak 2> /home/postgres/log_restore_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+/usr/lib/postgresql/11/bin/pg_restore -U postgres --clean --create -d postgres /home/postgres/backup_esppd_full_20240814_1000PM.bak
+
+
+
+--------------------- dump metada only (BACKUP) ------------------------------
+
+PGPASSWORD='4jiningD1r1ajiNingGust!' pg_dump -Fp -p 5432 back1 > /backup/esppd/dump/backup_back1_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/esppd/log/log_backup_back1_full_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+PGPASSWORD='4jiningD1r1ajiNingGust!' pg_dump -Fp -p 5432 hasura > /backup/esppd/dump/backup_hasura_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/esppd/dump/backup_log/log_backup_hasura_full_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+PGPASSWORD='4jiningD1r1ajiNingGust!' pg_dump -Fp -p 5432 kong > /backup/esppd/dump/backup_kong_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/esppd/dump/backup_log/log_backup_kong_full_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+PGPASSWORD='4jiningD1r1ajiNingGust!' pg_dump -Fp -p 5432 kong-travel > /backup/esppd/dump/backup_kongtravel_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/esppd/dump/backup_log/log_backup_kongtravel_full_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+PGPASSWORD='4jiningD1r1ajiNingGust!' pg_dump -Fp -p 5432 konga > /backup/esppd/dump/backup_konga_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/esppd/dump/backup_log/log_backup_konga_full_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+PGPASSWORD='4jiningD1r1ajiNingGust!' pg_dump -Fp -p 5432 konga-travel > /backup/esppd/dump/backup_kongatravel_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /backup/esppd/dump/backup_log/log_backup_kongatravel_full_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+pg_dump -Fp -p 5432 ProRBA2PLN > /home/postgres/dump/backup_proba_full_$(date +\%Y\%m\%d_%I\%M\%p).bak --verbose 2> /home/postgres/dump/log_backup_full_proba_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+
+pg_dump -Fp -p 5432 hasura_db2 > /home/postgres/backup_hasura_$(date +\%Y\%m\%d_%I\%M\%p).psql --verbose 2> /home/postgres/backuplog_hasura_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+pg_dump -Fp -p 5432 kong_db > /home/postgres/backup_hasura_$(date +\%Y\%m\%d_%I\%M\%p).psql --verbose 2> /home/postgres/backuplog_hasura_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+pg_dump -Fp -p 5432 konga_db > /home/postgres/backup_hasura_$(date +\%Y\%m\%d_%I\%M\%p).psql --verbose 2> /home/postgres/backuplog_hasura_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+
+pg_dump -Fp -p 5432 vcubicle_training > /var/lib/postgresql/vcubicle_full_$(date +\%Y\%m\%d_%I\%M\%p).dump --verbose 2> /var/lib/postgresql/backuplog_vcc_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+pg_dump -Fp -p 5432 -d vcubicle_training --verbose > /var/lib/postgresql/vcubicle_full_$(date +\%Y\%m\%d_%I\%M\%p).dump 2> /var/lib/postgresql/backuplog_vcc_$(date +\%Y\%m\%d_%I\%M\%p).log &
+
+
+
+---- dump all roles only ---------
+
+pg_dumpall --roles-only --file=/home/postgres/dump/roles.sql -p 5488 -U postgres
+
+
+----------------------------------------- BACKUP ---------------------------------------------------
+
+
+
+
+Penjelasan perintah:
+
+-Fp (format plan) : Menentukan format output sebagai plain text.
+-h localhost: Menentukan host database (dalam hal ini, localhost).
+-U username: Menentukan nama pengguna yang akan digunakan untuk melakukan backup.
+-p 5432: Menentukan port yang digunakan oleh PostgreSQL (port default adalah 5432).
+-d dbname: Menentukan nama database yang akan di-backup.
+-f /path/to/backup/dbname_backup.sql: Menentukan lokasi dan nama file untuk menyimpan hasil backup.
+
+
+
+====================================================== berishin pg_twophase di pln daily ===================================================================
+
+host=$(hostname)
+mv /home/postgres/data_$host/pg_twophase /home/postgres/data_$host/pg_twophase_backup/pg_twophase_$(date +\%Y\%m\%d_%I\%M\%p)
+su - postgres
+host=$(hostname)
+mkdir /home/postgres/data_$host/pg_twophase
+
+
+===================================================== cek query dengan PID suspect =========================================
+
+AMSKorp_DB=# select current_timestamp, select usename,state,backend_start,query from pg_stat_activity  where pid =72797;
+
+select current_timestamp; select usename,state,backend_start,query from pg_stat_activity  where pid =33455;
+
+date; ps aux --sort=-%cpu | head -n 100
+
+
+=================================================== cek penggunaan CPU & memory sorting by CPU Usage ===================================
+
+ps aux --sort=-%cpu | head -n 20
+
+	
+
+ps aux --sort=-%mem | head -n 20
+
+htop --sort -%mem
+
+/home/monitoring/log_utilitas.log
+
+
+====================================== Buat Ngecek Proses Query Di Postgres ======================
+
+SELECT
+    pid,
+    usename,
+    datname,
+    state,
+    substr(query, 1, 50) AS query_snippet,
+    query_start + INTERVAL '7 hours' AS adjusted_query_start
+FROM
+    pg_stat_activity
+WHERE
+    state != 'idle'
+ORDER BY
+    query_start;
+
+====================================== query ams ===========================
+
+128103 = SELECT "profiles_profile"."id", "profiles_profile"."created_by_id", "profiles_profile"."updated_at", "profiles_profile"."updated_by_id", "pr
+ofiles_profile"."deleted_at", "profiles_profile"."deleted_by_id", "profiles_profile"."created_date", "profiles_profile"."is_arsip", "profiles_profil
+e"."is_notactive", "profiles_profile"."is_migration", "profiles_profile"."nik", "profiles_profile"."nik_local", "profiles_profile"."fullname", "prof
+iles_profile"."display_deptcode", "profiles_profile"."name", "profiles_profile"."user_id", "profiles_profile"."role_id", "profiles_profile"."officec
+ity", "profiles_profile"."email", "profiles_profile"."address", "profiles_profile"."mobile", "profiles_profile"."gender", "profiles_profile"."prefix
+", "profiles_profile"."suffix", "profiles_profile"."loggedin", "profiles_profile"."starred", "profiles_profile"."avatar", "profiles_profile"."email_
+notification", "profiles_profile"."sms_notification", "profiles_profile"."push_notification", "profiles_profile"."show", "profiles_profile"."la
+
+SELECT DISTINCT "nde_agenda"."id", "nde_agenda"."agenda_type", "nde_agenda"."created_date", "nde_agenda"."created_date_migration", "nde_agen
+da"."is_migration", "nde_agenda"."obj_id", CONCAT('', CONCAT(STRING_AGG("nde_agenda_selesai"."privilege_id"::text, ''), '')) AS "s", CONCAT('', 
+CONCAT(STRING_AGG("nde_agenda_disposisi"."privilege_id"::text, ''), '')) AS "d", CASE WHEN (CONCAT('_', CONCAT(STRING_AGG("nde_agenda_disposisi"."
+privilege_id"::text, ''), ''))::text LIKE '%\121683\%' OR CONCAT('', CONCAT(STRING_AGG("nde_agenda_selesai"."privilege_id"::text, ''), '_'))::
+text LIKE '%\121683\%' OR CONCAT('', CONCAT(STRING_AGG("nde_agenda_disposisi"."privilege_id"::text, ''), ''))::text LIKE '%\_195991\%' OR CONC
+AT('', CONCAT(STRING_AGG("nde_agenda_selesai"."privilege_id"::text, ''), ''))::text LIKE '%\_195991\%') THEN '1' ELSE '0' END AS "t", "nde_docum
+ent"."id", "nde_document"."template_id", "nde_document"."subject", "nde_document"."priority", "nde_document"."ref_number", "nde_document"."att
+
+
+
+===================================== cek replikasi =====================================================
+
+select current_timestamp; select pid, usename, application_name, client_addr, sent_lsn, write_lsn, flush_lsn, replay_lsn, flush_lag, replay_lag, sync_state from pg_stat_replication order by application_name;
+
+
+============================== cek semua table yang ada schema postgres dan jumlah count nya =======================
+
+SELECT 
+    t.table_name,
+    COALESCE(s.n_live_tup, 0) AS row_count
+FROM 
+    information_schema.tables t
+LEFT JOIN 
+    pg_stat_user_tables s 
+ON 
+    t.table_name = s.relname
+WHERE 
+    t.table_schema = 'public';
+	
+================================================ cek max connection ==========================
+
+select s.setting max_conn,a.used_session used_conn ,s.setting::bigint - a.used_session conn_remain 
+from pg_settings s, (select count(*) as used_session from pg_stat_activity) a 
+where s.name='max_connections';

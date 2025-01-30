@@ -1,0 +1,131 @@
+Server=localhost;Database=master;Trusted_Connection=True;
+
+sql server = Welcome12345
+
+CREATE TABLE [user] (
+    user_id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    username NVARCHAR(50) NOT NULL UNIQUE,
+    password NVARCHAR(255) NOT NULL,
+    email NVARCHAR(100) NOT NULL UNIQUE,
+    full_name NVARCHAR(100),
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    updated_at DATETIME
+);
+
+INSERT INTO [user] (username, password, email, full_name, updated_at)
+VALUES 
+    ('john_doe', 'hashed_password1', 'john.doe@example.com', 'John Doe', GETDATE()),
+    ('jane_smith', 'hashed_password2', 'jane.smith@example.com', 'Jane Smith', GETDATE()),
+    ('mike_jones', 'hashed_password3', 'mike.jones@example.com', 'Mike Jones', GETDATE()),
+    ('susan_lee', 'hashed_password4', 'susan.lee@example.com', 'Susan Lee', GETDATE()),
+    ('peter_parker', 'hashed_password5', 'peter.parker@example.com', 'Peter Parker', GETDATE()),
+    ('tony_stark', 'hashed_password6', 'tony.stark@example.com', 'Tony Stark', GETDATE()),
+    ('bruce_wayne', 'hashed_password7', 'bruce.wayne@example.com', 'Bruce Wayne', GETDATE()),
+    ('clark_kent', 'hashed_password8', 'clark.kent@example.com', 'Clark Kent', GETDATE()),
+    ('diana_prince', 'hashed_password9', 'diana.prince@example.com', 'Diana Prince', GETDATE()),
+    ('steve_rogers', 'hashed_password10', 'steve.rogers@example.com', 'Steve Rogers', GETDATE());
+
+-- percobaan update tanpa where
+
+UPDATE [dbo].[user]
+SET [full_name] = 'John Doe';
+GO
+
+
+CREATE OR ALTER PROCEDURE InsertTenUsers
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @i INT = 1;
+
+    WHILE @i <= 10
+    BEGIN
+        INSERT INTO [user] (username, password, email, full_name, updated_at)
+        VALUES (
+            'auto_user_' + CAST(@i AS NVARCHAR(10)) + '_' + FORMAT(GETDATE(), 'yyyyMMdd_HHmmss'),
+            'hashed_password_' + CAST(@i AS NVARCHAR(10)),
+            'auto_user_' + CAST(@i AS NVARCHAR(10)) + '_' + FORMAT(GETDATE(), 'yyyyMMdd_HHmmss') + '@example.com',
+            'Auto User ' + CAST(@i AS NVARCHAR(10)),
+            GETDATE()
+        );
+        SET @i = @i + 1;
+    END
+END;
+
+
+EXEC InsertTenUsers;
+
+
+
+
+SELECT 
+    t.name AS TableName,
+    SUM(ps.row_count) AS [RowCount]
+FROM 
+    sys.tables t
+JOIN 
+    sys.dm_db_partition_stats ps 
+    ON t.object_id = ps.object_id
+WHERE 
+    ps.index_id IN (0, 1) -- Hanya menghitung row dari heap atau clustered index
+GROUP BY 
+    t.name
+ORDER BY 
+    t.name;
+
+
+
+--------------cek backup
+
+USE msdb;
+GO
+SELECT 
+    bs.database_name AS DatabaseName,
+    bs.backup_start_date AS BackupStartDate,
+    bs.backup_finish_date AS BackupFinishDate,
+    CASE bs.type
+        WHEN 'D' THEN 'Full'
+        WHEN 'I' THEN 'Differential'
+        WHEN 'L' THEN 'Transaction Log'
+        ELSE 'Unknown'
+    END AS BackupType,
+    bs.backup_size / 1024 / 1024 AS BackupSizeMB,
+    bmf.physical_device_name AS BackupFile
+FROM 
+    backupset bs
+JOIN 
+    backupmediafamily bmf 
+    ON bs.media_set_id = bmf.media_set_id
+WHERE 
+    bs.database_name = 'ProRBA2PLN' -- Filter hanya database yg dituju
+ORDER BY 
+    bs.backup_finish_date DESC;
+
+
+
+------------------ REPLIKASI --------------------------------------------------
+
+EXEC sp_adddistributor @distributor = '192.168.56.20', @password = 'Welcome12345';
+GO
+
+CREATE LOGIN distributor_admin WITH PASSWORD = 'Welcome12345';
+GO
+
+
+---------------- cel data
+
+SELECT 
+    t.name AS TableName,
+    SUM(ps.row_count) AS [RowCount]
+FROM 
+    sys.tables t
+JOIN 
+    sys.dm_db_partition_stats ps 
+    ON t.object_id = ps.object_id
+WHERE 
+    ps.index_id IN (0, 1) -- Hanya menghitung row dari heap atau clustered index
+GROUP BY 
+    t.name
+ORDER BY 
+    t.name;
