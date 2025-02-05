@@ -102,6 +102,22 @@ WHERE
 ORDER BY 
     bs.backup_finish_date DESC;
 
+------ script backup sql cmd ----------
+
+BACKUP DATABASE ujinuklir 
+TO DISK = '/var/opt/mssql/data/ujinuklir_full.bak' 
+WITH FORMAT, INIT, NAME = 'Full Backup nujinuklir', STATS = 10;
+GO
+
+
+#!/bin/bash
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="/var/opt/mssql/data/ujinuklir_$TIMESTAMP.bak"
+
+docker exec -it sqlserver2019 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Icon@thn2025!" -Q "BACKUP DATABASE ujinuklir TO DISK = '$BACKUP_FILE' WITH FORMAT, INIT, STATS = 10;"
+
+
+
 
 
 ------------------ REPLIKASI --------------------------------------------------
