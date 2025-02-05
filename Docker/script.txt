@@ -17,6 +17,16 @@ systemctl status docker
 
 systemctl enable --now docker
 
+===== buat zip docker =======
+
+docker save -o sqlservercustom2019.tar sqlserver-custom:latest
+
+docker save -o mssql-server-2019.tar mcr.microsoft.com/mssql/server:2019-latest
+
+=== buat unzip file images docker ===
+
+docker load -i (file images zip)
+
 
 ========================= VM BELAJAR ==========================================
 
@@ -126,12 +136,3 @@ select current_timestamp();
 
 /home/icofr/backup_db/log_backup_icofrpln_20230517_0100.log
 
-===== buat zip docker =======
-
-docker save -o sqlservercustom2019.tar sqlserver-custom:latest
-
-docker save -o mssql-server-2019.tar mcr.microsoft.com/mssql/server:2019-latest
-
-=== buat unzip file images docker ===
-
-docker load -i (file images zip)
