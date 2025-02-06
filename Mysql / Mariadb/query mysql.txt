@@ -1,0 +1,74 @@
+---- instal mysql di ubuntu server --------
+
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+
+ls -l mysql-apt-config_0.8.15-1_all.deb
+
+dpkg -i mysql-apt-config_0.8.15-1_all.deb
+
+apt update
+
+apt-get install mysql-server
+
+sudo mysql_secure_installation
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Welcome123@';
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost';
+
+SELECT User, Host FROM mysql.user WHERE User = 'root';
+
+CREATE USER 'root'@'192.168.56.111' IDENTIFIED BY 'Welcome123@';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.56.111';
+
+CREATE USER 'root'@'%' IDENTIFIED BY 'Welcome123@';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+
+FLUSH PRIVILEGES;
+
+- MASTER
+
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+
+server-id = 1
+log_bin = /var/log/mysql/mysql-bin.log
+binlog_do_db = nama_database # ganti dengan nama database yang ingin direplikasi
+
+systemctl restart MySQL
+
+CREATE USER 'repl_user'@'192.168.56.110' IDENTIFIED WITH mysql_native_password BY 'Welcome123@';
+GRANT REPLICATION SLAVE ON *.* TO 'repl_user'@'%';
+FLUSH PRIVILEGES;
+
+FLUSH TABLES WITH READ LOCK;
+
+mysqldump -u root -p nuusadb > /home/master01/nuusadb.sql
+
+- SLAVE
+
+mysql -u root -p nuusadb < /home/slave01/nuusadb.sql
+
+CHANGE MASTER TO
+MASTER_HOST='192.168.56.111',
+MASTER_USER='repl_user',
+MASTER_PASSWORD='Welcome123@',
+MASTER_LOG_FILE='mysql-bin.000003',
+MASTER_LOG_POS=837;
+
+START SLAVE;
+
+SHOW SLAVE STATUS\G
+
+SELECT table_schema "DB Name",
+        ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in KB" 
+FROM information_schema.tables 
+GROUP BY table_schema;
+
+relay_log = /var/log/mysql/mysql-relay-bin.log
+
+CHANGE MASTER TO
+MASTER_HOST ='192.168.56.111',
+MASTER_USER = 'repl_user',
+MASTER_PASSWORD = 'Welcome123@',
+MASTER_LOG_FILE = 'mysql-bin.000003',
+MASTER_LOG_POS = 157;
