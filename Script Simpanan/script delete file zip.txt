@@ -1,0 +1,22 @@
+@echo off
+setlocal
+
+REM Definisikan direktori tempat file .zip akan dihapus
+set TARGET_DIR=C:\Users\rizky.ramdani\Documents\Zoom
+
+REM Periksa apakah direktori ada
+if exist "%TARGET_DIR%" (
+    echo Menghapus semua file .zip di %TARGET_DIR%
+    for /r "%TARGET_DIR%" %%f in (*.zip) do (
+        echo Menghapus file: %%f
+        del "%%f"
+    )
+    echo Penghapusan selesai.
+) else (
+    echo Direktori %TARGET_DIR% tidak ditemukan.
+)
+
+endlocal
+echo Proses selesai. Script akan keluar dalam 5 detik.
+timeout /t 5 /nobreak >nul
+exit

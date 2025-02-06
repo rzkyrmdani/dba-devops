@@ -1,0 +1,39 @@
+@echo off
+setlocal
+
+REM Definisikan variabel
+set SRC_DIR=E:\DATABASE\BACKUP\BACKUP_NEW
+set DEST_DIR=/Backup_Database/Database/production/silm
+set SERVER=icon@10.14.152.62
+set PORT=6969
+set PASSWORD=R4in!Sc0mFOrT1nG
+set MOVE_DIR=E:\DATABASE\BACKUP\ALL_BACKUP_FULL_ZIP
+
+REM Temukan file .zip terbaru
+set "newest_file="
+for %%f in ("%SRC_DIR%\*.zip") do (
+    if not defined newest_file (
+        set "newest_file=%%f"
+    ) else (
+        if "%%~tf" GTR "%newest_file%" (
+            set "newest_file=%%f"
+        )
+    )
+)
+
+REM Menyalin file .zip terbaru menggunakan pscp
+if defined newest_file (
+    echo Menyalin %newest_file% ke %SERVER%:%DEST_DIR% menggunakan port %PORT%
+    pscp -P %PORT% -pw %PASSWORD% "%newest_file%" %SERVER%:%DEST_DIR%
+
+    REM Memindahkan file .zip terbaru ke MOVE_DIR
+    echo Memindahkan %newest_file% ke %MOVE_DIR%
+    move "%newest_file%" "%MOVE_DIR%"
+) else (
+    echo Tidak ada file .zip ditemukan di %SRC_DIR%.
+)
+
+endlocal
+echo Selesai menyalin dan memindahkan file.
+timeout /t 5 /nobreak >nul
+exit
