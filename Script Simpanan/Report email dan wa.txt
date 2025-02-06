@@ -1,0 +1,131 @@
+*CORETAN EMAIL*
+
+Dear Mas Andrian
+Terima kasih approvelnya
+
+Dear Mas Erbby Danastian
+Scriptnya sudah dijalankan dan object lamanya sudah dibackup. silahkan dicek Kembali.
+
+Permintaan sudah diproses sesuai dokumen teknis yang terlampir.
+Silahkan dilakukan pengecekan kembali,
+Terima kasih.
+
+ke 2
+
+Dear Mas Ilham Sejati,
+Terima kasih atas Approvalnya.
+
+Dear Mas Faris Salahuddin,
+Permintaan sudah diproses sesuai dokumen teknis yang terlampir dan sudah dilakukan backup.
+Silahkan dilakukan pengecekan kembali,
+
+
+
+
+*REPORT WA DBA OPHAR*
+
+X32 AP2T, NEW DBDTOA, NEW DBDTOB dan NEW PAYPRE - 07.29 - Status: Replikasi Running dan Tidak Ada GAP
+
+X42 FSO - Status: Replikasi Running dan Tidak Ada GAP
+
+PLN Daily - Status: All Service Running
+
+HAProxy PLN Daily - Current session terpantau normal
+
+Cluster PLN Daily - 15:51 - semua node terpantau running
+
+HAProxy PLN Daily - 15:51 - current session terpantau normal
+
+CPU Node 1 - Terpantau normal
+
+email proses didampingi
+
+Report Shift Support Database Administrator Shift 2
+==================================================
+1. Pekerjaan yang pending :
+	- 
+
+
+2. Status Monitoring Database Saat Shifting :
+	a. Layanan DB Existing (Oracle)
+		Database P2APST OLTP DBDTOA (Normal)
+		Database P2APST OLAP DBDTOB (Normal)
+		Database P2APST PREPAID DBPAYPRE (Normal)
+		Database NEW P2APST OLTP DBDTOA (Normal)
+		Database NEW P2APST OLAP DBDTOB (Normal)
+		Database NEW P2APST PREPAID DBPAYPRE (Normal)
+		Database AP2T (Normal)	
+		Database APKT-APKT Mobile DBAPKT (Normal)	
+		Database ACMT DBODSDW (Normal)	
+		Database AGO AT2LT (Normal)
+		Database EPROC (Normal)	
+		Database FSO-ITO (Normal)	
+		Database BBO DBCRM (Normal)
+		Database DBSOA_X42 (Normal)
+		Database EAM-KIT (Normal)
+		Database DBSOA_EAM-KIT (Normal)
+		Database DBHISTO-X22 (Normal)
+		Database DBHISTO-X32 (Normal)
+		Database DBHISTO-X42 (Normal)
+		Database AMICON A2MRT (Normal)
+	b. Layanan DB PLN Daily dan Dashboard Korporat
+		Database ICOFR (MariaDB-Normal)
+		Database PELITA/PANAS - APKT (Oracle-Normal)
+		Database ARENA (Oracle-Normal)
+		Database BI TREASURY (Oracle-Normal)
+		Database PLN Daily (PostgreSQL15.2-Data Node Normal)
+		Database PLN Marketplace (MongoDB-Normal)
+		Database GCG (Oracle-Normal)
+		Database EIC, EC dan E-Arsip (PostgreSQL-Normal)
+		Database EBIDOC (Oracle-Normal)
+		Database BPP (Oracle-Normal)
+		Database EAM DIST (DB2-Normal)
+		Database AMS (PostgreSQL10.22-Normal)
+		Database Emeeting & Etransport (Postgres-Normal)
+		Database PLN Kita (Postgres-Normal)
+		Database SMARTER (SQLServer-Normal)
+		Database Web Korporat (MySQL-Normal)
+		Database PLN FIT (MySQL-Normal)
+		Database Motion (PostgreSQL-Normal)
+		Database MIMS (PostgreSQL-Normal)
+		Database ESPPD (PostgreSQL & MongoDB-Normal)
+		Database AIL (PostgreSQL-Normal)
+
+3. Keterangan Gangguan :
+	- 
+	
+4. Deploy layanan :
+	- RE: [SMAR] Pembuatan User database SMAR Production *DONE*
+	- RE: Permohonan Update Stand IDPEL Gagal HItung unit 52251 *DONE*
+	- RE: Permohonan Update Stand IDPEL Gagal HItung unit 52551 *DONE*
+	- RE: Permohonan Update Stand IDPEL Gagal Hitung unit 52251  *DONE*
+	- RE: UPDATE TRANSAKSI AGO UPDATE STOK 29 November 2023 *DONE*
+	- RE: Perubahan Tanggal Backdate Penerimaan DO *DONE*
+	- RE: Permohonan Update Stan idpel Gagal Hitung *DONE*
+	- RE: Permohonan Update Stan idpel Gagal Hitung *DONE*
+
+
+5. Next Petugas Selanjutnya:
+
+====DBA Shift 1 29/11/2023====
+WFO Jamsos: 
+- Amiftahudin
+- Kuna Bakti 
+- Syihabul Milah
+- Claudine Sabila
+- Annisa Novianti
+- Ahmad Jazuli
+- Hendy Krismanto
+- Ando Pratama
+- Fahri Bagus F
+- Asdin Wahyu Pamungkas
+- Hananta Prasetia
+- Ikrar Harvy
+- Enceng Cahyadi
+- Andi Abd Jalil
+
+WFO Trapes: 
+- Jeremy Bryan
+- Muhammad Bayuaji
+
+Gyuram3288

@@ -1,0 +1,163 @@
+tahap 1
+
+python3 -m venv migration
+
+source migration/bin/activate
+
+pip install pip --upgrade
+
+pip install pg_chameleon
+
+chameleon set_configuration_files
+
+cd .pg_chameleon/configuration/
+
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+
+cp config-example.yml config-example.yml.bak
+
+cp config-example.yml migration.yml
+
+mv migration.yml default.yml
+
+
+cat default.yml
+
+(isisnya dibawah ini)
+---
+# global settings
+pid_dir: '~/.pg_chameleon/pid/'
+log_dir: '~/.pg_chameleon/logs/'
+log_dest: file
+log_level: info
+log_days_keep: 10
+rollbar_key: ''
+rollbar_env: ''
+
+# type_override allows the user to override the default type conversion
+# into a different one.
+
+type_override:
+  "tinyint(1)":
+    override_to: boolean
+    override_tables:
+      - "*"
+
+
+# postgres  destination connection
+pg_conn:
+  host: "192.168.56.110"
+  port: "5432"
+  user: "postgres"
+  password: "welcome123"
+  database: "nuusadb"
+  charset: "utf8"
+
+sources:
+  mysql_source:
+    db_conn:
+      host: "192.168.56.110"
+      port: "3306"
+      user: "repl_user"
+      password: "Welcome123@"
+      charset: 'utf8'
+      connect_timeout: 10
+    schema_mappings:
+      nuusadb: public
+      delphis_mediterranea: loxodonta_africana
+    limit_tables:
+      - nuusadb.data
+      - delphis_mediterranea.foo
+    skip_tables:
+      - delphis_mediterranea.bar
+    grant_select_to:
+      - usr_readonly
+    lock_timeout: "120s"
+    my_server_id: 100
+    replica_batch_size: 10000
+    replay_max_rows: 10000
+    batch_retention: '1 day'
+    copy_max_memory: "300M"
+    copy_mode: 'file'
+    out_dir: /tmp
+    sleep_loop: 1
+    on_error_replay: continue
+    on_error_read: continue
+    auto_maintenance: "disabled"
+    gtid_enable: false
+    type: mysql
+    skip_events:
+      insert:
+        - delphis_mediterranea.foo  # skips inserts on delphis_mediterranea.foo
+      delete:
+        - delphis_mediterranea  # skips deletes on schema delphis_mediterranea
+      update:
+    keep_existing_schema: No
+
+  pgsql:
+    db_conn:
+      host: "192.168.56.110"
+      port: "5432"
+      user: "usr_replica"
+      password: "replica"
+      database: "nuusadb"
+      charset: 'utf8'
+      connect_timeout: 10
+      schema_mappings:
+        loxodonta_africana: elephas_maximus
+      limit_tables:
+        - loxodonta_africana.foo
+      skip_tables:
+        - loxodonta_africana.bar
+      copy_max_memory: "300M"
+      grant_select_to:
+        - usr_readonly
+      lock_timeout: "10s"
+      my_server_id: 100
+      replica_batch_size: 3000
+      replay_max_rows: 10000
+      sleep_loop: 5
+      batch_retention: '1 day'
+      copy_mode: 'file'
+      out_dir: /tmp
+      type: pgsql
+
+# the dictionary fillfactor is used to set the fillfactor for tables that are expected to work with large updates
+# The key name defines the fillfactor level (The allowed values range is 10 to 100)
+# If key name is set to "*" then the fillfactor applies to all tables in the replicated schema
+# If the table appears in multiple fillfactors then only the last matched value will be applied
+fillfactor:
+  "30":
+    tables:
+      - "foo.bar"
+  "40":
+    tables:
+      - "foo.foobar"
+
+
+setelah di edit jalankan comman replica dibawah ini =
+
+chameleon create_replica_schema
+chameleon create_replica_schema --config replika
+
+chameleon enable_replica --config default --source mysql_source
+chameleon enable_replica --config replika --source mysql
+
+chameleon add_source --config default --source mysql_source
+chameleon init_replica --config default --source mysql_source
+chameleon start_replica --config default --source mysql_source
+chameleon show_status --config default --source mysql_source
+chameleon stop_replica --config default --source mysql_source
+
+chameleon drop_replica --config copas --source mysql_source
+
+chameleon detach_replica --config replika --source mysql --debug
+
+show_config,show_sources,show_status,create_replica_schema,drop_replica_schema,upgrade_replica_schema,add_source,drop_source,init_replica,enable_replica,update_schema_mappings,refresh_schema,sync_tables,start_replica,stop_replica,detach_replica,set_configuration_files,show_errors,run_maintenance,stop_all_replicas
+
+chameleon sync_tables --config replikasi --source MySQL
+
+chameleon sync_tables --config replika --source mysql --tables nuusadb.pelanggan
+
+
+chameleon.py start_replica --config replikasi --source mysql --tables nuusadb.data
