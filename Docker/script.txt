@@ -112,7 +112,7 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=welcome123" -p 1433:1433 -d 
 
 docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Icon@thn2025!' --env MSSQL_AGENT_ENABLED=True -p 6969:1433 --name sqlserver2019 -d mcr.microsoft.com/mssql/server:2019-latest
 
-# docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Icon@thn2025!' --env MSSQL_AGENT_ENABLED=True -p 6969:1433 --name sqlserver2019 -d sqlserver-custom:latest
+# docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Icon@thn2025!' --env MSSQL_AGENT_ENABLED=True -v /home/icon/docker/sqlserver/data:/var/lib/sqlserver -p 6969:1433 --name sqlserver2019 -d sqlserver-custom:latest
 
 /opt/mssql-tools/bin/sqlcmd -S localhost,6969 -U SA -P 'Icon@thn2025!'
 
