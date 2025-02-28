@@ -128,8 +128,20 @@ GO
 CREATE LOGIN distributor_admin WITH PASSWORD = 'Welcome12345';
 GO
 
+---------------- cek total ukuran database yang terdaftar ----------------
 
----------------- cel data
+
+SELECT 
+    d.name AS DatabaseName,
+    CAST(SUM(f.size * 8 / 1024.0) AS DECIMAL(10,2)) AS TotalSizeMB,
+    CAST(SUM(f.size * 8 / 1024.0 / 1024) AS DECIMAL(10,2)) AS TotalSizeGB
+FROM sys.databases d
+JOIN sys.master_files f ON d.database_id = f.database_id
+GROUP BY d.name
+ORDER BY TotalSizeMB DESC;
+
+
+---------------- cek total data yang ada didalam table -----------------
 
 SELECT 
     t.name AS TableName,
