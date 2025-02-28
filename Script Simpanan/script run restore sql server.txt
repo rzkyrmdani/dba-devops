@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Konfigurasi
+CONTAINER_NAME="sqlserver2019"   # Ganti dengan nama container SQL Server
+BACKUP_DIR="/var/lib/sqlserver"   # Lokasi file backup dalam container
+SA_PASSWORD="Icon@thn2025!"      # Password SA SQL Server
+
+# Cari file backup full (.bak)
+BACKUP_FILE=$(docker exec $CONTAINER_NAME ls -1 $BACKUP_DIR | grep -E '\.bak$' | sort | head -n 1)
+
+# Pastikan file backup full ditemukan
+if [ -z "$BACKUP_FILE" ]; then
+    echo "File backup .bak tidak ditemukan di $BACKUP_DIR"
+    exit 1
+fi
+
+# Menentukan nama database dari nama file backup (mengambil bagian depan sebelum '_')
+DB_TARGET=$(basename "$BACKUP_FILE" .bak | sed 's/_backup.*//')
+
+# Fungsi untuk menjalankan perintah SQL di dalam container
+run_sql() {
+    docker exec $CONTAINER_NAME /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -Q "$1" -W -h -1
+}
+
+# Pastikan backup full file ada di dalam container
+if ! docker exec $CONTAINER_NAME test -f "$BACKUP_DIR/$BACKUP_FILE"; then
+    echo "File backup tidak ditemukan: $BACKUP_DIR/$BACKUP_FILE"
+    exit 1
+fi
+
+# Ambil informasi file MDF dan LDF dari backup full
+FILELIST_OUTPUT=$(run_sql "RESTORE FILELISTONLY FROM DISK = '$BACKUP_DIR/$BACKUP_FILE';")
+
+# Debugging: tampilkan output filelist
+echo "=== Output RESTORE FILELISTONLY ==="
+echo "$FILELIST_OUTPUT"
+
+# Parsing nama file MDF dan LDF
+MDF_FILE=$(echo "$FILELIST_OUTPUT" | grep -i '\.mdf' | awk '{print $1}')
+LDF_FILE=$(echo "$FILELIST_OUTPUT" | grep -i '\.ldf' | awk '{print $1}')
+
+# Jika parsing gagal, keluar dengan error
+if [ -z "$MDF_FILE" ] || [ -z "$LDF_FILE" ]; then
+    echo "Gagal mendapatkan informasi file MDF/LDF dari backup!"
+    exit 1
+fi
+
+echo "Database Target: $DB_TARGET"
+echo "MDF File: $MDF_FILE"
+echo "LDF File: $LDF_FILE"
+
+# Restore database full
+echo "Mulai restore full database: $DB_TARGET"
+run_sql "
+USE master;
+RESTORE DATABASE [$DB_TARGET] FROM DISK = '$BACKUP_DIR/$BACKUP_FILE'
+WITH MOVE '$MDF_FILE' TO '/var/opt/mssql/data/$DB_TARGET.mdf',
+MOVE '$LDF_FILE' TO '/var/opt/mssql/data/${DB_TARGET}_log.ldf', REPLACE, NOUNLOAD, STATS = 5;
+"
+
+# Cek status restore
+STATUS_CHECK=$(run_sql "SELECT database_id, name, state_desc FROM sys.databases WHERE name = '$DB_TARGET';")
+echo "Status Database: $STATUS_CHECK"
+
+# Cek apakah restore selesai dan database dalam mode recovery
+DB_STATE=$(echo "$STATUS_CHECK" | grep -oP "(?<=state_desc\s{1,})\w+")
+
+if [[ "$DB_STATE" == "ONLINE" ]]; then
+    echo "Restore full selesai dan database '$DB_TARGET' dalam keadaan ONLINE."
+else
+    echo "Database '$DB_TARGET' tidak dalam keadaan ONLINE. Status saat ini: $DB_STATE"
+    exit 1
+fi
+
+# Cari semua file .trn yang sesuai dengan nama database dan urutkan berdasarkan waktu
+LOG_FILES=$(docker exec $CONTAINER_NAME ls -1 $BACKUP_DIR | grep "${DB_TARGET}.*\.trn" | sort)
+
+# Jika ada file .trn, lakukan restore transaction log
+if [ -n "$LOG_FILES" ]; then
+    echo "Memulai restore transaction log untuk database: $DB_TARGET"
+    for LOG_FILE in $LOG_FILES; do
+        echo "Memproses restore log file: $LOG_FILE"
+        run_sql "
+        RESTORE LOG [$DB_TARGET] FROM DISK = '$BACKUP_DIR/$LOG_FILE'
+        WITH NORECOVERY, STATS = 5;
+        "
+    done
+    echo "Semua transaction log telah direstore."
+else
+    echo "Tidak ada file transaction log (.trn) yang ditemukan untuk database '$DB_TARGET'."
+fi
+
+# Selesaikan restore dengan RECOVERY
+echo "Menutup restore dengan RECOVERY untuk database: $DB_TARGET"
+run_sql "
+RESTORE DATABASE [$DB_TARGET] WITH RECOVERY;
+"
+
+# Cek status akhir restore
+STATUS_CHECK_FINAL=$(run_sql "SELECT name, state_desc FROM sys.databases WHERE name = '$DB_TARGET';")
+echo "Status akhir database: $STATUS_CHECK_FINAL"
+
+echo "Restore selesai untuk database: $DB_TARGET"
