@@ -163,7 +163,30 @@ ORDER BY
 CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Plnpusat@2025!';
 CREATE CERTIFICATE BackupCertificate WITH SUBJECT = 'Certificate untuk backup terenkripsi';
 
+---------------- restore di server tujuan --------------------------------
+
+-- Di server asal (yang buat backup)
+
 BACKUP CERTIFICATE BackupCertificateTO FILE = 
 'D:\backup_db\Backup_enkripsi\BackupCertificate.cer'WITH PRIVATE KEY (    
     FILE = 'D:\backup_db\Backup_enkripsi\BackupCertificate_PrivateKey.pvk',    
     ENCRYPTION BY PASSWORD = 'Plnpusat@2025!');
+
+-- jgn lupa copy file nya ke server restore
+
+-------- di server restore ------------------
+-- Buat MASTER KEY jika belum ada
+USE master;
+GO
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Plnpusat@2025!';
+GO
+
+-- Import certificate yang digunakan saat backup
+
+CREATE CERTIFICATE BackupCertificate
+FROM FILE = '/var/opt/mssql/data/BackupCertificate.cer'
+WITH PRIVATE KEY (
+    FILE = '/var/opt/mssql/data/BackupCertificate_PrivateKey.pvk',
+    DECRYPTION BY PASSWORD = 'Plnpusat@2025!'
+);
+GO
