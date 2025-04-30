@@ -162,3 +162,8 @@ ORDER BY
 
 CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Plnpusat@2025!';
 CREATE CERTIFICATE BackupCertificate WITH SUBJECT = 'Certificate untuk backup terenkripsi';
+
+BACKUP CERTIFICATE BackupCertificateTO FILE = 
+'D:\backup_db\Backup_enkripsi\BackupCertificate.cer'WITH PRIVATE KEY (    
+    FILE = 'D:\backup_db\Backup_enkripsi\BackupCertificate_PrivateKey.pvk',    
+    ENCRYPTION BY PASSWORD = 'Plnpusat@2025!');
