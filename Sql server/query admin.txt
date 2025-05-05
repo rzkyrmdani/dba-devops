@@ -196,16 +196,12 @@ GO
 
 CREATE SERVER AUDIT Audit_Harian
 TO FILE (
-    FILEPATH = 'D:\AuditLogs\',
+    FILEPATH = 'C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\',
     MAXSIZE = 100 MB,
-    MAX_ROLLOVER_FILES = 30,  -- Simpan log 30 hari terakhir
-    RESERVE_DISK_SPACE = OFF
+    MAX_ROLLOVER_FILES = 30,
+    RESERVE_DISK_SPACE = ON
 )
-WITH (
-    QUEUE_DELAY = 1000,
-    ON_FAILURE = CONTINUE,
-    AUDIT_GUID = NEWID()
-);
+WITH (QUEUE_DELAY = 1000, ON_FAILURE = CONTINUE);
 ALTER SERVER AUDIT Audit_Harian WITH (STATE = ON);
 
 --- audit login dan logut -----
