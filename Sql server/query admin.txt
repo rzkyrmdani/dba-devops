@@ -208,6 +208,7 @@ WITH (
 );
 ALTER SERVER AUDIT Audit_Harian WITH (STATE = ON);
 
+--- audit login dan logut -----
 
 CREATE SERVER AUDIT SPECIFICATION Audit_Logins
 FOR SERVER AUDIT Audit_Harian
@@ -216,6 +217,7 @@ ADD (FAILED_LOGIN_GROUP),
 ADD (LOGOUT_GROUP);
 ALTER SERVER AUDIT SPECIFICATION Audit_Logins WITH (STATE = ON);
 
+----- Audit Aktivitas Data di Database -----
 
 USE YourDatabase;
 
@@ -224,6 +226,40 @@ FOR SERVER AUDIT Audit_Harian
 ADD (SELECT, INSERT, UPDATE, DELETE ON DATABASE::YourDatabase BY PUBLIC);
 ALTER DATABASE AUDIT SPECIFICATION Audit_DBActivity WITH (STATE = ON);
 
+---- Buat SQL Server Agent Job Harian -----
+
+1. SQL Server Agent → Klik kanan Jobs → New Job…
+
+2. Isi:
+
+    Name: AuditLog_Rotation_Daily
+
+    Owner: sa atau user admin
+
+3. Klik tab Steps, lalu klik New…
+    Isi seperti ini:
+
+    Step name: Restart_Audit
+
+    Type: Transact-SQL script (T-SQL)
+
+    Database: master
+
+    Command:
+    ALTER SERVER AUDIT Audit_Harian WITH (STATE = OFF);
+    ALTER SERVER AUDIT Audit_Harian WITH (STATE = ON);
+
+4. Klik tab Schedules → Klik New…
+
+    Name: Daily at Midnight
+
+    Occurs: Daily
+
+    Occurs once at: 00:00:00
+
+    Start date: (hari ini)
+
+---- cek log audit ----
 
 SELECT *
 FROM sys.fn_get_audit_file ('D:\AuditLogs\*.sqlaudit', DEFAULT, DEFAULT);
