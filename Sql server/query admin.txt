@@ -190,3 +190,40 @@ WITH PRIVATE KEY (
     DECRYPTION BY PASSWORD = 'Plnpusat@2025!'
 );
 GO
+
+
+------------------------------ buat audit log sql server -------------------------------------------
+
+CREATE SERVER AUDIT Audit_Harian
+TO FILE (
+    FILEPATH = 'D:\AuditLogs\',
+    MAXSIZE = 100 MB,
+    MAX_ROLLOVER_FILES = 30,  -- Simpan log 30 hari terakhir
+    RESERVE_DISK_SPACE = OFF
+)
+WITH (
+    QUEUE_DELAY = 1000,
+    ON_FAILURE = CONTINUE,
+    AUDIT_GUID = NEWID()
+);
+ALTER SERVER AUDIT Audit_Harian WITH (STATE = ON);
+
+
+CREATE SERVER AUDIT SPECIFICATION Audit_Logins
+FOR SERVER AUDIT Audit_Harian
+ADD (SUCCESSFUL_LOGIN_GROUP),
+ADD (FAILED_LOGIN_GROUP),
+ADD (LOGOUT_GROUP);
+ALTER SERVER AUDIT SPECIFICATION Audit_Logins WITH (STATE = ON);
+
+
+USE YourDatabase;
+
+CREATE DATABASE AUDIT SPECIFICATION Audit_DBActivity
+FOR SERVER AUDIT Audit_Harian
+ADD (SELECT, INSERT, UPDATE, DELETE ON DATABASE::YourDatabase BY PUBLIC);
+ALTER DATABASE AUDIT SPECIFICATION Audit_DBActivity WITH (STATE = ON);
+
+
+SELECT *
+FROM sys.fn_get_audit_file ('D:\AuditLogs\*.sqlaudit', DEFAULT, DEFAULT);
