@@ -258,4 +258,4 @@ ALTER DATABASE AUDIT SPECIFICATION Audit_DBActivity WITH (STATE = ON);
 ---- cek log audit ----
 
 SELECT *
-FROM sys.fn_get_audit_file ('D:\AuditLogs\*.sqlaudit', DEFAULT, DEFAULT);
+FROM sys.fn_get_audit_file ('C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\*.sqlaudit', DEFAULT, DEFAULT);
