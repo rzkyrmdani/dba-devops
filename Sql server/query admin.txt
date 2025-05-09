@@ -259,3 +259,78 @@ ALTER DATABASE AUDIT SPECIFICATION Audit_DBActivity WITH (STATE = ON);
 
 SELECT *
 FROM sys.fn_get_audit_file ('C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\*.sqlaudit', DEFAULT, DEFAULT);
+
+
+SELECT
+    DATEADD(HOUR, 7, event_time) AS event_time_wib,
+    action_id,
+    succeeded,
+    session_id,
+    server_principal_id,
+    database_principal_id,
+    target_server_principal_id,
+    target_database_principal_id,
+    session_server_principal_name,
+    server_principal_name,
+    database_principal_name,
+    target_server_principal_name,
+    server_instance_name,
+    database_name,
+    schema_name,
+    object_name,
+    statement,
+    file_name,
+    audit_file_offset,
+    client_ip,
+    application_name,
+    connection_id,
+    host_name,
+    data_sensitivity_information
+FROM sys.fn_get_audit_file(
+    'C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\*.sqlaudit',
+    DEFAULT,
+    DEFAULT
+)
+ORDER BY event_time DESC;
+
+
+----- sama backup log -----
+
+-- Audit log (dengan waktu WIB)
+SELECT
+    DATEADD(HOUR, 7, event_time) AS event_time,
+    action_id AS action_type,
+    succeeded,
+    server_principal_name AS username,
+    database_name,
+    object_name,
+    statement AS statement_or_device,
+    'AUDIT' AS source
+FROM sys.fn_get_audit_file(
+    'C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\*.sqlaudit',
+    DEFAULT,
+    DEFAULT
+)
+
+UNION ALL
+
+-- Backup log
+SELECT
+    backup_finish_date AS event_time,
+    CASE bs.type
+        WHEN 'D' THEN 'BACKUP DATABASE'
+        WHEN 'L' THEN 'BACKUP LOG'
+        WHEN 'I' THEN 'BACKUP DIFFERENTIAL'
+        ELSE 'BACKUP OTHER'
+    END AS action_type,
+    1 AS succeeded,
+    bs.user_name AS username,
+    bs.database_name,
+    NULL AS object_name,
+    bmf.physical_device_name AS statement_or_device,
+    'BACKUP' AS source
+FROM msdb.dbo.backupset bs
+JOIN msdb.dbo.backupmediafamily bmf
+    ON bs.media_set_id = bmf.media_set_id
+WHERE bs.backup_finish_date >= DATEADD(DAY, -1, GETDATE()) -- log 1 hari terakhir
+
