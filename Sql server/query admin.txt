@@ -196,7 +196,7 @@ GO
 
 CREATE SERVER AUDIT Audit_Harian
 TO FILE (
-    FILEPATH = 'C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\',
+    FILEPATH = 'C:\Program Files\Microsoft SQL Server\MSSQL11.PRORBA\MSSQL\Auditlog\',
     MAXSIZE = 100 MB,
     MAX_ROLLOVER_FILES = 30,
     RESERVE_DISK_SPACE = ON
@@ -258,7 +258,10 @@ ALTER DATABASE AUDIT SPECIFICATION Audit_DBActivity WITH (STATE = ON);
 ---- cek log audit ----
 
 SELECT *
-FROM sys.fn_get_audit_file ('C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\*.sqlaudit', DEFAULT, DEFAULT);
+FROM sys.fn_get_audit_file ('C:\Program Files\Microsoft SQL Server\MSSQL11.PRORBA\MSSQL\Auditlog\*.sqlaudit', DEFAULT, DEFAULT);
+
+SELECT     DATEADD(HOUR, 7, event_time) AS event_time_wib,    *FROM sys.fn_get_audit_file(    'C:\Program Files\Microsoft SQL Server\MSSQL11.PRORBA\MSSQL\Auditlog\*.sqlaudit',    DEFAULT,    DEFAULT)ORDER BY event_time DESC;
+
 
 
 SELECT
@@ -287,7 +290,7 @@ SELECT
     host_name,
     data_sensitivity_information
 FROM sys.fn_get_audit_file(
-    'C:\Program Files\Microsoft SQL Server\MSSQL15.MASTERDB01\MSSQL\Auditlog\*.sqlaudit',
+    'C:\Program Files\Microsoft SQL Server\MSSQL11.PRORBA\MSSQL\Auditlog\*.sqlaudit',
     DEFAULT,
     DEFAULT
 )
