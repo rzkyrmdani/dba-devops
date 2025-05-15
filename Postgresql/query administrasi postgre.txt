@@ -14,7 +14,7 @@ SELECT
 FROM
 	pg_stat_activity
 WHERE
-	pg_stat_activity.datname = 'plnpusat'
+	pg_stat_activity.datname = 'wave_db'
 	AND pid <> pg_backend_pid();
 
 
@@ -109,7 +109,7 @@ alter user erbas_apps with Superuser;
 
 --- memberikan user akses owner pada database
 
-alter database erbas_db owner to erbas_apps;
+alter database wave_db owner to wave_apps;
 
 --- hak akses user untuk melihat database pada schema tertentu di postgresql
 
@@ -128,9 +128,9 @@ alter user rizky_ramdani with password 'ic0Nplu5@2023!';
 
 ---- rename database -----
 
-ALTER DATABASE "STAGING_BAG" RENAME to "STAGING_BAG_OLD";
+ALTER DATABASE "wave_db" RENAME to "wave_db_old";
 
-create database STAGING_BAG;
+create database wave_db;
 
 ========================================================== backup & restore ====================================================================
 
@@ -168,7 +168,7 @@ pg_dump my_database_name > mydatabase.sql
 
 ------------- Restore -------------
 
-psql -U postgres -d back1 </home/postgres/restore/backup_back1_full_20240322_0207PM.bak 2> /home/postgres/restore/log_restore_back1_$(date +\%Y\%m\%d_%I\%M\%p).log &
+psql -U postgres -d wave_db </var/lib/pgsql/full_backup_motion_pmodb_20250310_0953AM.bak 2> /var/lib/pgsql/log_restore_motionpmo_$(date +\%Y\%m\%d_%I\%M\%p).log &
 
 psql -U postgres -d kong </home/postgres/restore/backup_kong_full_20240322_0213PM.bak 2> /home/postgres/restore/log_restore_kong_$(date +\%Y\%m\%d_%I\%M\%p).log &
 
@@ -270,8 +270,6 @@ date; ps aux --sort=-%cpu | head -n 100
 =================================================== cek penggunaan CPU & memory sorting by CPU Usage ===================================
 
 ps aux --sort=-%cpu | head -n 20
-
-	
 
 ps aux --sort=-%mem | head -n 20
 
