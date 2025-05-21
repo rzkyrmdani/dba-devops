@@ -1,0 +1,57 @@
+@echo off
+setlocal
+
+:: === KONFIGURASI ===
+set "SQL_USER=sa"
+set "SQL_PASS=Welcome12345"
+set "SQL_SERVER=localhost"
+set "BACKUP_DIR=C:\backup"
+set "SQLCMD_PATH=C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\sqlcmd.exe"
+set "PSCP_PATH=C:\Program Files\PuTTY\pscp.exe"
+set "SCP_PORT=6969"
+set "SCP_USER=icon"
+set "SCP_PASS=R4in!Sc0mFOrT1nG"
+set "SCP_IP=10.14.152.62"
+set "SCP_TARGET=/Backup_Database/Database/production/smarter"
+
+:: === BUAT FOLDER BACKUP JIKA BELUM ADA ===
+if not exist "%BACKUP_DIR%" (
+    mkdir "%BACKUP_DIR%"
+)
+
+:: === TANGGAL DAN WAKTU UNTUK NAMA FILE ===
+for /f %%i in ('powershell -NoLogo -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "DATETIME=%%i"
+set "ZIP_NAME=SQLTransLog_DBSILM%DATETIME%.zip"
+set "ZIP_PATH=%BACKUP_DIR%\%ZIP_NAME%"
+
+echo [INFO] Memulai backup TRANSACTION LOG untuk semua database...
+
+:: === BACKUP TRANSACTION LOG SEMUA DATABASE ===
+"%SQLCMD_PATH%" -S %SQL_SERVER% -U %SQL_USER% -P %SQL_PASS% -Q ^
+"DECLARE @name NVARCHAR(256), @fileName NVARCHAR(512), @fileDate NVARCHAR(20), @path NVARCHAR(512); ^
+SET @path = N'%BACKUP_DIR%\'; ^
+SET @fileDate = CONVERT(VARCHAR(20), GETDATE(), 112) + '_' + REPLACE(CONVERT(VARCHAR(8), GETDATE(), 108), ':', ''); ^
+DECLARE db_cursor CURSOR FOR ^
+    SELECT name FROM sys.databases ^
+    WHERE name NOT IN ('master','model','msdb','tempdb') AND recovery_model_desc IN ('FULL','BULK_LOGGED'); ^
+OPEN db_cursor FETCH NEXT FROM db_cursor INTO @name ^
+WHILE @@FETCH_STATUS = 0 ^
+BEGIN SET @fileName = @path + @name + '_TLOG_' + @fileDate + '.trn'; ^
+EXEC('BACKUP LOG [' + @name + '] TO DISK = ''' + @fileName + ''' WITH INIT, COMPRESSION'); ^
+FETCH NEXT FROM db_cursor INTO @name END ^
+CLOSE db_cursor DEALLOCATE db_cursor"
+
+:: === ZIP FILE .TRN ===
+powershell -Command "Compress-Archive -Path '%BACKUP_DIR%\*.trn' -DestinationPath '%ZIP_PATH%'"
+
+:: === HAPUS SEMUA FILE .TRN SETELAH ZIP ===
+del /q "%BACKUP_DIR%\*.trn"
+
+:: === KIRIM FILE ZIP KE SERVER UBUNTU ===
+echo [INFO] Mengirim file: %ZIP_NAME%
+echo y | "%PSCP_PATH%" -P %SCP_PORT% -pw "%SCP_PASS%" "%ZIP_PATH%" %SCP_USER%@%SCP_IP%:%SCP_TARGET%
+
+:: === SELESAI ===
+echo [SELESAI] Backup Transaction Log dan transfer berhasil.
+timeout /t 3 /nobreak >nul
+exit
