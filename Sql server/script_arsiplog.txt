@@ -4,6 +4,7 @@
 4.Kosongkan tabel setelah export.
 
 script =
+
 USE master;
 GO
 
@@ -26,7 +27,7 @@ BEGIN
     SET @filePath = 'C:\backup\SQLActivity_' + @date + '.txt';
     SET @serverName = CAST(SERVERPROPERTY('ServerName') AS NVARCHAR(128));
 
-    -- Siapkan tabel permanen jika belum ada
+    -- Siapkan tabel jika belum ada
     IF OBJECT_ID('dbo.ActivityLogTemp') IS NULL
     BEGIN
         CREATE TABLE dbo.ActivityLogTemp (
@@ -34,45 +35,51 @@ BEGIN
         );
     END
 
-    -- Bersihkan isi sebelumnya
+    -- Bersihkan isi tabel
     TRUNCATE TABLE dbo.ActivityLogTemp;
 
-    -- Header
+    -- Tambahkan header
     INSERT INTO dbo.ActivityLogTemp (LogText)
-    VALUES ('======== Berikut log ' + FORMAT(GETDATE(), 'dddd, dd MMMM yyyy') + ' ========');
+    VALUES ('======== Berikut log ' + FORMAT(GETDATE(), 'dddd, dd MMMM yyyy') + ' ========' + CHAR(13) + CHAR(10));
 
-    -- Insert data aktivitas
+    -- Tambahkan log aktivitas
     INSERT INTO dbo.ActivityLogTemp (LogText)
     SELECT 
-        'session_id = ' + CAST(s.session_id AS NVARCHAR) + CHAR(13) +
-        'username = ' + ISNULL(s.login_name, '-') + CHAR(13) +
-        'host_name = ' + ISNULL(s.host_name, '-') + CHAR(13) +
-        'program_name = ' + ISNULL(s.program_name, '-') + CHAR(13) +
-        'database_name = ' + ISNULL(DB_NAME(r.database_id), '-') + CHAR(13) +
-        'status = ' + ISNULL(r.status, '-') + CHAR(13) +
-        'command = ' + ISNULL(r.command, '-') + CHAR(13) +
-        'query = ' + ISNULL(REPLACE(t.text, CHAR(13) + CHAR(10), ' '), '-') + CHAR(13) +
-        'cpu_time = ' + CAST(ISNULL(r.cpu_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) +
-        'duration = ' + CAST(ISNULL(r.total_elapsed_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) +
-        'wait_type = ' + ISNULL(r.wait_type, '-') + CHAR(13) +
-        'wait_time = ' + CAST(ISNULL(r.wait_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) +
-        'client_ip = ' + ISNULL(c.client_net_address, '-') + CHAR(13) +
-        'last_start = ' + ISNULL(CONVERT(NVARCHAR, s.last_request_start_time, 120), '-') + CHAR(13) +
-        'last_end = ' + ISNULL(CONVERT(NVARCHAR, s.last_request_end_time, 120), '-') + CHAR(13) +
-        'blocking_session_id = ' + CAST(ISNULL(r.blocking_session_id, 0) AS NVARCHAR) + CHAR(13) +
-        '----------------------------'
+        'session_id = ' + CAST(s.session_id AS NVARCHAR) + CHAR(13) + CHAR(10) +
+        'username = ' + ISNULL(s.login_name, '-') + CHAR(13) + CHAR(10) +
+        'host_name = ' + ISNULL(s.host_name, '-') + CHAR(13) + CHAR(10) +
+        'program_name = ' + ISNULL(s.program_name, '-') + CHAR(13) + CHAR(10) +
+        'database_name = ' + ISNULL(DB_NAME(r.database_id), '-') + CHAR(13) + CHAR(10) +
+        'status = ' + ISNULL(r.status, '-') + CHAR(13) + CHAR(10) +
+        'command = ' + ISNULL(r.command, '-') + CHAR(13) + CHAR(10) +
+        'query = ' + ISNULL(REPLACE(t.text, CHAR(13) + CHAR(10), ' '), '-') + CHAR(13) + CHAR(10) +
+        'cpu_time = ' + CAST(ISNULL(r.cpu_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) + CHAR(10) +
+        'duration = ' + CAST(ISNULL(r.total_elapsed_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) + CHAR(10) +
+        'wait_type = ' + ISNULL(r.wait_type, '-') + CHAR(13) + CHAR(10) +
+        'wait_time = ' + CAST(ISNULL(r.wait_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) + CHAR(10) +
+        'client_ip = ' + ISNULL(c.client_net_address, '-') + CHAR(13) + CHAR(10) +
+        'last_start = ' + ISNULL(CONVERT(NVARCHAR, s.last_request_start_time, 120), '-') + CHAR(13) + CHAR(10) +
+        'last_end = ' + ISNULL(CONVERT(NVARCHAR, s.last_request_end_time, 120), '-') + CHAR(13) + CHAR(10) +
+        'blocking_session_id = ' + CAST(ISNULL(r.blocking_session_id, 0) AS NVARCHAR) + CHAR(13) + CHAR(10) +
+        '----------------------------' + CHAR(13) + CHAR(10)
     FROM sys.dm_exec_sessions s
     LEFT JOIN sys.dm_exec_requests r ON s.session_id = r.session_id
     LEFT JOIN sys.dm_exec_connections c ON s.session_id = c.session_id
     OUTER APPLY sys.dm_exec_sql_text(r.sql_handle) t
     WHERE s.is_user_process = 1;
 
-    -- Ekspor isi tabel ke file teks
-    SET @bcpCmd = 'bcp "SELECT LogText FROM master.dbo.ActivityLogTemp" queryout "' + @filePath + '" -c -T -S ' + CAST(@serverName AS VARCHAR(128));
+    -- Ekspor ke file teks menggunakan bcp
+    SET @bcpCmd = 'bcp "SELECT LogText FROM master.dbo.ActivityLogTemp" queryout "' + @filePath + '" -c -T -S "' + @serverName + '"';
     EXEC xp_cmdshell @bcpCmd;
 END;
 GO
 
+aktifkan xp_cmdshell  jika belum di aktifkan
+
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'xp_cmdshell', 1;
+RECONFIGURE;
 
 tes run script = 
 EXEC dbo.Export_ServerActivity_ToText;
