@@ -1,0 +1,94 @@
+1.Buat tabel permanen sementara: dbo.ActivityLogTemp
+2.Insert semua log ke tabel itu.
+3.Ekspor isi tabel pakai bcp.
+4.Kosongkan tabel setelah export.
+
+script =
+USE master;
+GO
+
+IF OBJECT_ID('dbo.Export_ServerActivity_ToText', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.Export_ServerActivity_ToText;
+GO
+
+CREATE PROCEDURE dbo.Export_ServerActivity_ToText
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE 
+        @date NVARCHAR(20),
+        @filePath NVARCHAR(400),
+        @bcpCmd VARCHAR(8000),
+        @serverName NVARCHAR(128);
+
+    SET @date = FORMAT(GETDATE(), 'yyyyMMdd');
+    SET @filePath = 'C:\backup\SQLActivity_' + @date + '.txt';
+    SET @serverName = CAST(SERVERPROPERTY('ServerName') AS NVARCHAR(128));
+
+    -- Siapkan tabel permanen jika belum ada
+    IF OBJECT_ID('dbo.ActivityLogTemp') IS NULL
+    BEGIN
+        CREATE TABLE dbo.ActivityLogTemp (
+            LogText NVARCHAR(MAX)
+        );
+    END
+
+    -- Bersihkan isi sebelumnya
+    TRUNCATE TABLE dbo.ActivityLogTemp;
+
+    -- Header
+    INSERT INTO dbo.ActivityLogTemp (LogText)
+    VALUES ('======== Berikut log ' + FORMAT(GETDATE(), 'dddd, dd MMMM yyyy') + ' ========');
+
+    -- Insert data aktivitas
+    INSERT INTO dbo.ActivityLogTemp (LogText)
+    SELECT 
+        'session_id = ' + CAST(s.session_id AS NVARCHAR) + CHAR(13) +
+        'username = ' + ISNULL(s.login_name, '-') + CHAR(13) +
+        'host_name = ' + ISNULL(s.host_name, '-') + CHAR(13) +
+        'program_name = ' + ISNULL(s.program_name, '-') + CHAR(13) +
+        'database_name = ' + ISNULL(DB_NAME(r.database_id), '-') + CHAR(13) +
+        'status = ' + ISNULL(r.status, '-') + CHAR(13) +
+        'command = ' + ISNULL(r.command, '-') + CHAR(13) +
+        'query = ' + ISNULL(REPLACE(t.text, CHAR(13) + CHAR(10), ' '), '-') + CHAR(13) +
+        'cpu_time = ' + CAST(ISNULL(r.cpu_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) +
+        'duration = ' + CAST(ISNULL(r.total_elapsed_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) +
+        'wait_type = ' + ISNULL(r.wait_type, '-') + CHAR(13) +
+        'wait_time = ' + CAST(ISNULL(r.wait_time, 0) AS NVARCHAR) + ' ms' + CHAR(13) +
+        'client_ip = ' + ISNULL(c.client_net_address, '-') + CHAR(13) +
+        'last_start = ' + ISNULL(CONVERT(NVARCHAR, s.last_request_start_time, 120), '-') + CHAR(13) +
+        'last_end = ' + ISNULL(CONVERT(NVARCHAR, s.last_request_end_time, 120), '-') + CHAR(13) +
+        'blocking_session_id = ' + CAST(ISNULL(r.blocking_session_id, 0) AS NVARCHAR) + CHAR(13) +
+        '----------------------------'
+    FROM sys.dm_exec_sessions s
+    LEFT JOIN sys.dm_exec_requests r ON s.session_id = r.session_id
+    LEFT JOIN sys.dm_exec_connections c ON s.session_id = c.session_id
+    OUTER APPLY sys.dm_exec_sql_text(r.sql_handle) t
+    WHERE s.is_user_process = 1;
+
+    -- Ekspor isi tabel ke file teks
+    SET @bcpCmd = 'bcp "SELECT LogText FROM master.dbo.ActivityLogTemp" queryout "' + @filePath + '" -c -T -S ' + CAST(@serverName AS VARCHAR(128));
+    EXEC xp_cmdshell @bcpCmd;
+END;
+GO
+
+
+tes run script = 
+EXEC dbo.Export_ServerActivity_ToText;
+
+
+✅ Scheduler Jam 12 Malam
+1. Buka SQL Server Agent > Jobs > New Job
+Name: Export Log Activity
+
+2. Step:
+Type: Transact-SQL
+Database: master
+Command:
+EXEC dbo.Export_ServerActivity_ToText;
+
+3.Schedules:
+Recurring
+Frequency: Daily
+Time: 00:00:00 (jam 12 malam)
