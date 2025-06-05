@@ -128,7 +128,7 @@ BEGIN
         @serverName NVARCHAR(128);
 
     SET @date = FORMAT(GETDATE(), 'yyyyMMdd');
-    SET @filePath = 'E:\BackupDB\LogDB\All_Logdb_' + @date + '.txt';
+    SET @filePath = 'C:\BACKUP\arsip_logdb\All_Logdb_' + @date + '.txt';
     SET @serverName = CAST(SERVERPROPERTY('ServerName') AS NVARCHAR(128));
 
     -- Pastikan tabel log ada
