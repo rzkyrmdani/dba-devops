@@ -1,0 +1,108 @@
+Berikut penjelasan fungsi dari masing-masing Server Role di SQL Server:
+
+🔐 1. bulkadmin
+Mengizinkan user menjalankan operasi BULK INSERT.
+
+Contoh: BULK INSERT dari file .csv atau .txt ke dalam tabel SQL Server.
+
+Cocok untuk import data besar dari file eksternal.
+
+⚠️ Akses terbatas tapi tetap bisa digunakan untuk menyisipkan data dalam jumlah besar.
+
+🛠️ 2. dbcreator
+Bisa membuat, menghapus, mengatur, dan meng-restore database.
+
+Contoh izin:
+
+CREATE DATABASE
+
+ALTER DATABASE
+
+DROP DATABASE
+
+⚠️ Tidak otomatis punya akses ke data dalam database, hanya mengelola struktur database.
+
+💽 3. diskadmin
+Mengelola file dan disk SQL Server.
+
+Bisa:
+
+Memetakan file ke drive menggunakan sp_addumpdevice, dll.
+
+⚠️ Jarang digunakan kecuali untuk konfigurasi perangkat penyimpanan.
+
+🧠 4. processadmin
+Bisa melihat dan mengakhiri (kill) proses SQL Server (SPID).
+
+Cocok untuk:
+
+Admin yang memantau blocking, deadlock, atau proses runaway.
+
+⚠️ Tidak boleh diberikan ke user biasa karena bisa mengganggu operasi aktif.
+
+👥 5. public
+Role default untuk semua user.
+
+Semua user adalah bagian dari public.
+
+Hanya memiliki hak akses minimal yang tidak bisa dihapus.
+
+Gunakan ini untuk memberikan akses dasar yang aman untuk semua user.
+
+🛡️ 6. securityadmin
+Mengelola login, user, role, dan permission.
+
+Bisa:
+
+Membuat login
+
+Reset password
+
+Mengatur permission
+
+⚠️ Bisa memberi hak admin ke dirinya sendiri secara tidak langsung → hati-hati.
+
+🖥️ 7. serveradmin
+Mengelola pengaturan server seperti:
+
+Konfigurasi sp_configure
+
+Mulai/berhenti SQL Server
+
+Menetapkan opsi server-wide
+
+⚠️ Punya hak penting terhadap instansi SQL Server, tapi tidak ke data per se.
+
+⚙️ 8. setupadmin
+Bisa menjalankan prosedur konfigurasi server seperti sp_addlinkedserver, sp_configure.
+
+Digunakan untuk:
+
+Membuat linked server
+
+Mengatur remote login
+
+⚠️ Akses teknis tinggi, tapi tidak setinggi sysadmin.
+
+👑 9. sysadmin
+Hak akses tertinggi.
+
+Bisa melakukan semua tindakan di SQL Server tanpa batas.
+
+Setara dengan “superuser” atau “root”.
+
+Tidak bisa dibatasi dengan DENY.
+
+⚠️ Sangat sensitif, hanya diberikan ke user yang benar-benar dipercaya.
+
+📌 Rangkuman (Tabel Sederhana):
+Server Role	Fungsi Utama	Tingkat Risiko
+bulkadmin	BULK INSERT dari file	Rendah
+dbcreator	Buat/drop database	Menengah
+diskadmin	Kelola perangkat disk	Rendah
+processadmin	Kill proses SQL	Menengah
+public	Default untuk semua user	Rendah
+securityadmin	Kelola login dan permission	Tinggi
+serveradmin	Kelola pengaturan server & start/stop SQL	Tinggi
+setupadmin	Kelola linked server dan setup konfigurasi	Tinggi
+sysadmin	Segalanya (tanpa batas)	Sangat Tinggi
