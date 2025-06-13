@@ -2,8 +2,274 @@ use [master]
 
 GO
 
-GRANT ALTER ANY LOGIN TO [dba_select] AS [sa]
+GRANT ALTER ANY CONNECTION TO [dba_select]
 
 GO
 
+use [master]
 
+GO
+
+GRANT CONNECT ANY DATABASE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+GRANT CONNECT SQL TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+GRANT SELECT ALL USER SECURABLES TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+GRANT UNSAFE ASSEMBLY TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+GRANT VIEW ANY DATABASE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+GRANT VIEW ANY DEFINITION TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+GRANT VIEW SERVER STATE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ADMINISTER BULK OPERATIONS TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY AVAILABILITY GROUP TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY CREDENTIAL TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY DATABASE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY ENDPOINT TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY EVENT NOTIFICATION TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY EVENT SESSION TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY LINKED SERVER TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY LOGIN TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY SERVER AUDIT TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER ANY SERVER ROLE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER RESOURCES TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER SERVER STATE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER SETTINGS TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY ALTER TRACE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY AUTHENTICATE SERVER TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY CONTROL SERVER TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY CREATE ANY DATABASE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY CREATE AVAILABILITY GROUP TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY CREATE DDL EVENT NOTIFICATION TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY CREATE ENDPOINT TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY CREATE SERVER ROLE TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY CREATE TRACE EVENT NOTIFICATION TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY EXTERNAL ACCESS ASSEMBLY TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY IMPERSONATE ANY LOGIN TO [dba_select]
+
+GO
+
+use [master]
+
+GO
+
+DENY SHUTDOWN TO [dba_select]
+
+GO
+
+GRANT ALTER ANY LOGIN TO [dba_select] AS [sa]
+
+GO
