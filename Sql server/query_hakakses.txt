@@ -130,14 +130,6 @@ use [master]
 
 GO
 
-DENY ALTER ANY LOGIN TO [dba_select]
-
-GO
-
-use [master]
-
-GO
-
 DENY ALTER ANY SERVER AUDIT TO [dba_select]
 
 GO
@@ -186,7 +178,7 @@ use [master]
 
 GO
 
-DENY AUTHENTICATE SERVER TO [dba_select]
+GRANT AUTHENTICATE SERVER TO [dba_select]
 
 GO
 
