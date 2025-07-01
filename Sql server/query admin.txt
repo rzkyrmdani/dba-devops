@@ -162,6 +162,29 @@ JOIN sys.master_files f ON d.database_id = f.database_id
 GROUP BY d.name
 ORDER BY TotalSizeMB DESC;
 
+-----------------------------cek tablespace
+SELECT     
+    db.name AS database_name,
+    fg.name AS filegroup_name,
+    mf.name AS logical_file_name,
+    mf.physical_name,
+    mf.type_desc AS file_type,
+    mf.size * 8 / 1024 AS size_MB,
+    mf.max_size,
+    mf.growth,
+    mf.is_percent_growth
+FROM     
+    sys.master_files mf
+JOIN     
+    sys.databases db ON mf.database_id = db.database_id
+LEFT JOIN     
+    sys.filegroups fg ON mf.data_space_id = fg.data_space_id
+WHERE
+    db.name = 'ProRBA2PLN'
+ORDER BY     
+    db.name, fg.name;
+
+
 
 ---------------- cek total data yang ada didalam table -----------------
 
