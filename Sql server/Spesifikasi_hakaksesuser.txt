@@ -63,6 +63,7 @@ Mengatur permission
 ⚠️ Bisa memberi hak admin ke dirinya sendiri secara tidak langsung → hati-hati.
 
 🖥️ 7. serveradmin
+
 Mengelola pengaturan server seperti:
 
 Konfigurasi sp_configure
@@ -74,6 +75,7 @@ Menetapkan opsi server-wide
 ⚠️ Punya hak penting terhadap instansi SQL Server, tapi tidak ke data per se.
 
 ⚙️ 8. setupadmin
+
 Bisa menjalankan prosedur konfigurasi server seperti sp_addlinkedserver, sp_configure.
 
 Digunakan untuk:
@@ -106,3 +108,17 @@ securityadmin	Kelola login dan permission	Tinggi
 serveradmin	Kelola pengaturan server & start/stop SQL	Tinggi
 setupadmin	Kelola linked server dan setup konfigurasi	Tinggi
 sysadmin	Segalanya (tanpa batas)	Sangat Tinggi
+
+
+
+| Server Role     | Fungsi Utama                               | Tingkat Risiko |
+| --------------- | ------------------------------------------ | -------------- |
+| `bulkadmin`     | BULK INSERT dari file                      | Rendah         |
+| `dbcreator`     | Buat/drop database                         | Menengah       |
+| `diskadmin`     | Kelola perangkat disk                      | Rendah         |
+| `processadmin`  | Kill proses SQL                            | Menengah       |
+| `public`        | Default untuk semua user                   | Rendah         |
+| `securityadmin` | Kelola login dan permission                | Tinggi         |
+| `serveradmin`   | Kelola pengaturan server & start/stop SQL  | Tinggi         |
+| `setupadmin`    | Kelola linked server dan setup konfigurasi | Tinggi         |
+| `sysadmin`      | Segalanya (tanpa batas)                    | Sangat Tinggi  |
