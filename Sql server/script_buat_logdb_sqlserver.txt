@@ -1,3 +1,10 @@
+aktifkan xp_cmdshell  jika belum di aktifkan
+
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'xp_cmdshell', 1;
+RECONFIGURE;
+
 -- 1. Buat database khusus audit
 
 IF DB_ID('AuditDB') IS NULL
