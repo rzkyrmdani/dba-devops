@@ -109,7 +109,7 @@ serveradmin	Kelola pengaturan server & start/stop SQL	Tinggi
 setupadmin	Kelola linked server dan setup konfigurasi	Tinggi
 sysadmin	Segalanya (tanpa batas)	Sangat Tinggi
 
-
+SERVER ROLE SERVER INSTANCE
 
 | Server Role     | Fungsi Utama                               | Tingkat Risiko |
 | --------------- | ------------------------------------------ | -------------- |
@@ -122,3 +122,21 @@ sysadmin	Segalanya (tanpa batas)	Sangat Tinggi
 | `serveradmin`   | Kelola pengaturan server & start/stop SQL  | Tinggi         |
 | `setupadmin`    | Kelola linked server dan setup konfigurasi | Tinggi         |
 | `sysadmin`      | Segalanya (tanpa batas)                    | Sangat Tinggi  |
+
+
+SERVER ROLE SERVER DATABASE
+
+
+| Role                   | Fungsi                                                                                 | Tingkat Akses                      |
+| ---------------------- | -------------------------------------------------------------------------------------- | ---------------------------------- |
+| **public**             | Role default semua user. Akses paling dasar (lihat schema, default permission).        | 🔒 **Sangat Aman**                 |
+| **db\_datareader**     | Bisa melakukan **SELECT** semua tabel & view. Tidak bisa ubah data.                    | ✅ Aman                             |
+| **db\_denydatawriter** | **Menolak (DENY)** semua `INSERT`, `UPDATE`, dan `DELETE`. Cocok untuk user read-only. | ✅ Aman                             |
+| **db\_datawriter**     | Bisa melakukan **INSERT**, **UPDATE**, **DELETE** ke semua tabel.                      | ⚠️ Berbahaya untuk user monitoring |
+| **db\_denydatareader** | **Menolak SELECT** semua tabel. Biasanya untuk membatasi data sensitif.                | ❗ Sangat terbatas                  |
+| **db\_ddladmin**       | Bisa menjalankan **perintah DDL** seperti `CREATE TABLE`, `ALTER`, `DROP`, dll.        | ⚠️ Bisa ubah struktur              |
+| **db\_backupoperator** | Bisa menjalankan **backup database** (tapi tidak restore).                             | ⚠️ Aman untuk operator backup      |
+| **db\_accessadmin**    | Bisa menambahkan dan menghapus user database.                                          | ⚠️ Admin level                     |
+| **db\_securityadmin**  | Bisa mengatur **permission pengguna di level database**, termasuk GRANT/DENY.          | ⚠️ Admin level                     |
+| **db\_owner**          | **Menguasai penuh database**: bisa mengubah data, struktur, permission, dll.           | 🔥 **Sangat Berbahaya**            |
+
