@@ -1,0 +1,63 @@
+================ hanya select view didalam database ==========================
+
+USE [master];
+GO
+
+-- Daftar user
+DECLARE @UserList TABLE (UserName NVARCHAR(100));
+INSERT INTO @UserList (UserName) VALUES
+('herri'),
+('aridwan'),
+('andi_jalil'),
+('andopratama'),
+('asdinwp'),
+('bayuts'),
+('enceng_cahyadi'),
+('fahribag'),
+('hananta'),
+('ikrar_harvy'),
+('latifui'),
+('mjay_rizky'),
+('mridha_hakim'),
+('rizky_ramdani'),
+('alivia_prameswari'),
+('kamila_aprilia'),
+('dwiky_melinia'),
+('doand_panjaitan');
+
+-- Loop dan eksekusi pembuatan login dan user per DB
+DECLARE @UserName NVARCHAR(100);
+DECLARE cur CURSOR FOR SELECT UserName FROM @UserList;
+OPEN cur;
+FETCH NEXT FROM cur INTO @UserName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    DECLARE @SQL NVARCHAR(MAX);
+
+    -- Buat login di server (jika belum ada)
+    SET @SQL = '
+    IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ''' + @UserName + ''')
+    BEGIN
+        CREATE LOGIN [' + @UserName + '] WITH PASSWORD = ''ic0Nplu5@2025!'', CHECK_POLICY = OFF;
+    END;';
+    EXEC (@SQL);
+
+    -- Buat user di database Terpilih dan beri role db_datareader
+    SET @SQL = '
+    USE [DBGANDUL];
+    IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = ''' + @UserName + ''')
+    BEGIN
+        CREATE USER [' + @UserName + '] FOR LOGIN [' + @UserName + '];
+        EXEC sp_addrolemember ''db_datareader'', ''' + @UserName + ''';
+    END;';
+    EXEC (@SQL);
+
+    FETCH NEXT FROM cur INTO @UserName;
+END
+
+CLOSE cur;
+DEALLOCATE cur;
+
+
+========================== Superadmin bisa semuanya di database ===============================
