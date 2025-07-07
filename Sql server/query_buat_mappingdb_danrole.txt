@@ -3,39 +3,39 @@
 USE [master];
 GO
 
--- Daftar user
+-- Daftar user yang akan dibuat
 DECLARE @UserList TABLE (UserName NVARCHAR(100));
 INSERT INTO @UserList (UserName) VALUES
-('herri'),
-('aridwan'),
-('andi_jalil'),
-('andopratama'),
-('asdinwp'),
+('herri'), 
+('aridwan'), 
+('andi_jalil'), 
+('andopratama'), 
+('asdinwp'), 
 ('bayuts'),
-('enceng_cahyadi'),
-('fahribag'),
-('hananta'),
-('ikrar_harvy'),
+('enceng_cahyadi'), 
+('fahribag'), 
+('hananta'), 
+('ikrar_harvy'), 
 ('latifui'),
-('mjay_rizky'),
-('mridha_hakim'),
-('rizky_ramdani'),
-('alivia_prameswari'),
-('kamila_aprilia'),
-('dwiky_melinia'),
+('mjay_rizky'), 
+('mridha_hakim'), 
+('rizky_ramdani'), 
+'alivia_prameswari'),
+('kamila_aprilia'), 
+('dwiky_melinia'), 
 ('doand_panjaitan');
 
--- Loop dan eksekusi pembuatan login dan user per DB
+-- Cursor untuk semua user
 DECLARE @UserName NVARCHAR(100);
-DECLARE cur CURSOR FOR SELECT UserName FROM @UserList;
-OPEN cur;
-FETCH NEXT FROM cur INTO @UserName;
+DECLARE cur_user CURSOR FOR SELECT UserName FROM @UserList;
+OPEN cur_user;
+FETCH NEXT FROM cur_user INTO @UserName;
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
     DECLARE @SQL NVARCHAR(MAX);
 
-    -- Buat login di server (jika belum ada)
+    -- Buat login di level server jika belum ada
     SET @SQL = '
     IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ''' + @UserName + ''')
     BEGIN
@@ -43,21 +43,130 @@ BEGIN
     END;';
     EXEC (@SQL);
 
-    -- Buat user di database Terpilih dan beri role db_datareader
-    SET @SQL = '
-    USE [DBGANDUL];
-    IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = ''' + @UserName + ''')
-    BEGIN
-        CREATE USER [' + @UserName + '] FOR LOGIN [' + @UserName + '];
-        EXEC sp_addrolemember ''db_datareader'', ''' + @UserName + ''';
-    END;';
-    EXEC (@SQL);
+    -- Cursor untuk semua database user (skip sistem)
+    DECLARE @DBName NVARCHAR(128);
+    DECLARE cur_db CURSOR FOR
+        SELECT name FROM sys.databases
+        WHERE state_desc = 'ONLINE'
+          AND name NOT IN ('master', 'tempdb', 'model', 'msdb');
 
-    FETCH NEXT FROM cur INTO @UserName;
+    OPEN cur_db;
+    FETCH NEXT FROM cur_db INTO @DBName;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Periksa dan buat user serta assign db_datareader
+        SET @SQL = '
+        USE [' + @DBName + '];
+        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = ''' + @UserName + ''')
+        BEGIN
+            CREATE USER [' + @UserName + '] FOR LOGIN [' + @UserName + '];
+            EXEC sp_addrolemember ''db_datareader'', ''' + @UserName + ''';
+        END;';
+        EXEC (@SQL);
+
+        FETCH NEXT FROM cur_db INTO @DBName;
+    END
+
+    CLOSE cur_db;
+    DEALLOCATE cur_db;
+
+    FETCH NEXT FROM cur_user INTO @UserName;
 END
 
-CLOSE cur;
-DEALLOCATE cur;
+CLOSE cur_user;
+DEALLOCATE cur_user;
 
 
 ========================== Superadmin bisa semuanya di database ===============================
+
+
+USE [master];
+GO
+
+-- Daftar user yang akan dibuat
+DECLARE @UserList TABLE (UserName NVARCHAR(100));
+INSERT INTO @UserList (UserName) VALUES
+('herri'), 
+('aridwan'), 
+('andi_jalil'), 
+('andopratama'), 
+('asdinwp'), 
+('bayuts'),
+('enceng_cahyadi'), 
+('fahribag'), 
+('hananta'), 
+('ikrar_harvy'), 
+('latifui'),
+('mjay_rizky'), 
+('mridha_hakim'), 
+('rizky_ramdani'), 
+('alivia_prameswari'),
+('kamila_aprilia'), 
+('dwiky_melinia'), 
+('doand_panjaitan');
+
+-- Cursor untuk semua user
+DECLARE @UserName NVARCHAR(100);
+DECLARE cur_user CURSOR FOR SELECT UserName FROM @UserList;
+OPEN cur_user;
+FETCH NEXT FROM cur_user INTO @UserName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    DECLARE @SQL NVARCHAR(MAX);
+
+    -- Buat login jika belum ada
+    SET @SQL = '
+    IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ''' + @UserName + ''')
+    BEGIN
+        CREATE LOGIN [' + @UserName + '] WITH PASSWORD = ''ic0Nplu5@2025!'', CHECK_POLICY = OFF;
+    END;';
+    EXEC (@SQL);
+
+    -- Tambahkan ke role sysadmin jika belum
+    SET @SQL = '
+    IF NOT EXISTS (
+        SELECT 1 FROM sys.server_role_members rm
+        JOIN sys.server_principals r ON r.principal_id = rm.role_principal_id
+        JOIN sys.server_principals m ON m.principal_id = rm.member_principal_id
+        WHERE r.name = ''sysadmin'' AND m.name = ''' + @UserName + '''
+    )
+    BEGIN
+        EXEC sp_addsrvrolemember @loginame = ''' + @UserName + ''', @rolename = ''sysadmin'';
+    END;';
+    EXEC (@SQL);
+
+    -- Loop semua database user
+    DECLARE @DBName NVARCHAR(128);
+    DECLARE cur_db CURSOR FOR
+        SELECT name FROM sys.databases
+        WHERE state_desc = 'ONLINE'
+          AND name NOT IN ('master', 'tempdb', 'model', 'msdb');
+
+    OPEN cur_db;
+    FETCH NEXT FROM cur_db INTO @DBName;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Buat user dan beri db_owner
+        SET @SQL = '
+        USE [' + @DBName + '];
+        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = ''' + @UserName + ''')
+        BEGIN
+            CREATE USER [' + @UserName + '] FOR LOGIN [' + @UserName + '];
+        END;
+        EXEC sp_addrolemember ''db_owner'', ''' + @UserName + ''';';
+        EXEC (@SQL);
+
+        FETCH NEXT FROM cur_db INTO @DBName;
+    END
+
+    CLOSE cur_db;
+    DEALLOCATE cur_db;
+
+    FETCH NEXT FROM cur_user INTO @UserName;
+END
+
+CLOSE cur_user;
+DEALLOCATE cur_user;
