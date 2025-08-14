@@ -4,25 +4,26 @@ setlocal
 :: === KONFIGURASI ===
 set "SQL_USER=backup_db"
 set "SQL_PASS=Plnpusat@2025!"
-set "SQL_SERVER=WIN-4OM4B4TF6R2\MAXICOPLNDB"
-set "BACKUP_DIR=E:\Backup_DB\Full"
-set "SQLCMD_PATH=C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\SQLCMD.EXE"
+set "SQL_SERVER=10.1.8.205\RDBSILM"
+set "BACKUP_DIR=E:\DATABASE\BACKUP\ALL_BACKUP_FULL_ZIP"
+set "SQLCMD_PATH=C:\Program Files\Microsoft SQL Server\110\Tools\Binn\SQLCMD.EXE"
 set "PSCP_PATH=C:\Program Files\PuTTY\pscp.exe"
 set "WINRAR_PATH=C:\Program Files\WinRAR\WinRAR.exe"
+set "ZIP_PASSWORD=Iconplnkorporat1"
 
 :: === SERVER SCP 1 ===
 set "SCP1_PORT=6969"
 set "SCP1_USER=icon"
 set "SCP1_PASS=R4in!Sc0mFOrT1nG"
 set "SCP1_IP=10.14.152.62"
-set "SCP1_TARGET=/Backup_Database/Database/production/maxico_pln"
+set "SCP1_TARGET=/Backup_Database/Database/production/silm"
 
 :: === SERVER SCP 2 ===
 set "SCP2_PORT=22"
 set "SCP2_USER=sqlserver"
 set "SCP2_PASS=Icon@thn2025!"
 set "SCP2_IP=10.14.113.34"
-set "SCP2_TARGET=/backupfull_sqlserver/maxico_pln/backup_full"
+set "SCP2_TARGET=/backupfull_sqlserver/silm/backup_full"
 
 :: === BUAT FOLDER BACKUP JIKA BELUM ADA ===
 if not exist "%BACKUP_DIR%" (
@@ -31,7 +32,7 @@ if not exist "%BACKUP_DIR%" (
 
 :: === TANGGAL DAN WAKTU UNTUK NAMA FILE ZIP ===
 for /f %%i in ('powershell -NoLogo -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "DATETIME=%%i"
-set "ZIP_NAME=Prod_Backup_All_FullDBMAXICOPLN_%DATETIME%.zip"
+set "ZIP_NAME=Prod_Backup_All_DBSILM_%DATETIME%.zip"
 set "ZIP_PATH=%BACKUP_DIR%\%ZIP_NAME%"
 
 echo [INFO] Memulai proses FULL BACKUP semua database user...
@@ -49,9 +50,9 @@ EXEC('BACKUP DATABASE [' + @name + '] TO DISK = ''' + @fileName + ''' WITH INIT,
 FETCH NEXT FROM db_cursor INTO @name END ^
 CLOSE db_cursor DEALLOCATE db_cursor"
 
-:: === ZIP FILE .BAK DENGAN WINRAR ===
-echo [INFO] Mengarsipkan file .bak ke ZIP...
-"%WINRAR_PATH%" a -ep1 -ibck -m5 -r "%ZIP_PATH%" "%BACKUP_DIR%\*.bak"
+:: === ZIP FILE .BAK DENGAN WINRAR DAN PASSWORD ===
+echo [INFO] Mengarsipkan file .bak ke ZIP dengan password...
+"%WINRAR_PATH%" a -ep1 -ibck -m5 -r -p%ZIP_PASSWORD% "%ZIP_PATH%" "%BACKUP_DIR%\*.bak"
 
 :: === HAPUS FILE .BAK SETELAH DIARSIPKAN ===
 echo [INFO] Menghapus file .bak setelah ZIP...
