@@ -1,0 +1,88 @@
+param(
+    [string]$Status       = "FAILED",
+    [string]$StartTime    = "",
+    [string]$EndTime      = "",
+    [string]$Description  = ""
+)
+
+# Nama database tetap manual
+$Database = "SMARTER"
+
+# Konversi StartTime / EndTime ke datetime
+if ($StartTime -ne "") { 
+    $StartTimeDT = [datetime]::ParseExact($StartTime, "yyyy-MM-dd_HH:mm:ss", $null) 
+} else { 
+    $StartTimeDT = Get-Date 
+}
+if ($EndTime -ne "") { 
+    $EndTimeDT = [datetime]::ParseExact($EndTime, "yyyy-MM-dd_HH:mm:ss", $null) 
+} else { 
+    $EndTimeDT = Get-Date 
+}
+
+# Jika deskripsi kosong, buat default
+if ($Description -eq "") {
+    $Description = if ($Status -eq "SUCCESS") { "Backup berjalan normal." } else { "Backup gagal." }
+}
+
+# Hitung durasi
+$Duration = New-TimeSpan -Start $StartTimeDT -End $EndTimeDT
+
+# Tentukan ikon & class
+if ($Status -eq "SUCCESS") {
+    $StatusClass = "success"
+    $StatusIcon  = "✅"
+} else {
+    $StatusClass = "failed"
+    $StatusIcon  = "❌"
+}
+
+# Variabel email
+$EmailFrom = "backup-sql@iconpln.co.id"
+$EmailTo   = "rizky.ramdani@iconpln.co.id"
+$SMTPServer = "10.14.152.62"
+$SMTPPort   = 2525
+
+# Body email HTML
+$Body = @"
+<html>
+<head>
+<meta charset="UTF-8">  <style>
+body { font-family: Arial, sans-serif; background-color: #f8f9fa; color: #333; padding: 20px; }
+.container { max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 20px; }
+h2 { text-align: center; color: #0078D7; }
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+th { background: #0078D7; color: white; width: 30%; }
+.success { color: green; font-weight: bold; }
+.failed { color: red; font-weight: bold; }
+.footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Backup SQL Server Report</h2>
+<table>
+<tr><th>Status</th><td class="$StatusClass">$StatusIcon $Status</td></tr>
+<tr><th>Database</th><td>$Database</td></tr>
+<tr><th>Description</th><td>$Description</td></tr>
+<tr><th>Start</th><td>$($StartTimeDT.ToString("dd-MM-yyyy HH:mm:ss"))</td></tr>
+<tr><th>End</th><td>$($EndTimeDT.ToString("dd-MM-yyyy HH:mm:ss"))</td></tr>
+<tr><th>Duration</th><td>$($Duration.ToString("hh\:mm\:ss"))</td></tr>
+</table>
+<div class="footer">
+Report generated at $(Get-Date -Format "dd-MM-yyyy HH:mm:ss")
+</div>
+</div>
+</body>
+</html>
+"@
+
+# Kirim email
+try {
+    # Pastikan parameter -Encoding ditambahkan di sini
+    Send-MailMessage -From $EmailFrom -To $EmailTo -Subject "[ALERT] Backup SQL Server" -Body $Body -BodyAsHtml -SmtpServer $SMTPServer -Port $SMTPPort -Encoding ([System.Text.Encoding]::UTF8) -ErrorAction Stop # <-- DITAMBAHKAN Encoding di sini
+    Write-Host "[INFO] Email notifikasi terkirim."
+} catch {
+    Write-Host "[ERROR] Gagal mengirim email:" $_.Exception.Message
+}
