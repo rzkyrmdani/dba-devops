@@ -1,0 +1,26 @@
+
+===== allow remote mariadb =========
+
+- vi /etc/mysql/mariadb.conf.d/50-server.cnf
+
+ganti bind-address            = 127.0.0.1
+jadi ini bind-address            = 0.0.0.0
+
+- selanjutnya
+
+systemctl restart mariadb
+
+- buat user root dengan persen(%) agar connect ke semua ip 
+
+CREATE USER 'root'@'%' IDENTIFIED BY 'Welcome1';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+FLUSH PRIVILEGES;
+
+-Pastikan firewall mendaftarkan port mariadb/mysql
+
+ufw allow 3306/tcp
+ufw status
+
+*jika firewall mati abaikan selanjutnya
+
+- coba remote pakai tools seperti navicat dll
