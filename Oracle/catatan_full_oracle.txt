@@ -1,0 +1,3944 @@
+1.	DEFAULT BASH PROFILE
+✔	Profile DB
+[oracle@ap2tdrdb01 ~]$ cat .ap2t_profile
+# .ap2t_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+export ORACLE_BASE=/u01/app/oracle
+export ORACLE_HOME=$ORACLE_BASE/product/11.2.0.3/dbhome_1
+export ORACLE_SID=ap2t1
+PATH=$PATH:$ORACLE_HOME/bin
+
+export PATH
+unset USERNAME
+✔	Profile Grid
+[oracle@ap2tdrdb01 ~]$ cat .grid_profile
+# .ap2t_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+export ORACLE_BASE=/u01/app
+export ORACLE_HOME=$ORACLE_BASE/11.2.0.3/grid
+export ORACLE_SID=+ASM1
+PATH=$PATH:$ORACLE_HOME/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+
+export PATH
+unset USERNAME
+
+[oracle@ap2tdrdb01 ~]$
+2.	DEFAULT CRONTAB
+[oracle@ap2tdrdb01 ~]$ crontab -l
+# Minute   Hour   Day of Month       Month          Day of Week        Command
+# (0-59)  (0-23)     (1-31)    (1-12 or Jan-Dec)  (0-6 or Sun-Sat)
+#0 01 * * 6 /Backup_AP2T1/rman/backup/backup_script/run_delbu_ap2t_vmax1.sh
+#0 03 * * 6 /Backup_AP2T1/rman/backup/backup_script/run_fullbu_ap2t1_vmax.sh
+#0 01 * * * /Backup_AP2T3/rman/backup/backup_script/run_arc_backup.sh
+#0 03 * * 1 /Backup_AP2T1/rman/backup/backup_script/run_atchbu_ap2t.sh
+#0 03 * * 1 /Backup_AP2T1/rman/backup/backup_script/run_atchbu_detail_ap2t.sh
+#05 03 * * 1 /Backup_AP2T1/rman/backup/backup_script/run_chkbu_ap2t.sh
+[oracle@ap2tdrdb01 ~]$
+3.	DEFAULT SCRIPT BACKUP FULL DB
+1.	Untuk crontab menjalankan script untuk membuat log,
+[oracle@ap2tdrdb01 ~]$ cat /Backup_AP2T1/rman/backup/backup_script/run_fullbu_ap2t1_vmax.sh
+#find /Backup_AP2T1/rman/backup/backup_piece -mtime +3 -name '*.bkp' -exec rm -f {} \;
+#wait
+export ORACLE_BASE=/u01/app
+export ORACLE_HOME=$ORACLE_BASE/oracle/product/11.2.0.3/dbhome_1
+export ORACLE_SID=ap2t1
+PATH=$PATH:$ORACLE_HOME/bin
+NLS_DATE_FORMAT='DD/MON/YYYY HH24:MI:SS';export NLS_DATE_FORMAT
+rman target sys/t4kc3lur1ts4mp34nd1k nocatalog cmdfile=/Backup_AP2T1/rman/backup/backup_script/fullbu_ap2t_vmax.sh log=/Backup_AP2T1/rman/backup/backup_log/log_fullbu_ap2t_vmax_$(date +\%Y\%m\%d_%I\%M\%p).log
+[oracle@ap2tdrdb01 ~]$
+2.	Untuk cmdfile nya sendiri adalah script RMAN
+[oracle@ap2tdrdb01 ~]$ cat /Backup_AP2T1/rman/backup/backup_script/fullbu_ap2t_vmax.sh
+RUN
+{
+CONFIGURE DEFAULT DEVICE TYPE TO 'DISK';
+CONFIGURE CHANNEL DEVICE TYPE disk clear;
+CONFIGURE DEVICE TYPE DISK PARALLELISM 16 BACKUP TYPE TO COMPRESSED BACKUPSET;
+sql "alter session set optimizer_mode=RULE";
+SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
+#backup format '/Backup_AP2T1/rman/backup/backup_piece/fullbu_ap2t_%Y%M%D_%U.bkp' SECTION SIZE 20G database;
+ALLOCATE CHANNEL ch1 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch2 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch3 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch4 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch5 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch6 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch7 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch8 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch9 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch10 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch11 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch12 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch13 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch14 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch15 DEVICE TYPE DISK FORMAT '/Backup_AP2T1/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+ALLOCATE CHANNEL ch16 DEVICE TYPE DISK FORMAT '/Backup_AP2T2/rman/backup/backup_piece/fullbu_%d_%Y%M%D_%U.bkp';
+backup database;
+release channel ch1;
+release channel ch2;
+release channel ch3;
+release channel ch4;
+release channel ch5;
+release channel ch6;
+release channel ch7;
+release channel ch8;
+release channel ch9;
+release channel ch10;
+release channel ch11;
+release channel ch12;
+release channel ch13;
+release channel ch14;
+release channel ch15;
+release channel ch16;
+delete noprompt obsolete;
+CONFIGURE DEVICE TYPE DISK PARALLELISM 1 BACKUP TYPE TO COMPRESSED BACKUPSET;
+backup current controlfile format '/Backup_AP2T1/rman/backup/backup_controlfile/cf_%I_%d_%u_%T.bkc';
+}
+exit;
+[oracle@ap2tdrdb01 ~]$
+Dengan script yang dibuat diatas dikombinasikan dengan crontab job yang ada dilinux, maka job backup dapat dilakukan sesuai dengan jadwal yang kita kehendaki.
+4.	DEFAULT SCRIPT BACKUP ARCHIVELOG
+1.	Untuk crontab menjalankan script untuk membuat log, 
+[oracle@ap2tdrdb01 ~]$ cat /Backup_AP2T3/rman/backup/backup_script/run_arc_backup.sh
+export ORACLE_BASE=/u01/app
+export ORACLE_HOME=$ORACLE_BASE/oracle/product/11.2.0.3/dbhome_1
+export ORACLE_SID=ap2t1
+PATH=$PATH:$ORACLE_HOME/bin
+NLS_DATE_FORMAT='DD/MON/YYYY HH24:MI:SS';export NLS_DATE_FORMAT
+rman target / nocatalog cmdfile=/Backup_AP2T3/rman/backup/backup_script/backup_arc_ap2t.sh log=/Backup_AP2T3/rman/backup/backup_log/log_backup_arc_ap2t_vmax_$(date +\%Y\%m\%d_%I\%M\%p).log
+[oracle@ap2tdrdb01 ~]$
+2.	Untuk cmdfile nya sendiri adalah script RMAN
+[oracle@ap2tdrdb01 ~]$ cat /Backup_AP2T3/rman/backup/backup_script/backup_arc_ap2t.sh
+RUN
+{
+CONFIGURE DEFAULT DEVICE TYPE TO 'DISK';
+CONFIGURE BACKUP OPTIMIZATION ON;
+CONFIGURE DEVICE TYPE DISK PARALLELISM 16 BACKUP TYPE TO COMPRESSED BACKUPSET;
+CONFIGURE CHANNEL DEVICE TYPE disk clear;
+CONFIGURE CHANNEL DEVICE TYPE DISK MAXPIECESIZE 10 G;
+sql "alter session set optimizer_mode=RULE";
+SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
+backup archivelog all format '/Backup_AP2T3/rman/backup/backup_arc/bkp_arch_%d_thread_%h_%Y%M%D_%U.bkp';
+delete noprompt archivelog all backed up 1 times to device type disk;
+CONFIGURE DEVICE TYPE DISK PARALLELISM 6 BACKUP TYPE TO COMPRESSED BACKUPSET;
+#CONFIGURE CHANNEL DEVICE TYPE DISK MAXPIECESIZE 128 G;
+}
+exit;
+[oracle@ap2tdrdb01 ~]$
+5.	DEFAULT SCRIPT RESTORE DATABASE
+run {
+#set newname for database to new;
+configure device type disk parallelism 1;
+sql "alter session set optimizer_mode=RULE";
+sql 'alter system set "_backup_disk_bufsz"=1048576';
+sql 'alter system set "_backup_disk_bufcnt"=64';
+sql 'alter system set "_BACKUP_FILE_BUFSZ"=1048576';
+sql 'alter system set "_BACKUP_FILE_BUFCNT"=64';
+set  newname  for  datafile 20  to '+DG_DATA/dbdtoa/datafile/tbs_oltpprenewidx_01.dbf';
+set  newname  for  datafile 239  to '+DG_DATA/dbdtoa/datafile/double/tbs_oltpprenewidx_01.dbf';
+#restore database;
+restore datafile 20 ;
+restore datafile 239 ;
+#switch datafile all;
+switch datafile 20 to datafilecopy '+DG_DATA/dbdtoa/datafile/tbs_oltpprenewidx_01.dbf';
+switch datafile 239 to datafilecopy '+DG_DATA/dbdtoa/datafile/double/tbs_oltpprenewidx_01.dbf';
+#recover database;
+#alter database open;
+}
+
+Keterangan : script diatas adalah contoh dari script yang dijalankan pada saat restore, untuk mendapatkan informasi datafile dan nomor datafile harus dilist dulu dan harus disesuaikan.
+✔	#set newname for datafile to ‘new’;
+Adalah script yang digunakan untuk memberikan nama baru untuk datafile tertentu yang kita pilih, didaftarkan ke database yang baru dengan datafile yang baru pula
+✔	restore datafile 20
+Adalah script yang menjalankan restore dari datafile lama dibentuk pada datafile baru yang kita buat diawal tadi
+✔	switch datafile 20 to datafilecopy
+Adalah proses pemindahan datafile yang dipakai, jadi dengan script ini datafile copy akan menjadi yang utama.
+✔	#recover database;
+Adalah script yang digunakan untuk menduplikasi transaksi yang ada dalam datafile yang lama menuju datafile baru, setelah wadahnya terbentuk pada proses restore, recover dijalankan untuk menyamakan isinya
+✔	#alter database open;
+Adalah script terahkir yang digunakan untuk membuka database, script ini dijalankan setelah semua datafile terestore dan terrecover sebelumnya
+6.	START EXPDP IMPDP
+Untuk table yang dipartisi dapat ditambahkan tables=’schema.namatable:namapartisi’
+CREATE OR REPLACE DIRECTORY IMPTAPKT AS '/Backup_Histo_X4-2/titip_asdin';
+
+expdp \"/ as sysdba\" tables='VMAX_PLNHISTO.FAILURE:CREATE_2017_06','VMAX_PLNHISTO.FAILURE:CREATE_2017_07','VMAX_PLNHISTO.FAILURE:CREATE_2017_08','VMAX_PLNHISTO.FAILURE:CREATE_2017_09','VMAX_PLNHISTO.FAILURE:CREATE_2017_10','VMAX_PLNHISTO.FAILURE:CREATE_2017_11','VMAX_PLNHISTO.FAILURE:CREATE_2017_12','VMAX_PLNHISTO.FAILURE:CREATE_2018_01' ,'VMAX_PLNHISTO.FAILURE:CREATE_2018_02','VMAX_PLNHISTO.FAILURE:CREATE_2018_03','VMAX_PLNHISTO.FAILURE:CREATE_2018_04','VMAX_PLNHISTO.FAILURE:CREATE_2018_05','VMAX_PLNHISTO.COMPLAIN:CREATE_2017_06','VMAX_PLNHISTO.COMPLAIN:CREATE_2017_07','VMAX_PLNHISTO.COMPLAIN:CREATE_2017_08','VMAX_PLNHISTO.COMPLAIN:CREATE_2017_09','VMAX_PLNHISTO.COMPLAIN:CREATE_2017_10','VMAX_PLNHISTO.COMPLAIN:CREATE_2017_11','VMAX_PLNHISTO.COMPLAIN:CREATE_2017_12','VMAX_PLNHISTO.COMPLAIN:CREATE_2018_01' ,'VMAX_PLNHISTO.COMPLAIN:CREATE_2018_02','VMAX_PLNHISTO.COMPLAIN:CREATE_2018_03','VMAX_PLNHISTO.COMPLAIN:CREATE_2018_04','VMAX_PLNHISTO.COMPLAIN:CREATE_2018_05','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2017_06','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2017_07','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2017_08','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2017_09','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2017_10','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2017_11','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2017_12','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2018_01' ,'VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2018_02','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2018_03','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2018_04','VMAX_PLNHISTO.HISTTRANSFAILURE:CREATE_2018_05','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2017_06','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2017_07','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2017_08','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2017_09','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2017_10','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2017_11','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2017_12','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2018_01' ,'VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2018_02','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2018_03','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2018_04','VMAX_PLNHISTO.HISTTRANSCOMPLAIN:CREATE_2018_05' directory=EXTRACTAPKT dumpfile=histoapkt%U.dmp filesize=10G logfile=histoapkt_expdp%U.log cluster=N parallel=2 &
+
+expdp \"/ as sysdba\" tables='KONEKSITAS.LOG_ACCESS_WS_JSON', 'KONEKSITAS.LOG_ACCESS_WS', 'KONEKSITAS.AGG_USER_AKSES', 'KONEKSITAS.USER_MASTER2', 'KONEKSITAS.MST_METODE', 'KONEKSITAS.DIM_USER', 'KONEKSITAS.SECMAN_T_USER_ACTIVITY', 'KONEKSITAS.LOG_USER_INSTANSI', 'KONEKSITAS.DIM_INSTANSI', 'KONEKSITAS.SECMAN_M_USER', 'KONEKSITAS.DIM_INSTANSI_LB', 'KONEKSITAS.DIM_UNIT', 'KONEKSITAS.DIM_UNIT_X', 'KONEKSITAS.REF_ID_SISTEM', 'KONEKSITAS.LOG_KUOTA_WS', 'KONEKSITAS.AGG_USER_AKSES_20200817', 'KONEKSITAS.SECMAN_M_USER_GROUP', 'KONEKSITAS.DIM_UNIT_HISTO', 'KONEKSITAS.T_SEQUENCE', 'KONEKSITAS.DIM_PROV', 'KONEKSITAS.ZZZ', 'KONEKSITAS.APPROVE_KUOTA', 'KONEKSITAS.AGG_USER_AKSES_20200719', 'KONEKSITAS.AGG_USER_AKSES_20200726', 'KONEKSITAS.DIM_KAB', 'KONEKSITAS.DIM_INSTANSI_BDG', 'KONEKSITAS.AGG_USER_AKSES_20200712', 'KONEKSITAS.MST_URL', 'KONEKSITAS.MST_PARAMETER', 'KONEKSITAS.MST_METODE_HISTO', 'KONEKSITAS.SECMAN_M_GROUP' directory=FOR_OGG dumpfile=SRX58_20200822_%U.dmp filesize=30G FLASHBACK_SCN=10812609340828 logfile=SRX58_20200822_expdp.log &
+
+expdp \"/ as sysdba\" directory=dmp_staging  dumpfile= PHOTO_PELANGGAN_DTKS_NON.dmp logfile=expdp_ PHOTO_PELANGGAN_DTKS_NON.log cluster=N parallel=2 &
+
+7.	IMPDP HASIL EXPDP
+ 
+impdp \"asdinwp/naruto123\" directory=IMPTAPKT dumpfile=histoapkt01.dmp,histoapkt02.dmp REMAP_TABLESPACE=VMAX_PLN_HISTO:ASDIN_TBS remap_schema=VMAX_PLNHISTO:ASDINWP logfile=imp.log TABLE_EXISTS_ACTION=REPLACE cluster=n PARALLEL=2 transform=segment_attributes:n:table &
+
+https://docs.oracle.com/cd/F49540_01/DOC/server.815/a67792/ch02.htm
+	
+	WINDOWS
+	impdp "'/ as sysdba' DIRECTORY=imptkr DUMPFILE=expdp_full_dbtkr_20240307-010001.dmp CONTENT=ALL "
+8.	IMPDP WITH EXCLUDE
+impdp \"/ as sysdba\" directory=EXPIMPDP dumpfile=MGMT_TBSNEW01.dmp,MGMT_TBSNEW02.dmp REMAP_TABLESPACE=MGMT_TABLESPACE:MGMT_TBS_NEW EXCLUDE=TABLE:\"LIKE \'%AQ$%\'\" CONTENT=ALL logfile=impSYS04%U.log TABLE_EXISTS_ACTION=REPLACE cluster=n PARALLEL=2 &
+9.	CEK BACKUP HARIAN
+column start_time format a25;	
+	column OUTPUT_DEVICE format a15;	
+	column TIME_TAKEN format a10;	
+	column OUTPUT_RATE format a12;	
+	set linesize 200;	
+	SELECT   TO_CHAR (j.start_time, 'MON DD, YYYY HH24:MI:SS') as start_time, j.status,	
+			 ROUND ((j.input_bytes / 1024 / 1024 / 1024), 2) input_gb,	
+			 ROUND ((j.output_bytes / 1024 / 1024 / 1024), 2) output_gb,	
+			 j.input_type, j.output_device_type AS output_device,	
+			 j.time_taken_display AS time_taken,	
+			 j.output_bytes_per_sec_display AS output_rate	
+		FROM v$rman_backup_job_details j	
+		WHERE j.start_time > TRUNC (SYSDATE) - 15	
+	ORDER BY j.session_recid DESC;
+10.	CEK BACKUP RMAN
+RMAN > crosscheck backup;
+RMAN > list expired backup;
+RMAN > delete noprompt expired backup;
+11.	EXPORT TO TEXT
+51,52,53,54
+
+CREATE OR REPLACE procedure SYS.export_data_test is
+begin
+DECLARE
+ l_sql dbms_sql.varchar2a;
+ l_cnt integer;
+BEGIN
+ l_sql(1) := 'select nomor_meter_kwh from asdinwp.tabel_51';
+ l_cnt    := export_table_to_csv_file
+             (
+                  l_sql,
+                  '|', -- delimiter
+                  'HELLPOWER', -- directory
+                  'text_prepaid_51_1jt.txt', -- nama file hasil exp
+                  TRUE
+             );
+END;
+end;
+/
+
+CREATE OR REPLACE FUNCTION SYS.EXPORT_TABLE_TO_CSV_FILE
+(
+       p_query     in dbms_sql.varchar2a,
+       p_separator in varchar2 default ',',
+       p_dir       in varchar2,
+       p_filename  in varchar2,
+       p_is_head   in boolean default false
+)
+RETURN NUMBER
+is
+       l_output        utl_file.file_type;
+       l_theCursor     integer default dbms_sql.open_cursor;
+       l_columnValue   varchar2(2000);
+       l_columnValClob clob;
+       l_status        integer;
+       l_colCnt        number default 0;
+       l_separator     varchar2(10) default '';
+       l_cnt           number default 0;
+       l_col_desc      dbms_sql.desc_tab;
+       l_offset        integer;
+BEGIN
+       dbms_sql.parse
+       (
+           l_theCursor
+         , p_query
+         , p_query.first
+         , p_query.last
+         , true
+         , dbms_sql.native
+       );
+     
+       dbms_sql.describe_columns
+       (
+           l_theCursor
+         , l_colCnt
+         , l_col_desc
+       );
+     
+       for i in 1 .. l_colCnt loop
+           if l_col_desc(i).col_type = 112 then
+               dbms_sql.define_column
+               (
+                   l_theCursor
+                 , i
+                 , l_columnValClob
+               );
+          else
+               dbms_sql.define_column
+               (
+                   l_theCursor
+                 , i
+                 , l_columnValue
+                 , 4000
+               );
+          end if;
+       end loop;
+
+       l_status := dbms_sql.execute(l_theCursor);
+       if dbms_sql.fetch_rows(l_theCursor) > 0 then
+               l_output := utl_file.fopen( p_dir, p_filename, 'w', 32767 );
+               if p_is_head then
+                       for i in 1..l_col_desc.count
+                       loop
+                               utl_file.put(l_output, l_separator || l_col_desc(i).col_name);
+                               l_separator := p_separator;
+                       end loop;
+                       utl_file.new_line( l_output );
+               end if;
+
+               loop
+                       l_separator := '';
+                       for i in 1 .. l_colCnt
+                       loop
+                           if l_col_desc(i).col_type = 112
+                           then
+                              l_offset := 1;
+                              dbms_sql.column_value
+                              (
+                                   l_theCursor
+                                 , i
+                                 , l_columnValClob
+                              );
+                              utl_file.put( l_output, l_separator );
+
+                              loop
+                                    l_columnValue := dbms_lob.substr(l_columnValClob, 2000, l_offset);
+                                   -- dbms_output.put_line(l_columnValue);
+                                    l_offset := l_offset + 2000;
+                                    utl_file.put( l_output, l_columnValue);
+                                    exit when trim(l_columnValue) is null;
+                               end loop;
+                           else
+                              dbms_sql.column_value
+                              (
+                                   l_theCursor
+                                 , i
+                                 , l_columnValue
+                              );
+                              utl_file.put( l_output, l_separator ||  l_columnValue );
+                           end if;
+                         
+                           l_separator := p_separator;
+                       end loop;
+             
+                       utl_file.new_line( l_output );
+                       l_cnt := l_cnt+1;
+
+                       exit when ( dbms_sql.fetch_rows(l_theCursor) <= 0 );
+               end loop;
+       end if;
+       dbms_sql.close_cursor(l_theCursor);
+       utl_file.fclose( l_output );
+       return l_cnt;
+END;
+/
+12.	DEFAULT SCRIPT BACKUP METADATA (EXPDP)
+1.	Scripting Metadata
+[oracle@vm-apkt-db-staging ~]$ cat /Backup_stagapkt/datapump/datapump_script/run_datapump_full_apktstag.sh
+STARTTIME=$(date +%s)
+export ORACLE_HOME=/data/u01/oracle/app/oracle/product/11.2.0/dbhome_1
+export ORACLE_SID=apktstag
+export PATH=$ORACLE_HOME/bin:$PATH
+filename=expdp_fullmetadata_apktstag_$(date +%Y%m%d-%H%M%S)
+locatename=/Backup_stagapkt/datapump/datapump_file/expdp_fullmetadata_apktstag_$(date +%Y%m%d-%H%M%S)
+expdp \"/ as sysdba\" dumpfile=$filename.dmp logfile=BACKUP:$filename.log directory=BACKUP full=Y CONTENT=METADATA_ONLY parallel=2 cluster=n
+bzip2 -9c < $locatename.dmp > $locatename.dmp.bz2 &
+wait
+cp $locatename.log /Backup_stagapkt/datapump/datapump_log
+wait
+rm $locatename.dmp $locatename.log
+wait
+find /Backup_stagapkt/datapump/datapump_file -mtime +30 -name '*.bz2' -exec rm -f {} \;
+wait
+
+ENDTIME=$(date +%s)
+echo "It takes $(($ENDTIME - $STARTTIME)) seconds to complete this task..."
+
+echo $?
+13.	AGENT RESTART COMMAND
+Restart Agent
+===========================================================================================================================================================
+cd /u01/app/oracle/agent12c/agent_inst/bin
+./emctl status agent; 
+./emctl stop agent; 
+./emctl secure agent; 
+./emctl start agent; 
+./emctl clearstate agent; 
+./emctl upload agent; 
+./emctl status agent; 
+./emctl reload agent; 
+./emctl status agent;
+
+https://grepora.com/2020/01/14/oem-12c-agent-java-lang-outofmemoryerror-java-heap-space/
+
+--need clear state agent
+move or backup files in '/u01/app/agent12c/agent_inst/sysman/emd/state/'
+create folder state with emty contains
+
+--try start agent again
+
+14.	HAPUS FILE / FOLDER
+touch --date "2022-08-20" /tmp/end
+ls -ltrh /tmp/end
+touch --date "2022-08-20" /tmp/end
+find -maxdepth 1 -type f -iname "*.trc" -not -newer /tmp/end -exec ls -altrh '{}' \;
+find -maxdepth 1 -type f -iname "*.trm" -not -newer /tmp/end -exec ls -altrh '{}' \;
+find -maxdepth 1 -type f -iname "*.trc" -not -newer /tmp/end -exec rm -f '{}' \;
+find -maxdepth 1 -type f -iname "*.trm" -not -newer /tmp/end -exec rm -f '{}' \;
+
+find -maxdepth 1 -type f -iname "*.aud" -not -newer /tmp/end -exec ls -altrh '{}' \;
+find -maxdepth 1 -type f -iname "*.aud" -not -newer /tmp/end -exec rm -f '{}' \;
+
+newer /tmp/end -exec rm -rf '{}' \;
+15.	CEK SEQUENCE REPLIKASI DAN GAP ORACLE DATA GUARD
+SELECT SEQUENCE#, CREATOR, THREAD#, COMPLETION_TIME, APPLIED FROM V$ARCHIVED_LOG ORDER BY SEQUENCE#;
+select * from v$archive_gap;
+16.	CEK BACKGROUND PROSES ODG
+select process,sequence#,status from v$managed_standby order by sequence#;
+17.	CEK BLOCK APPLYING DG
+ALTER SYSTEM ARCHIVE LOG CURRENT;
+18.	CEK SEQUENCE ODG
+SELECT SEQUENCE#, CREATOR, THREAD#, COMPLETION_TIME, APPLIED FROM V$ARCHIVED_LOG ORDER BY SEQUENCE#;
+select * from v$archive_gap;
+
+select thread#, to_char(first_time,'yyyy/mm/dd hh24:mi:ss'),sequence#, ARCHIVED, APPLIED from gv$archived_log where first_time>=sysdate-15 order by thread#,sequence# asc, first_time desc;
+
+a.	--Group By Thread
+select thread#, to_char(first_time,'yyyy/mm/dd hh24:mi:ss')tanggal, sequence#, APPLIED 
+from v$archived_log 
+where sequence# in (
+select last_seq from (select thread#,max(sequence#)last_seq from v$archived_log WHERE applied='YES' group by thread#))
+and APPLIED = 'YES'
+group by thread#, first_time, sequence#, APPLIED  
+order by tanggal,sequence# desc;
+
+b.	–Only sho last 10 row descending
+set pagesize 999;
+set linesize 999;
+select * from (
+select thread#, to_char(first_time,'yyyy/mm/dd hh24:mi:ss'), max(sequence#), APPLIED from v$archived_log where applied='YES' group by thread#, first_time, sequence#, APPLIED  order by first_time DESC) where rownum <=10;
+
+
+19.	CEK PID WINDOWS
+Get-Service | Where-Object {$_.Name -like "*COMODO*"}
+20.	START MRP
+START MRP
+
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE;
+
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE DISCONNECT FROM SESSION;
+
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE PARALLEL 3 DISCONNECT FROM SESSION
+===================================================================================
+To start real-time apply, include the USING CURRENT LOGFILE clause on the SQL statement. For example:
+
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE USING CURRENT LOGFILE;
+21.	STOP MRP
+STOP MRP
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
+22.	START STANDBY DATABASE
+Start the Oracle instance for the standby database without mounting it:
+SQL> STARTUP NOMOUNT;
+
+Mount the standby database:
+SQL> ALTER DATABASE MOUNT STANDBY DATABASE;
+
+Open the database for read-only access:
+SQL> ALTER DATABASE OPEN READ ONLY;
+
+--cek applied
+set linesize 200;
+set pagesize 999;
+select thread#, to_char(first_time,'dd-mm-yyyy hh24:mi:ss'),max(sequence#), APPLIED from v$archived_log where first_time>=sysdate-7 and applied='YES'group by thread#, first_time, sequence#, applied order by first_time asc;
+
+--cek mode_recovery
+SELECT INST_ID,RECOVERY_MODE FROM GV$ARCHIVE_DEST_STATUS where RECOVERY_MODE  = 'MANAGED REAL TIME APPLY' ORDER BY INST_ID;
+SELECT PROCESS FROM GV$MANAGED_STANDBY WHERE PROCESS LIKE 'MRP%';
+23.	BACKUP CONTROL FILE
+BACKUP AS COPY CURRENT CONTROLFILE FORMAT '/home/oracle/cf_eproc_201904.ctl';
+
+BACKUP CURRENT CONTROLFILE TAG = 'cf24022019';
+24.	CEK MRP
+SELECT RECOVERY_MODE FROM GV$ARCHIVE_DEST_STATUS;
+SELECT PROCESS FROM GV$MANAGED_STANDBY WHERE PROCESS LIKE 'MRP%';
+
+SELECT RECOVERY_MODE FROM GV$ARCHIVE_DEST_STATUS;
+
+SELECT INST_ID,RECOVERY_MODE FROM GV$ARCHIVE_DEST_STATUS where RECOVERY_MODE  = 'MANAGED REAL TIME APPLY' ORDER BY INST_ID;
+
+SELECT PROCESS,STATUS, THREAD#, SEQUENCE#, BLOCK#, BLOCKS, DELAY_MINS FROM V$MANAGED_STANDBY;
+25.	CEK TABLE SIZE FROM DB BY SCHEMA
+SELECT 
+      OWNER,
+      SEGMENT_NAME AS NAMA_TABLE,
+      TABLESPACE_NAME,
+      SEGMENT_TYPE,
+      ROUND (BYTES/1024/1024/1024 ,2) GB
+      FROM
+      DBA_SEGMENTS
+   WHERE
+      SEGMENT_TYPE = 'TABLE'
+       AND OWNER IN ('APLIKASI',
+                       'APLIKASI_BANTU',
+                       'BI_PMO',
+                       'CBC',
+                       'CSS123_MOBILE',
+                       'FSO',
+                       'M_APKT',
+                       'MGMT_VIEW',
+                       'MONITOR_APKT',
+                       'PLNADMIN',
+                       'SECMAN') 
+       AND SEGMENT_NAME  NOT LIKE '%BIN$%'                         
+   ORDER BY
+      BYTES/1024/1024/1024 DESC;
+26.	CREATE TABLE PARTITON
+
+CREATE TABLE ARIDWAN.AUD_PART_2
+(
+  SESSIONID        NUMBER                       NOT NULL,
+  ENTRYID          NUMBER                       NOT NULL,
+  STATEMENT        NUMBER                       NOT NULL,
+  TIMESTAMP#       DATE,
+  USERID           VARCHAR2(30 BYTE),
+  USERHOST         VARCHAR2(128 BYTE),
+  TERMINAL         VARCHAR2(255 BYTE),
+  ACTION#          NUMBER                       NOT NULL,
+  RETURNCODE       NUMBER                       NOT NULL,
+  OBJ$CREATOR      VARCHAR2(30 BYTE),
+  OBJ$NAME         VARCHAR2(128 BYTE),
+  AUTH$PRIVILEGES  VARCHAR2(16 BYTE),
+  AUTH$GRANTEE     VARCHAR2(30 BYTE),
+  NEW$OWNER        VARCHAR2(30 BYTE),
+  NEW$NAME         VARCHAR2(128 BYTE),
+  SES$ACTIONS      VARCHAR2(19 BYTE),
+  SES$TID          NUMBER,
+  LOGOFF$LREAD     NUMBER,
+  LOGOFF$PREAD     NUMBER,
+  LOGOFF$LWRITE    NUMBER,
+  LOGOFF$DEAD      NUMBER,
+  LOGOFF$TIME      DATE,
+  COMMENT$TEXT     VARCHAR2(4000 BYTE),
+  CLIENTID         VARCHAR2(64 BYTE),
+  SPARE1           VARCHAR2(255 BYTE),
+  SPARE2           NUMBER,
+  OBJ$LABEL        RAW(255),
+  SES$LABEL        RAW(255),
+  PRIV$USED        NUMBER,
+  SESSIONCPU       NUMBER,
+  NTIMESTAMP#      TIMESTAMP(6),
+  PROXY$SID        NUMBER,
+  USER$GUID        VARCHAR2(32 BYTE),
+  INSTANCE#        NUMBER,
+  PROCESS#         VARCHAR2(16 BYTE),
+  XID              RAW(8),
+  AUDITID          VARCHAR2(64 BYTE),
+  SCN              NUMBER,
+  DBID             NUMBER,
+  SQLBIND          CLOB,
+  SQLTEXT          CLOB,
+  OBJ$EDITION      VARCHAR2(30 BYTE)
+)
+PARTITION BY RANGE (ntimestamp#)
+(  
+  PARTITION BLTH_201401 VALUES LESS THAN (TO_DATE('2014-02-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201402 VALUES LESS THAN (TO_DATE('2014-03-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201403 VALUES LESS THAN (TO_DATE('2014-04-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201404 VALUES LESS THAN (TO_DATE('2014-05-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201405 VALUES LESS THAN (TO_DATE('2014-06-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201406 VALUES LESS THAN (TO_DATE('2014-07-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201407 VALUES LESS THAN (TO_DATE('2014-08-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201408 VALUES LESS THAN (TO_DATE('2014-09-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201409 VALUES LESS THAN (TO_DATE('2014-10-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201410 VALUES LESS THAN (TO_DATE('2014-11-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201411 VALUES LESS THAN (TO_DATE('2014-12-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')),
+  PARTITION BLTH_201412 VALUES LESS THAN (TO_DATE('2015-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')))
+27.	CEK OPEN MODE
+select sysdate from dual;
+select name, database_role,db_unique_name,OPEN_MODE from gv$database;
+28.	GET DURWAKTU
+CREATE OR REPLACE FUNCTION SYS.GET_DURWAKTU(d1 date, d2 date) RETURN VARCHAR2 IS
+--# d1 = tanggal awal
+--# d2 = tanggal akhir
+tmpvar varchar2(100);
+durdays number(20, 10); -- days between two dates
+durhrs binary_integer; -- completed hours
+durmin binary_integer; -- completed minutes
+dursec binary_integer; -- completed second
+durJam binary_integer; -- completed second
+durhari pls_integer;
+BEGIN
+durdays := d2 - d1;
+durhari := trunc(d2 - d1);
+durhrs := MOD(TRUNC(24 * durdays), 24);
+durmin := MOD(TRUNC(durdays * 1440), 60);
+dursec := MOD(TRUNC(durdays * 86400), 60);
+if durhari >='1' then 
+   durjam:=durdays*24+durhrs;
+else
+   durjam:=durhrs;
+end if;
+   /*
+tmpvar := durhari || 'Day:' || durhrs || 'H:' || durmin || 'Min:' ||
+dursec || 'ss';
+*/
+tmpvar :=lpad(durjam,2,'00')||':'||lpad(durmin,2,'00')||':'||lpad(dursec,2,'00');
+return(tmpvar);
+END GET_DURWAKTU;
+/
+29.	CEK LINE FILE
+$ wc -l /dir/file.txt
+30.	CEK SID PMON
+pgrep  -lf _pmon_
+ 
+31.	CEK HIGH WATERMARK DATAFILE
+select a.tablespace_name
+,a.file_name
+,round ((b.maximum+c.blocks-1)*d.db_block_size/1024/1024/1024 ,2) highwater_GB
+from dba_data_files a
+,(select file_id,max(block_id) maximum
+from dba_extents
+group by file_id) b
+,dba_extents c
+,(select value db_block_size
+from v$parameter
+where name='db_block_size') d
+where A.TABLESPACE_NAME	='VMAX_PHOTOHISTO_51B'
+and a.file_id = b.file_id
+and c.file_id = b.file_id
+and c.block_id = b.maximum
+order by a.tablespace_name,a.file_name
+/
+32.	CEK FREE SPACE DATAFILE
+select sum(bytes)/1024/1024/1024  GB from dba_free_space
+where tablespace_name = 'VMAX_PHOTOHISTO_51B'
+and file_id = 40;
+
+select file_id, block_id, blocks, bytes,ROUND((BYTES/1024/1024/1024),2),  'Free' from dba_free_space
+where tablespace_name = 'VMAX_PHOTOHISTO_51B'
+and file_id = 40
+--and rownum < 7
+order by block_id desc;
+33.	CEK FILE PATH DATAFILE
+SELECT FILE_ID, FILE_NAME, TABLESPACE_NAME, ROUND (BYTES/1024/1024/1024, 2) GB FROM DBA_DATA_FILES
+WHERE FILE_NAME LIKE '%ACMT6%'
+ORDER BY GB DESC;
+
+SELECT substr(FILE_NAME,0,instr(FILE_NAME,'/',1,2)-1) MTPOINT,FILE_ID, FILE_NAME, TABLESPACE_NAME, ROUND (BYTES/1024/1024/1024, 2) GB FROM DBA_DATA_FILES
+--WHERE FILE_NAME LIKE '+%'
+ORDER BY TABLESPACE_NAME;
+34.	CEK UKURAN TABLE BY TABLE_NAME
+SELECT OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       TABLESPACE_NAME,
+       SEGMENT_TYPE,
+       ROUND (BYTES/1024/1024/1024, 2) GB
+FROM DBA_SEGMENTS
+WHERE SEGMENT_TYPE = 'TABLE'
+  AND SEGMENT_NAME IN ('SALDO_SAP_HARIAN',
+                       'MATERIAL_STOCK',
+                       'TRANS_PERMINTAAN',
+                       'TRANS_RESERVASI',
+                       'USERTOKEN',
+                       'INT_GOODS_MVT_IN_INSP',
+                       'INT_INSP_LOT')
+  AND SEGMENT_NAME NOT LIKE '%BIN$%'
+ORDER BY BYTES/1024/1024/1024 DESC;
+35.	CEK UKURAN TABLE DAN LOKASI PATH
+SELECT A.OWNER,A.NAMA_TABLE,PARTITION_NAME, SUM(GB),A.TABLESPACE_NAME,B.FILE_NAME FROM (
+SELECT OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       TABLESPACE_NAME,
+       PARTITION_NAME,
+       SEGMENT_TYPE,
+       ROUND (BYTES/1024/1024/1024, 2) GB
+FROM DBA_SEGMENTS
+WHERE 
+    OWNER IN ('ACMT_HISTO')
+    and SEGMENT_TYPE in ('TABLE','TABLE PARTITION')
+--  AND SEGMENT_NAME IN
+-- (
+--  'TEMP_TRAN_MAIN'
+--  )
+  AND SEGMENT_NAME NOT LIKE '%BIN$%'
+ORDER BY BYTES/1024/1024/1024 DESC) A
+JOIN DBA_DATA_FILES B ON A.TABLESPACE_NAME = B.TABLESPACE_NAME
+WHERE B.FILE_NAME LIKE '%ACMT6%'
+AND NAMA_TABLE LIKE 'DPM_PHOTO_HISTO_%'
+GROUP BY OWNER,NAMA_TABLE,PARTITION_NAME,A.TABLESPACE_NAME,B.FILE_NAME
+ORDER BY NAMA_TABLE;
+36.	CEK UKURAN TABLE DAN TABLE PARTISI
+SELECT A.OWNER,A.NAMA_TABLE, SUM(GB) FROM (
+SELECT OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       TABLESPACE_NAME,
+       SEGMENT_TYPE,
+       ROUND (BYTES/1024/1024/1024, 2) GB
+FROM DBA_SEGMENTS
+WHERE 
+    OWNER IN ('OLAP')
+    and SEGMENT_TYPE in ('TABLE','TABLE PARTITION')
+  AND SEGMENT_NAME IN
+ (
+  'TEMP_TRAN_MAIN',
+  )
+  AND SEGMENT_NAME NOT LIKE '%BIN$%'
+ORDER BY BYTES/1024/1024/1024 DESC) A
+GROUP BY OWNER,NAMA_TABLE
+ORDER BY SUM(GB) DESC;
+37.	CEK PARAMETER HIDDEN
+SELECT x.ksppinm "Parameter",
+       Y.ksppstvl "Session_Value",
+       Z.ksppstvl "Instance_Value"
+FROM   x$ksppi X,
+       x$ksppcv Y,
+       x$ksppsv Z
+WHERE  x.indx = Y.indx
+AND    x.indx = z.indx
+AND    x.ksppinm LIKE '%_cursor_features_enabled%'
+order by x.ksppinm;
+38.	CEK SESSION USER
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       p.spid,
+       s.username,
+       s.program
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+WHERE  s.type != 'BACKGROUND'
+        AND S.USERNAME='ASDINWP';
+39.	CEK POSSIBLE TABLE COMPRESSION
+SELECT D.OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       D.TABLESPACE_NAME,
+       SEGMENT_TYPE,
+       O.COMPRESSION,
+       ROUND (BYTES/1024/1024/1024, 2) GB
+FROM DBA_SEGMENTS D
+    LEFT JOIN DBA_TABLES O ON D.SEGMENT_NAME = O.TABLE_NAME
+WHERE 
+  D.TABLESPACE_NAME = 'BACKUP_TEMP2'
+  AND O.COMPRESSION = 'DISABLED'
+  AND SEGMENT_TYPE in ('TABLE')
+  AND SEGMENT_NAME NOT LIKE '%BIN$%'
+ORDER BY BYTES/1024/1024/1024 DESC
+40.	CEK SESSION GROUP BY NODE
+SELECT COUNT(SID) AS JUMLAH_SESSION, INST_ID AS INSTANCE FROM (
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       p.spid,
+       s.username,
+       s.program,
+       S.WAIT_TIME	
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+WHERE  s.type != 'BACKGROUND')
+GROUP BY INST_ID
+41.	CEK SESSION DENGAN GROUP BY NODE DAN USERNAME
+SELECT COUNT(SID) AS JUMLAH_SESSION, INST_ID,username,machine AS INSTANCE FROM (
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       p.spid,
+       s.username,
+       s.program,
+       S.WAIT_TIME,
+       S.STATUS,
+       s.machine	
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+WHERE  s.type != 'BACKGROUND'
+)
+where  STATUS  = 'ACTIVE'
+GROUP BY INST_ID,username,machine
+ORDER BY JUMLAH_SESSION DESC
+42.	CEK SESSION ALL
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       p.spid,
+       s.username,
+       s.program,
+       S.WAIT_TIME	
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+WHERE  s.type != 'BACKGROUND'
+43.	CEK LOKASI DATAFILE OTOMATIS
+--cek all datafile
+SELECT substr(FILE_NAME,0,instr(FILE_NAME,'/',1,2)-1) MTPOINT,FILE_ID, FILE_NAME, TABLESPACE_NAME, ROUND (BYTES/1024/1024/1024, 2) GB FROM DBA_DATA_FILES
+--WHERE FILE_NAME LIKE '+%'
+ORDER BY TABLESPACE_NAME;
+
+--cek Mount Point
+select unique 'df -kh '||a.MTPOINT MOUNT_POINT
+from ( select substr(FILE_NAME,0,instr(FILE_NAME,'/',1,2)-1) MTPOINT
+from dba_data_files
+union
+select substr(FILE_NAME,0,instr(FILE_NAME,'/',1,2)-1) MTPOINT
+from dba_temp_files
+union
+select substr(MEMBER,0,instr(MEMBER,'/',1,2)-1) MTPOINT
+from v$logfile
+union
+select substr(NAME,0,instr(NAME,'/',1,2)-1) MTPOINT
+from v$controlfile
+) a
+ORDER BY MOUNT_POINT;
+
+--cek archivelog size
+SELECT name
+, ceil( space_limit / 1024 / 1024 /1024) SIZE_GB
+,ceil( space_used  / 1024 / 1024 / 1024) USED_GB
+, decode( nvl( space_used, 0), 0, 0
+, ceil ( ( space_used / space_limit) * 100) ) PCT_USED
+FROM v$recovery_file_dest
+ORDER BY name;
+
+
+44.	GET DUR WAKTU
+CREATE OR REPLACE FUNCTION IMANBHARATA.GET_DURWAKTU(d1 date, d2 date) RETURN VARCHAR2 IS
+--# d1 = tanggal awal
+--# d2 = tanggal akhir
+tmpvar varchar2(100);
+durdays number(20, 10); -- days between two dates
+durhrs binary_integer; -- completed hours
+durmin binary_integer; -- completed minutes
+dursec binary_integer; -- completed second
+durJam binary_integer; -- completed second
+durhari pls_integer;
+BEGIN
+durdays := d2 - d1;
+durhari := trunc(d2 - d1);
+durhrs := MOD(TRUNC(24 * durdays), 24);
+durmin := MOD(TRUNC(durdays * 1440), 60);
+dursec := MOD(TRUNC(durdays * 86400), 60);
+if durhari >='1' then 
+   durjam:=durdays*24+durhrs;
+else
+   durjam:=durhrs;
+end if;
+   /*
+tmpvar := durhari || 'Day:' || durhrs || 'H:' || durmin || 'Min:' ||
+dursec || 'ss';
+*/
+tmpvar :=lpad(durjam,2,'00')||':'||lpad(durmin,2,'00')||':'||lpad(dursec,2,'00');
+return(tmpvar);
+END GET_DURWAKTU;
+/
+45.	REUSE PASSWORD
+c.	Cara susah wkwk
+select 'alter user "'||d.username||'" identified by values '''||u.password||''';' c
+from dba_users d, sys.user$ u
+where d.username = 'IMANBHARATA'
+and u.user# = d.user_id;
+
+alter profile DBA_PROFILE limit PASSWORD_REUSE_TIME UNLIMITED;
+alter profile DBA_PROFILE limit PASSWORD_REUSE_MAX UNLIMITED;
+
+alter user "IMANBHARATA" identified by values 'B71AD3D25FFCE668';
+
+alter profile DBA_PROFILE limit PASSWORD_REUSE_TIME 60;
+alter profile DBA_PROFILE limit PASSWORD_REUSE_MAX 15;
+
+d.	Cara mudah
+select username, account_status,profile from dba_users where username='ASDINWP';
+
+ALTER USER ASDINWP PROFILE DEFAULT;
+ALTER USER ASDINWP IDENTIFIED BY hilang123 account unlock;
+ALTER USER ASDINWP PROFILE DBA_PROFILE;
+46.	GET  ALTERUSER DENGAN HASKEY
+select 'alter user "'||d.username||'" identified by values '''||u.password||''';' c
+from dba_users d, sys.user$ u
+where d.username = 	‘sys’
+and u.user# = d.user_id;
+	
+alter user "APPSUPPTDEK" identified by values '41E57FC89977CDE7';
+ 
+47.	REUSED PASSWORD
+select profile from DBA_USERS where username = 'DBSNMP';
+
+select username, account_status, EXPIRY_DATE from dba_users where username='DBSNMP';
+
+select 'alter user "'||d.username||'" identified by values '''||u.password||''';' c
+from dba_users d, sys.user$ u
+where d.username = 'DBSNMP'
+and u.user# = d.user_id;
+
+alter user "DBSNMP" identified by values '40F5DA6E24AB9204' account UNLOCK;
+
+select username, account_status, EXPIRY_DATE from dba_users where username='DBSNMP';
+48.	CEK LOCK SESSION
+--cek sesion lock:
+SELECT   b.inst_id, a.session_id, b.serial#, a.oracle_username,
+            c.object_name, f.spid,
+            DECODE (d.TYPE,
+                    'MR', 'Media Recovery',
+                    'RT', 'Redo Thread',
+                    'UN', 'User Name',
+                    'TX', 'Transaction',
+                    'TM', 'DML',
+                    'UL', 'PL/SQL User Lock',
+                    'DX', 'Distrib Xaction',
+                    'CF', 'Control File',
+                    'IS', 'Instance State',
+                    'FS', 'File Set',
+                    'IR', 'Instance Recovery',
+                    'ST', 'Disk Space Transaction',
+                    'TS', 'Temp Segment',
+                    'IV', 'Library Cache Invalidation',
+                    'LS', 'Log Start or Switch',
+                    'RW', 'Row Wait',
+                    'SQ', 'Sequence Number',
+                    'TE', 'Extend Table',
+                    'TT', 'Temp Table',
+                    'JQ', 'Job queue',
+                    'WL', 'Being-written redo log instance',
+                    'CU', 'Cursor bind',
+                    'SM', 'SMON',
+                    'PS', 'Parallel operation',
+                    d.TYPE
+                   ) lock_type,
+            DECODE (d.lmode,
+                    0, 'None',                       /* Mon Lock equivalent */
+                    1, 'Null',                                         /* N */
+                    2, 'Row-S (SS)',                                   /* L */
+                    3, 'Row-X (SX)',                                   /* R */
+                    4, 'Share',                                        /* S */
+                    5, 'S/Row-X (SSX)',                                /* C */
+                    6, 'Exclusive',
+                    TO_CHAR (d.lmode)
+                   ) mode_held,
+            e.event, e.seconds_in_wait "Wait(Seconds)"
+       FROM                                                     -- sys.obj$ c,
+            dba_objects c,
+            -- v$session b,
+            gv$session b,
+            -- v$locked_object a,
+            gv$locked_object a,
+            -- sys.v_$lock d,
+            gv$lock d,
+            --v$session_wait e,
+            gv$session_wait e,
+            --v$process f
+            gv$process f
+                                                                           --,
+      -- gv$instance i
+   WHERE    a.session_id = b.SID
+        AND a.inst_id = b.inst_id
+        AND b.paddr = f.addr
+        AND b.inst_id = f.inst_id
+        AND b.SID = e.SID
+        AND b.inst_id = e.inst_id
+        AND c.object_id = a.object_id
+        AND a.object_id = d.id1
+        AND b.SID = d.SID
+        AND b.EVENT='enq: TX - row lock contention'
+   ORDER BY e.seconds_in_wait DESC;
+49.	CEK ALL SOURCE BACKDATE
+select text
+from all_source
+as of timestamp
+to_timestamp('01-JAN-2023 21:30:00', 'DD-MON-YYYY HH24:MI:SS')
+where name = 'PKG_NEW_ITO'
+and type = 'PACKAGE BODY';
+50.	CEK USER EXPIRED
+SELECT * FROM DBA_USERS WHERE ACCOUNT_STATUS='LOCKED'
+AND PROFILE like '%APLIKASI%'
+ORDER BY LOCK_DATE DESC;
+51.	KILL SESSION LOCK
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE event='enq: TX - row lock contention';
+52.	KILL SESSION WITH SID
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE s.sid in (‘1727)
+53.	CEK INACTIVE SESSION
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       p.spid,
+       s.username,
+       s.program
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+WHERE  s.type != 'BACKGROUND'
+        AND S.STATUS = 'INACTIVE';
+54.	CEK INACTIVE BY NODE
+SELECT COUNT(SID) AS JUMLAH_SESSION, INST_ID AS INSTANCE FROM (
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       p.spid,
+       s.username,
+       s.program,
+       S.WAIT_TIME    
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+WHERE  s.type != 'BACKGROUND' and S.STATUS = 'INACTIVE')
+GROUP BY INST_ID
+ORDER BY INST_ID
+55.	JOB KILL INACTIVE
+declare
+     sqltxt VARCHAR2(1000);
+BEGIN
+     For x in (
+     ---Made by Arif
+     SELECT SID,SERIAL# FROM V$SESSION WHERE STATUS='INACTIVE' AND last_call_et > 60  AND USERNAME IN('M_APKT') )
+
+     loop
+          sqltxt := 'ALTER SYSTEM KILL SESSION ''' || X.SId || ',' || X.Serial# || ''' IMMEDIATE' ;
+          dbms_output.put_line( sqltxt );
+          EXECUTE IMMEDIATE sqltxt;
+     End loop;
+end;
+56.	KILL INACTIVE
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE S.STATUS = 'INACTIVE'
+ and s.type != 'BACKGROUND';
+57.	KILL RMAN
+SELECT 'kill -9  ' || b.spid || ''
+  FROM v$session a, v$process b
+ WHERE b.addr = a.paddr
+ and a.username='SYS' and a.program like '%rman%';
+58.	KILL SESSION BY SID WITH SPESIFIK OBJECT
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE s.sid in (SELECT 
+A.SID
+FROM GV$ACCESS A ,GV$SESSION B 
+WHERE A.OBJECT ='PKG_INTEG_KELUHAN_MOBILE'
+AND A.SID =B.SID
+AND B.STATUS ='ACTIVE')
+59.	KILL BY USERNAME
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE S.USERNAME = ‘PDAMCORE;
+
+
+M3g@ntr0pu5.3r3kTu$
+60.	KILL BY SQL ID
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE S.SQL_ID = ‘6vuqft6b31n5v;
+61.	KILL JOB SID DAN SERIAL JOB YANG JALAN
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || S.SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+  JOIN Gv$process p ON (p.addr=s.paddr)
+  WHERE S.sid in (select v.SID
+from sys.job$ j, gv$lock v
+  where v.type = 'JQ' and j.job (+)= v.id2
+  and j.WHAt is null;
+
+62.	KILL SESSION VIA OS
+SELECT 'kill -9  ' || b.spid || ''
+  FROM v$session a, v$process b
+ WHERE b.addr = a.paddr
+ and a.username='SYS' and a.program like '%rman%';
+63.	KILL USER AND CALL ET > 1800 / 30 MENIT
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+WHERE username = 'OPHARAPP'
+and last_call_et > 1800;
+64.	KILL JOB TERTENTU YANG SEDANG BERJALAN
+select 'ALTER SYSTEM KILL SESSION ''' ||a.sid || ',' ||a.serial#|| ''' IMMEDIATE ;'
+  from v$session a,v$process p
+where sid in (select sid from dba_jobs_running)
+and a.paddr = p.addr
+65.	CEK SESSION DENGAN OBJECT TERTENTU YANG SEDANG DIAKASES
+SELECT 
+B.USERNAME,
+A.INST_ID,	
+A.SID,
+B.SERIAL#,
+A.OWNER	,
+A.OBJECT,
+A.TYPE,
+B.SQL_EXEC_START,
+B.STATUS
+FROM GV$ACCESS A ,GV$SESSION B 
+WHERE A.OBJECT = PENDING_LOG_NTL'
+AND A.SID =B.SID
+AND B.STATUS ='ACTIVE';
+66.	CEK TABLESPACE SIZE AND USAGE DIDALAM DATABASE
+   Select d.status status
+ , d.tablespace_name name
+ , d.contents type
+ , d.extent_management extent_mgt
+ , d.segment_space_management segment_mgt
+ , NVL(a.bytes/1024/1024, 0) ts_size
+ , NVL((a.bytes/1024/1024) - NVL(f.bytes/1024/1024, 0), 0) used
+ -- , NVL(f.bytes, 0) free
+ , round(NVL((a.bytes/1024/1024 - NVL(f.bytes/1024/1024, 0)) / (a.bytes/1024/1024) * 100, 2),3) pct_used
+FROM 
+ sys.dba_tablespaces d
+ , ( select tablespace_name, sum(bytes) bytes
+ from dba_data_files
+ group by tablespace_name
+ ) a
+ , ( select tablespace_name, sum(bytes) bytes
+ from dba_free_space
+ group by tablespace_name
+ ) f
+WHERE
+ d.tablespace_name = a.tablespace_name(+)
+ AND d.tablespace_name = f.tablespace_name(+)
+ AND NOT (
+ d.extent_management like 'LOCAL'
+ AND
+ d.contents like 'TEMPORARY'
+ )
+UNION ALL 
+SELECT
+ d.status status
+ , d.tablespace_name name
+ , d.contents type
+ , d.extent_management extent_mgt
+ , d.segment_space_management segment_mgt
+ , NVL(a.bytes/1024/1024, 0) ts_size
+ , NVL(t.bytes/1024/1024, 0) used
+ -- , NVL(a.bytes - NVL(t.bytes,0), 0) free
+ , NVL(t.bytes / a.bytes * 100, 0) pct_used
+FROM
+ sys.dba_tablespaces d
+ , ( select tablespace_name, sum(bytes) bytes
+ from dba_temp_files
+ group by tablespace_name
+ ) a
+ , ( select tablespace_name, sum(bytes_cached) bytes
+ from v$temp_extent_pool
+ group by tablespace_name
+ ) t
+WHERE
+ d.tablespace_name = a.tablespace_name(+)
+ AND d.tablespace_name = t.tablespace_name(+)
+ AND d.extent_management like 'LOCAL'
+ AND d.contents like 'TEMPORARY'
+ORDER BY pct_used desc;
+67.	CEK DATAFILE DAN UKURANYA
+Select substr(tablespace_name,1,10) as Tablespace_Name,
+round(bytes/1024/1024/1024 ,1) as Size_Gb
+from dba_data_files
+order by tablespace_name, file_name;
+68.	CEK UKURAN SUATU TABLE
+SELECT AA.OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       TABLESPACE_NAME,
+       SEGMENT_TYPE,
+       PARTITION_NAME,
+       ROUND(MAX_SIZE/1024/1024/1024, 2) MAXSIZEGB,
+       ROUND (BYTES/1024/1024/1024, 2) SIZEGB,
+       ROUND ((BYTES/MAX_SIZE) * 100, 2) AS PCT_USAGE
+FROM DBA_SEGMENTS AA
+WHERE OWNER = 'AP2TCARGO'
+  AND SEGMENT_NAME='TRANSAKSI_NONTAGLIS_QA1'
+69.	CEK SOURCE VIEW
+select owner, view_name, text from dba_views where view_name ='DBA_SOURCE';
+70.	CEK SID DAN SPID
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       --s.sql_id,
+       p.spid,
+       s.username,
+       s.program
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+WHERE  s.type != 'BACKGROUND';
+71.	CEK DAN GROUP SQL_ID
+SELECT COUNT(SID) AS JUMLAH_SESSION, INST_ID,username AS SESSION_NAME,SQL_ID FROM (
+SELECT s.inst_id,
+       s.sid,
+       s.serial#,
+       p.spid,
+       s.username,
+       s.program,
+       S.WAIT_TIME,
+       S.STATUS,
+       S.SQL_ID       
+FROM   gv$session s
+       JOIN gv$process p ON p.addr = s.paddr AND p.inst_id = s.inst_id
+--WHERE  s.type != 'BACKGROUND'
+)
+where  username in ('WEBDPP')
+AND STATUS  = 'ACTIVE'
+GROUP BY INST_ID,username,SQL_ID
+ORDER BY USERNAME
+72.	CEK TABLE KOSONG DENGAN PATTERN 
+SELECT * FROM (
+SELECT 
+DS.OWNER,
+DS.NAMA_TABLE,
+DS.TABLESPACE_NAME,
+DS.SIZEGB,
+B.REFERENCED_NAME
+ FROM (
+        SELECT 
+      AA.OWNER,
+      SEGMENT_NAME AS NAMA_TABLE,
+      TABLESPACE_NAME,
+      SEGMENT_TYPE,
+      ROUND(MAX_SIZE/1024/1024/1024 , 2) MAXSIZEGB,
+      ROUND (BYTES/1024/1024/1024 ,2) SIZEGB,
+      ROUND ((BYTES/MAX_SIZE) * 100,2) AS PCT_USAGE
+      FROM
+      DBA_SEGMENTS AA
+   WHERE
+      SEGMENT_TYPE = 'TABLE'
+       AND AA.OWNER ='EMULSION'
+       AND AA.SEGMENT_NAME  LIKE '%ZZZ%'
+       OR AA.SEGMENT_NAME  LIKE '%ZZ%'
+       OR AA.SEGMENT_NAME  LIKE '%Z%'
+       OR AA.SEGMENT_NAME  LIKE '%XXX%'
+       OR AA.SEGMENT_NAME  LIKE '%XX%'
+       OR AA.SEGMENT_NAME  LIKE '%X%'
+       AND BYTES/1024/1024/1024 <= 0
+   ORDER BY
+      BYTES/1024/1024/1024,SEGMENT_NAME  DESC) DS
+LEFT JOIN (SELECT REFERENCED_NAME FROM ALL_DEPENDENCIES WHERE OWNER='EMULSION' AND REFERENCED_OWNER NOT IN ('SYS')) B ON DS.NAMA_TABLE = B.REFERENCED_NAME
+WHERE DS.OWNER ='EMULSION'
+AND DS.SEGMENT_TYPE='TABLE'
+AND DS.SIZEGB = 0
+AND DS.PCT_USAGE = 0
+) Z 
+WHERE Z.REFERENCED_NAME IS NULL
+73.	WFH CEK DB
+SELECT TO_CHAR(SYSDATE, 'MM-DD-YYYY HH24:MI:SS') as tglcatat FROM dual;
+
+SELECT INST_ID, NAME, OPEN_MODE FROM GV$DATABASE ORDER BY INST_ID;
+SELECT count(*), status FROM GV$SESSION WHERE STATUS in ('ACTIVE','INACTIVE')  GROUP BY STATUS;
+
+column name format a15;
+   set linesize 200;
+   SELECT NAME, ROUND ((total_mb / 1024), 2) total_gb,
+       ROUND ((cold_used_mb / 1024), 2) used_gb,
+       ROUND ((usable_file_mb / 1024), 2) free_gb,
+       ROUND (cold_used_mb / total_mb * 100, 2) AS used_percent,
+       ROUND (free_mb / total_mb * 100, 2) AS free_percent, offline_disks
+   FROM v$asm_diskgroup;
+
+--Cek tablespace HARIAN
+set pagesize 20;
+set linesize 200;
+column name format a20;
+SELECT
+    d.status                                            status
+  , d.tablespace_name                                   name
+  , round(NVL(a.bytes/1024/1024/1024, 0),2)                                     max_size_GB
+  , round(NVL((a.bytes/1024/1024/1024) - NVL(f.bytes/1024/1024/1024, 0), 0),2)                   used_GB
+  , round(NVL(f.bytes/1024/1024/1024, 0),2)                                     free_GB
+  , round(NVL((NVL(f.bytes/1024/1024, 0)) / (a.bytes/1024/1024) * 100, 0),2) pct_free
+  , round(NVL((a.bytes/1024/1024 - NVL(f.bytes/1024/1024, 0)) / (a.bytes/1024/1024) * 100, 0),2) pct_used
+FROM
+    sys.dba_tablespaces d
+  , ( select tablespace_name, sum(bytes) bytes
+      from dba_data_files
+      group by tablespace_name
+    ) a
+  , ( select tablespace_name, sum(bytes) bytes
+      from dba_free_space
+      group by tablespace_name
+    ) f
+WHERE
+      d.tablespace_name = a.tablespace_name(+)
+  AND d.tablespace_name = f.tablespace_name(+)
+  AND NOT (
+    d.extent_management like 'LOCAL'
+    AND
+    d.contents like 'TEMPORARY'
+  )
+union all
+SELECT
+    d.status                         status
+  , d.tablespace_name                name
+  , round(NVL(a.bytes/1024/1024/1024, 0),2)                  max_size_GB
+  , round(NVL(t.bytes/1024/1024/1024, 0),2)                  used_GB
+  , round(NVL((a.bytes/1024/1024/1024) - NVL(t.bytes/1024/1024/1024, 0), 0),2) free_GB
+  , round(NVL((a.bytes - NVL(t.bytes,0)) / a.bytes * 100, 0),2) pct_free
+  , round(NVL(t.bytes / a.bytes * 100, 0),2)  pct_used
+FROM
+    sys.dba_tablespaces d
+  , ( select tablespace_name, sum(bytes) bytes
+      from dba_temp_files
+      group by tablespace_name
+    ) a
+  , ( select tablespace_name, sum(bytes_used) bytes
+      from v$temp_extent_pool
+      group by tablespace_name
+    ) t
+WHERE
+      d.tablespace_name = a.tablespace_name(+)
+  AND d.tablespace_name = t.tablespace_name(+)
+  AND d.extent_management like 'LOCAL'
+  AND d.contents like 'TEMPORARY'
+ORDER BY pct_used desc;
+74.	GET GATHER SQL FOM STALE TABLE
+SELECT 'EXEC DBMS_STATS.gather_table_stats('''||OWNER||''''||','||''''||TABLE_NAME||''''||', ESTIMATE_PERCENT=>DBMS_STATS.AUTO_SAMPLE_SIZE, degree=>24,CASCADE=>DBMS_STATS.AUTO_CASCADE);'
+FROM
+  (SELECT OWNER,
+          TABLE_NAME
+   FROM DBA_TAB_STATISTICS
+   WHERE stale_stats = 'YES'
+     AND LAST_ANALYZED < trunc(sysdate, 'MM')
+     AND OWNER IN ('AP2T',
+                   'AP2TCARGO',
+                   'AP2TCARGOHISTO',
+                   'AP2TWEB',
+                   'APLIKASI',
+                   'AUDITHISTO',
+                   'AUDITUSER',
+                   'BILL52',
+                   'DIL_AP2T',
+                   'DIL_CRM',
+                   'EMULSION',
+                   'GAPURA',
+                   'KONSOLA',
+                   'MAUTAUAJA',
+                   'MONITOR',
+                   'MONITOR_TDE',
+                   'MONITORDB',
+                   'OPHARAPP',
+                   'P2APST',
+                   'SECMAN',
+                   'SECMANFSO',
+                   'SIP3EIS',
+                   'SIP3ERP',
+                   'SIP3NONREK',
+                   'SIP3SINGLE',
+                   'SIP3SINGLE_AP2T',
+                   'SIP3SINGLE_P2APST',
+                   'SIP3SINGLEBALI',
+                   'SIP3SINGLEBARAT',
+                   'SIP3SINGLEJABAR',
+                   'SIP3SINGLEJATENG',
+                   'SIP3SINGLEJAYA',
+                   'SIP3SINGLETENGAH',
+                   'SIP3SINGLETIMUR',
+                   'SIP3USERJATENG',
+                   'STANDMETER',
+                   'USER2ICON',
+                   'USERBILLUP',
+                   'USERP2APST')
+   GROUP BY OWNER,
+            TABLE_NAME,
+            LAST_ANALYZED
+   ORDER BY OWNER,
+            LAST_ANALYZED ASC)
+GROUP BY OWNER,
+         TABLE_NAME
+ORDER BY OWNER,
+         TABLE_NAME;
+75.	CEK UNTUK HASIL GATHER
+SELECT OWNER, TABLE_NAME, PARTITION_NAME ,LAST_ANALYZED  ,STALE_STATS         
+    FROM DBA_TAB_STATISTICS            
+   WHERE 
+   OWNER IN ('REPADMIN','GAPURA')
+   AND TABLE_NAME IN 
+   (
+   'TOKEN_PRE2W',
+'DIL_PREPAID',
+'CDCMOD_EL_PRE_LOG_TRAN',
+'CDCMOD_EL_PRE_TRAN_MAIN'
+   )
+AND LAST_ANALYZED >= TO_DATE('2019/10/23', 'yyyy/mm/dd')
+GROUP BY OWNER, TABLE_NAME,PARTITION_NAME, LAST_ANALYZED,STALE_STATS
+ORDER BY OWNER;
+76.	CEK PENGGUNAAN MEMORY PER SESSION
+SET PAGESIZE 200;
+SET LINESIZE 300;
+
+SELECT USERNAME, ROUND(VALUE/1024/1024, 2) || 'MB' "Current UGA memory"
+   FROM V$SESSION sess, V$SESSTAT stat, V$STATNAME name
+WHERE sess.SID = stat.SID
+   AND stat.STATISTIC# = name.STATISTIC#
+   AND name.NAME = 'session uga memory'
+   AND USERNAME = 'ASDINWP';
+77.	CREATE USER
+CREATE USER ASDINWP
+  IDENTIFIED BY force123
+  DEFAULT TABLESPACE USERS
+  --TEMPORARY TABLESPACE TEMP
+  ACCOUNT UNLOCK;
+  -- 4 Roles for ASDINWP 
+  GRANT CONNECT TO ASDINWP;
+  GRANT RESOURCE TO ASDINWP;
+  GRANT DBA TO ASDINWP;
+  --ALTER USER ASDINWP DEFAULT ROLE CONNECT, DBA_ROLE_CCB, DBA_ROLE_DEPLOY;
+  -- 1 System Privilege for ASDINWP 
+  GRANT UNLIMITED TABLESPACE TO ASDINWP;
+  -- 1 Tablespace Quota for ASDINWP 
+  ALTER USER ASDINWP QUOTA UNLIMITED ON USERS;
+  -- 10 Object Privileges for ASDINWP 
+     -- GRANT SELECT ON GAPURA.CDCMOD_EL_PRE_REGISTRATION TO ASDINWP;
+    GRANT SELECT ON SYS.DBA_DATA_FILES TO ASDINWP;
+    GRANT SELECT ON SYS.DBA_FREE_SPACE TO ASDINWP;
+    GRANT SELECT ON SYS.DBA_TEMP_FILES TO ASDINWP;
+    GRANT EXECUTE ON SYS.DBMS_ADVISOR TO ASDINWP;
+    GRANT EXECUTE ON SYS.DBMS_WORKLOAD_REPOSITORY TO ASDINWP;
+    GRANT SELECT ON SYS.V_$ARCHIVED_LOG TO ASDINWP;
+    GRANT SELECT ON SYS.V_$PARAMETER TO ASDINWP;
+    GRANT SELECT ON SYS.V_$TEMP_EXTENT_POOL TO ASDINWP;
+    GRANT SELECT ON SYS.V_$TEMP_SPACE_HEADER TO ASDINWP;
+78.	CEK USER DAN ROLE BESERTA PRIVILEDGE ROLE YANG DIMILIKI
+SELECT C.GRANTEE,C.ROLE,COUNT(C.ROLE), C.PRIVILEGE
+FROM
+(SELECT B.GRANTEE,
+A.ROLE,
+A.TABLE_NAME,
+A.PRIVILEGE 
+FROM ROLE_TAB_PRIVS A
+JOIN DBA_ROLE_PRIVS B ON A.ROLE = B.GRANTED_ROLE
+WHERE 
+B.GRANTEE IN (SELECT USERNAME FROM DBA_USERS)
+AND B.GRANTEE NOT LIKE '%SYS%'
+AND B.GRANTEE NOT IN ('DBSNMP','OUTLN') 
+AND B.GRANTED_ROLE NOT IN ('CONNECT','RESOURCE')
+AND B.GRANTED_ROLE NOT LIKE '%DBA%'
+AND A.ROLE NOT IN ('SELECT_CATALOG_ROLE')
+ORDER BY GRANTEE) C
+GROUP BY C.GRANTEE,C.ROLE,C.PRIVILEGE
+ORDER BY C.GRANTEE, C.PRIVILEGE;
+79.	CREATE DATABASELINK
+CREATE DATABASE LINK LINK_PRIV_APKT_1
+ CONNECT TO ASDINWP
+ IDENTIFIED BY newpass11
+ USING 'DBAPKTDR';
+80.	CREATE DATABASE LINK WITHOUT TNS
+CREATE DATABASE LINK test
+  CONNECT TO asdinwp IDENTIFIED BY xxxxxx
+  USING '(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=10.70.2.22)(PORT=22102))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=DBDTOB)))';
+81.	CEK USER ROLE DATABASE
+SELECT GRANTEE,ROLE,COUNT(ROLE) FROM (
+SELECT C.GRANTEE,C.ROLE,COUNT(C.ROLE), C.PRIVILEGE
+FROM
+(SELECT B.GRANTEE,
+A.ROLE,
+A.TABLE_NAME,
+A.PRIVILEGE 
+FROM ROLE_TAB_PRIVS A
+JOIN DBA_ROLE_PRIVS B ON A.ROLE = B.GRANTED_ROLE
+WHERE 
+B.GRANTEE IN (SELECT USERNAME FROM DBA_USERS)
+AND B.GRANTEE NOT LIKE '%SYS%'
+AND B.GRANTEE NOT IN ('DBSNMP','OUTLN') 
+AND B.GRANTED_ROLE NOT IN ('CONNECT','RESOURCE')
+AND B.GRANTED_ROLE NOT LIKE '%DBA%'
+AND A.ROLE NOT IN ('SELECT_CATALOG_ROLE')
+ORDER BY GRANTEE) C
+GROUP BY C.GRANTEE,C.ROLE,C.PRIVILEGE
+ORDER BY C.GRANTEE, C.PRIVILEGE)
+GROUP BY GRANTEE,ROLE
+ORDER BY GRANTEE;
+ 
+83.	CEK ROLE SEMUA
+SELECT USERNAME,
+       A.PROFILE,
+       B.GRANTED_ROLE ROLE,
+       K.TABLE_NAME,
+       K.PRIVILEGE
+FROM DBA_USERS A
+LEFT JOIN DBA_ROLE_PRIVS B ON A.USERNAME = B.GRANTEE
+JOIN DBA_TAB_PRIVS K ON A.USERNAME = K.GRANTEE
+WHERE A.USERNAME NOT LIKE '%SYS%'
+  AND A.USERNAME NOT IN ('DBSNMP',
+                         'OUTLN',
+                         'SYS',
+                         'SYSTEM',
+                         'XDB')
+  AND B.GRANTED_ROLE NOT IN ('DATAPUMP_EXP_FULL_DATABASE',
+                             'SELECT_CATALOG_ROLE'
+                            )
+  AND A.PROFILE NOT IN ('SYSTEM_PROFILE')
+  --OR B.GRANTED_ROLE IS NULL
+  AND A.PROFILE NOT LIKE '%SYSTEM%'
+ORDER BY A.USERNAME,
+         B.GRANTED_ROLE;
+84.	CEK USER ROLE DARI  DBA_ROLE (TOAD) TRUE
+SELECT USERNAME,A.PROFILE,B.GRANTED_ROLE, A.ACCOUNT_STATUS FROM DBA_USERS A
+LEFT JOIN DBA_ROLE_PRIVS B ON A.USERNAME = B.GRANTEE
+WHERE A.USERNAME NOT LIKE '%SYS%'
+AND A.USERNAME NOT IN ('DBSNMP','OUTLN','SYS','SYSTEM','XDB')
+AND B.GRANTED_ROLE NOT IN ('DBA_ROLE_CCB','DBA','DBA_ROLE_DEPLOY','DATAPUMP_EXP_FULL_DATABASE','SELECT_CATALOG_ROLE','CONNECT','RESOURCE')
+AND A.PROFILE NOT IN ('DBA_PROFILE','SYSTEM_PROFILE')
+OR B.GRANTED_ROLE IS NULL
+AND A.PROFILE NOT LIKE '%SYSTEM%'
+--OR B.GRANTED_ROLE NOT LIKE '%DBA%'
+ ORDER BY A.USERNAME,B.GRANTED_ROLE;
+85.	HANYA LIST ROLE (TOAD)
+SELECT GRANTED_ROLE, COUNT(GRANTED_ROLE)  FROM (
+SELECT * FROM DBA_ROLE_PRIVS
+WHERE GRANTED_ROLE NOT IN ('CONNECT','RESOURCE')
+AND GRANTEE NOT LIKE '%SYS%'
+AND GRANTEE NOT IN ('DBSNMP','OUTLN') 
+AND GRANTED_ROLE NOT LIKE '%DBA%') A
+GROUP BY  GRANTED_ROLE
+ORDER BY GRANTED_ROLE;
+86.	CEKUSER DAN ROLE PRIVILEGE
+SELECT USERNAME,
+       A.PROFILE,
+       B.GRANTED_ROLE ROLE,
+       K.TABLE_NAME,
+       K.PRIVILEGE
+FROM DBA_USERS A
+LEFT JOIN DBA_ROLE_PRIVS B ON A.USERNAME = B.GRANTEE
+JOIN DBA_TAB_PRIVS K ON A.USERNAME = K.GRANTEE
+WHERE A.USERNAME NOT LIKE '%SYS%'
+  AND A.USERNAME NOT IN ('DBSNMP',
+                         'OUTLN',
+                         'SYS',
+                         'SYSTEM',
+                         'XDB')
+  AND B.GRANTED_ROLE NOT IN ('DBA_ROLE_CCB',
+                             'DBA',
+                             'DBA_ROLE_DEPLOY',
+                             'DATAPUMP_EXP_FULL_DATABASE',
+                             'SELECT_CATALOG_ROLE',
+                             'CONNECT',
+                             'RESOURCE')
+  AND A.PROFILE NOT IN ('DBA_PROFILE',
+                        'SYSTEM_PROFILE')
+  OR B.GRANTED_ROLE IS NULL
+  AND A.PROFILE NOT LIKE '%SYSTEM%'
+ORDER BY A.USERNAME,
+         B.GRANTED_ROLE;
+87.	CEK ROLES DAN PTIME PASSWORD
+SELECT USERNAME,
+       PROFILE,
+       ROLE,
+       PTIME PASSWORD_CHANGE_TIME,
+       ACCOUNT_STATUS
+FROM
+  (SELECT USERNAME,
+          A.PROFILE,
+          B.GRANTED_ROLE ROLE,
+                         U.PTIME,
+                         A.ACCOUNT_STATUS
+   FROM DBA_USERS A
+   LEFT JOIN DBA_ROLE_PRIVS B ON A.USERNAME = B.GRANTEE
+   JOIN SYS.USER$ U ON U.NAME = A.USERNAME
+   WHERE A.USERNAME NOT LIKE '%SYS%'
+     AND A.USERNAME NOT IN ('DBSNMP',
+                            'OUTLN',
+                            'SYS',
+                            'SYSTEM',
+                            'XDB')
+     OR B.GRANTED_ROLE IS NULL
+     AND A.PROFILE NOT LIKE '%SYSTEM%'
+   ORDER BY A.USERNAME,
+            B.GRANTED_ROLE) T
+WHERE ROLE = 'DBA'
+GROUP BY USERNAME,
+         PROFILE,
+         ROLE,
+         PTIME,
+         ACCOUNT_STATUS
+ORDER BY USERNAME
+88.	GANTI SESSION USER
+1) check is your session in multiprocessing mod
+
+select sys.kupp$proc. IS_MULTIPROCESS_ENABLED from dual;
+
+
+
+2) If it is, disable moltiprocessing
+
+select sys.kupp$proc.disable_multiprocess from dual;
+
+
+3) switch current schema
+
+alter session set current_schema = 'PRAMUSINTO';
+
+
+
+4) change user
+
+
+exec sys.kupp$proc.change_user('PRAMUSINTO');
+89.	CEK MRP APPLYING
+set line 200 
+set pagesize 150
+col time format a30	
+SELECT a.process, a.thread#, a.sequence#, a.status, a.block#, a.blocks, b.creator, TO_CHAR(b.first_time, 'MM-DD-YYYY HH24:MI:SS')time, b.applied, b.deleted FROM v$managed_standby a, v$archived_log b WHERE a.process='MRP0' AND  a.thread#=b.thread# AND a.sequence#=b.sequence#;
+90.	CEK ASM
+. .grid_profile	
+	sqlplus / as sysasm
+
+	column name format a15;	
+	set linesize 200;	
+	SELECT NAME, ROUND ((total_mb / 1024), 2) total_gb,	
+		ROUND ((cold_used_mb / 1024), 2) used_gb,	
+		ROUND ((usable_file_mb / 1024), 2) free_gb,	
+		ROUND (cold_used_mb / total_mb * 100, 2) AS used_percent,	
+		ROUND (free_mb / total_mb * 100, 2) AS free_percent, offline_disks	
+	FROM v$asm_diskgroup;	
+91.	CEK SESSION
+SELECT SID, SERIAL#,USERNAME
+FROM GV$SESSION
+WHERE AUDSID = Sys_Context('USERENV', 'SESSIONID')
+   AND SID = Sys_Context('USERENV', 'SID');
+92.	CEK SHARE POOL
+select round(bytes/1024/1024,2) MB from v$sgastat  where pool='shared pool' and name='free memory';
+93.	CEK BACKUP HARIAN
+column start_time format a25;
+column OUTPUT_DEVICE format a15;
+column TIME_TAKEN format a10;
+column OUTPUT_RATE format a12;
+set linesize 200;
+SELECT   TO_CHAR (j.start_time, 'MON DD, YYYY HH24:MI:SS') as start_time, j.status,
+ ROUND ((j.input_bytes / 1024 / 1024 / 1024), 2) input_gb,
+ ROUND ((j.output_bytes / 1024 / 1024 / 1024), 2) output_gb,
+ j.input_type, j.output_device_type AS output_device,
+ j.time_taken_display AS time_taken,
+ j.output_bytes_per_sec_display AS output_rate
+FROM v$rman_backup_job_details j
+WHERE j.start_time > TRUNC (SYSDATE) - 7
+ORDER BY j.session_recid DESC;	
+94.	CEK PACKAGE BLOCKED
+select * from DBA_DDL_LOCKS where name like '%BBTRX%'
+95.	CEK SQL BY SQL ID
+SELECT A.INST_ID,
+       A.SQL_ID,
+       A.SQL_TEXT,
+       A.SQL_FULLTEXT,
+       A.CPU_TIME,
+       A.LOCKED_TOTAL,
+       A.PLSQL_EXEC_TIME,
+       A.SQLTYPE
+FROM GV$SQL A
+WHERE SQL_ID = 8bthuth4h3f0w;
+96.	CEK UNTUK PLAN SQL
+SELECT * FROM table(DBMS_XPLAN.DISPLAY_AWR('&sql_id'));
+
+SELECT * FROM table(DBMS_XPLAN.DISPLAY_CURSOR('&sql_id'));
+
+select * from table(dbms_xplan.display_cursor(null,null,'ALLSTATS LAST'));
+97.	CEK YANG DIJALANKAN JOB
+SELECT J.JOB,
+       J.FAILURES,
+       J.POWNER,
+       LAST_DATE,
+       SUBSTR(TO_CHAR(LAST_DATE, 'HH24:MI:SS'), 1, 8) LAST_SEC,
+       J.WHAT,
+       THIS_DATE,
+       SUBSTR(TO_CHAR(THIS_DATE, 'HH24:MI:SS'), 1, 8) THIS_SEC
+FROM SYS.JOB$ J
+WHERE J.WHAT LIKE '% PLNADMIN.PROC_GIS %'
+  AND J.WHAT NOT LIKE '%TKS%'
+ORDER BY J.JOB,
+         LAST_DATE
+98.	CEK JOB RUNNING
+select v.SID, v.id2 JOB, j.FAILURES, j.powner,
+    LAST_DATE, substr(to_char(last_date,'HH24:MI:SS'),1,8) LAST_SEC,
+ j.what,
+THIS_DATE, substr(to_char(this_date,'HH24:MI:SS'),1,8) THIS_SEC,
+    v.INST_ID instance
+from sys.job$ j, gv$lock v
+  where v.type = 'JQ' and j.job (+)= v.id2;
+
+SELECT count(*)
+  FROM dba_jobs_running
+ WHERE job = 383 -----<<job number>>
+
+99.	CEK JOB YANG ADA
+SELECT  JOB,
+        SCHEMA_USER,
+        LAST_DATE,
+        NEXT_DATE,
+        NEXT_SEC,
+        ROUND(TOTAL_TIME/60/60 ,2) AS JUMLAH_WAKTU_JAM,
+        BROKEN,
+        INTERVAL,
+        FAILURES,
+        WHAT
+ FROM dba_jobs 
+WHERE SCHEMA_USER NOT LIKE '%SYS%'
+ORDER BY SCHEMA_USER;
+
+100.	MEMATIKAN JOB BI JOBID
+dbms_job.broken( <<job number>>, true );
+commit;
+101.	CEK DELETE APKT
+SELECT 
+A.BATCH_ID,
+A.TABLE_NAME,
+A.MULAI,
+A.SELESAI,
+ABS(TO_NUMBER(TO_CHAR(SELESAI, 'hh')) - TO_NUMBER(to_char(MULAI, 'hh'))) as jam,
+ABS(TO_NUMBER(TO_CHAR(SELESAI, 'mi')) - TO_NUMBER(TO_CHAR(MULAI, 'mi'))) as menit,
+A.PROSES,
+A.KETERANGAN 
+FROM ASDINWP.LOG_HISTO A  WHERE MULAI > TO_DATE('15/01/2021', 'dd/mm/yyyy');
+102.	CEK BLOCK CORRUPTION AS LOGIC
+SELECT * FROM gv$database_block_corruption;
+
+SELECT e.owner, e.segment_type, e.segment_name, e.partition_name, e.tablespace_name, c.file#
+     , greatest(e.block_id, c.block#) corr_start_block#
+     , least(e.block_id+e.blocks-1, c.block#+c.blocks-1) corr_end_block#
+     , least(e.block_id+e.blocks-1, c.block#+c.blocks-1)
+       - greatest(e.block_id, c.block#) + 1 blocks_corrupted
+     , null description
+  FROM dba_extents e, v$database_block_corruption c
+ WHERE e.file_id = c.file#
+   AND e.block_id <= c.block# + c.blocks - 1
+   AND e.block_id + e.blocks - 1 >= c.block#
+UNION
+SELECT s.owner, s.segment_type, s.segment_name, s.partition_name, s.tablespace_name, c.file#
+     , header_block corr_start_block#
+     , header_block corr_end_block#
+     , 1 blocks_corrupted
+     , 'Segment Header' description
+  FROM dba_segments s, v$database_block_corruption c
+ WHERE s.header_file = c.file#
+   AND s.header_block between c.block# and c.block# + c.blocks - 1
+UNION
+SELECT null owner, null segment_type, null segment_name, null partition_name, f.tablespace_name, c.file#
+     , greatest(f.block_id, c.block#) corr_start_block#
+     , least(f.block_id+f.blocks-1, c.block#+c.blocks-1) corr_end_block#
+     , least(f.block_id+f.blocks-1, c.block#+c.blocks-1)
+       - greatest(f.block_id, c.block#) + 1 blocks_corrupted
+     , 'Free Block' description
+  FROM dba_free_space f, v$database_block_corruption c
+ WHERE f.file_id = c.file#
+   AND f.block_id <= c.block# + c.blocks - 1
+   AND f.block_id + f.blocks - 1 >= c.block#
+order by file#, corr_start_block#;
+
+103.	CEK DATA FROM PARTITION
+SELECT count(A.REPORTNUMBER) FROM VMAX_PLNHISTO.FAILURE PARTITION (CREATE_2016_12) A;
+104.	ADD PARTTITION TABLE
+ALTER TABLE VMAX_PLNHISTO.HISTTRANSFAILURE
+ ADD 
+  PARTITION CREATE_2017_01 VALUES LESS THAN (TO_DATE(' 2017-02-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    LOGGING
+    NOCOMPRESS 
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+               );
+105.	LISTING OBJECT
+SELECT DISTINCT (OBJECT_TYPE) FROM ALL_OBJECTS WHERE OWNER IN ('BILL52') ORDER BY OBJECT_TYPE ASC;
+106.	CEK METER
+SELECT * FROM BILL52.DIL_KWH WHERE NOMETER_KWH ='14070528295';
+
+SELECT * FROM BILL52.TRANS_PDL WHERE IDPEL ='543104985288';
+
+SELECT * FROM BILL52.TRANS_NOMETER_LPB WHERE IDPEL ='543104985288';
+
+SELECT BLTH,IDPEL,TGLBAYAR,DAYA,RPPTL,RPBPJU,RPPTL+RPBPJU AS TOTAL_BAYAR, TGLTRANSAKSI FROM SIP3SINGLEJATENG.DPHBARU WHERE IDPEL ='520550167932';
+
+SELECT IDPEL, SUM (PEMKWH) AS PEMAKAIAN_KWH,SUM (RPTAG) BELI, SUBSTR(TGLBAYAR,1,6) BULAN FROM (
+SELECT IDPEL,NOMOR_METER_KWH, PEMKWH,RPPTL,RPPTL,RPTAG,TGLBAYAR,JAMBAYAR,NOMOR_TOKEN 
+FROM OLAP.TRANSAKSI_PREPAID WHERE NOMOR_METER_KWH ='56606850602') A
+GROUP BY IDPEL,SUBSTR(TGLBAYAR,1,6)
+ORDER BY SUBSTR(TGLBAYAR,1,6);
+
+
+	
+107.	CEK UNDO RETENTION
+Secara default untuk value undo retention ini adalah 900 (ini artinya ia memiliki waktu tunggu 15 menit)
+ALTER SYSTEM SET UNDO_RETENTION = 900;
+108.	AKUN 
+user  : ap2t.exadata@iconpln.co.id
+Pass  : AP2TExaAdmin
+109.	AKUN APPSUPPTDEK
+ALTER USER APPSUPPTDEK PROFILE DEFAULT;
+PEJUANG45#indonesia
+110.	HAPUS DATA AUTO COMMIT 2000 ROW
+DECLARE 
+    NOMOR INT:=0;
+BEGIN
+		FOR X IN (select * from olap.transaksi_prepaid where tglbayar < '20190101') LOOP
+            NOMOR := NOMOR + 1;
+		DELETE FROM olap.transaksi_prepaid TB WHERE TB.IDPEL = X.IDPEL ;
+		IF (NOMOR = 2000) THEN
+		COMMIT;
+		NOMOR:=0;
+		ELSIF (NOMOR <> 2000) THEN
+		NOMOR:=NOMOR;
+		END IF;
+				
+	END LOOP;
+END;
+111.	ADD PARTITION TABLE
+ALTER TABLE VMAX_PLNHISTO.COMPLAIN
+ ADD 
+  PARTITION CREATE_2017_01 VALUES LESS THAN (TO_DATE(' 2017-02-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+    LOGGING
+    NOCOMPRESS 
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+               );
+112.	REBUILD INDEX
+ALTER INDEX ACMT_HISTO.PK_DPM_PHOTO_HISTO_BARAT
+REBUILD
+NOCOMPRESS
+PARALLEL 16
+TABLESPACE VMAX_PHOTOHISTOIDX_BRT
+STORAGE (
+         INITIAL     64K
+         NEXT        1M
+        )
+ONLINE;
+
+ALTER INDEX ACMT_HISTO.PK_DPM_PHOTO_HISTO_BARAT NOPARALLEL;
+113.	CEK BLOCK CORRUPTION NO LOGGING
+SELECT e.owner, e.segment_type, e.segment_name, e.partition_name, c.file#
+       , greatest(e.block_id, c.block#) s_blk#
+       , least(e.block_id+e.blocks-1, c.block#+c.blocks-1) e_dblk#
+       , least(e.block_id+e.blocks-1, c.block#+c.blocks-1)
+       - greatest(e.block_id, c.block#) + 1 blk_corrupt
+      , null description
+FROM dba_extents e, v$database_block_corruption c
+WHERE e.file_id = c.file# AND e.block_id <= c.block# + c.blocks - 1  AND e.block_id + e.blocks - 1 >= c.block#
+UNION
+SELECT s.owner, s.segment_type, s.segment_name, s.partition_name, c.file#
+       , header_block s_blk#
+       , header_block e_blk#
+       , 1 blk_corrupt
+       , 'Segment Header' description
+FROM dba_segments s, v$database_block_corruption c
+WHERE s.header_file = c.file#
+AND s.header_block between c.block# and c.block# + c.blocks - 1
+UNION
+SELECT null owner, null segment_type, null segment_name, null partition_name, c.file#
+       , greatest(f.block_id, c.block#) s_blk#
+       , least(f.block_id+f.blocks-1, c.block#+c.blocks-1) e_blk#
+       , least(f.block_id+f.blocks-1, c.block#+c.blocks-1)
+       - greatest(f.block_id, c.block#) + 1 blk_corrupt
+       , 'Free Block' description
+FROM dba_free_space f, v$database_block_corruption c
+WHERE f.file_id = c.file#
+AND f.block_id <= c.block# + c.blocks - 1 AND f.block_id + f.blocks - 1 >= c.block#
+order by file#, s_blk#;
+
+SELECT * FROM GV$DATABASE_BLOCK_CORRUPTION WHERE CORRUPTION_TYPE NOT LIKE '%NOLOGGING%';
+114.	SPLIT PARTITION TABLE
+ALTER TABLE VMAX_PLNHISTO.HISTRUNTASK
+ SPLIT PARTITION CREATE_DATE_MAX AT 
+ (TO_DATE(' 2017-10-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN'))
+ INTO (PARTITION CREATE_2017_09
+       TABLESPACE VMAX_PLN_HISTO
+       PCTFREE    10
+       INITRANS   1
+       MAXTRANS   255
+       STORAGE    (
+                   INITIAL          8M
+                   NEXT             1M
+                   MAXSIZE          UNLIMITED
+                   MINEXTENTS       1
+                   BUFFER_POOL      DEFAULT
+                   FLASH_CACHE      DEFAULT
+                   CELL_FLASH_CACHE DEFAULT
+                  ), 
+       PARTITION CREATE_DATE_MAX);
+115.	CEK TABLE ACMT
+SELECT AA.OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       TABLESPACE_NAME,
+       SEGMENT_TYPE,
+       PARTITION_NAME,
+       ROUND(MAX_SIZE/1024/1024/1024, 2) MAXSIZEGB,
+       ROUND (BYTES/1024/1024/1024, 2) SIZEGB,
+       ROUND ((BYTES/MAX_SIZE) * 100, 2) AS PCT_USAGE
+FROM DBA_SEGMENTS AA
+--DBA_TABLESPACES BB
+WHERE OWNER = 'ACMT_HISTO'
+AND SEGMENT_NAME IN ('DPM_PHOTO_HISTO_51',trx
+'DPM_PHOTO_HISTO_52',
+'DPM_PHOTO_HISTO_53',
+'DPM_PHOTO_HISTO_54',
+'DPM_PHOTO_HISTO_BARAT',
+'DPM_PHOTO_HISTO_TIMUR',
+'TRX_DPM_HISTO',
+'TRX_BACA_STAN_HISTO',
+'TRX_BACA_STAN_LPB',
+'TRX_BACA_SISIPAN',
+'TRX_VERIFIKASI_HB_HISTO',
+'TRX_BACA_ULANG',
+'LOG_WS_PERIDPEL_ERROR',
+'TRX_PENATAAN_KOORDINAT',
+'TRX_PENATAAN_RBM',
+'TRX_KWH_LEBIH_TAGIH',
+'TRX_RBM_BERSAMA',
+'TRX_SISIPAN_LPB_NON',
+'TRX_SISIPAN_LPB',
+'TRX_HITUNG_RATA2',
+'TRX_HITUNG_RATA2_USUL',
+'ERRORLOGS_HP_LPB',
+'ERRORLOGS_HP',
+'DPM_PHOTO2',
+'DPM_PHOTO3')
+AND SEGMENT_TYPE IN ('TABLE','TABLE PARTITION')
+ORDER BY SEGMENT_NAME ASC, PARTITION_NAME ASC;
+116.	AUTO COMMIT 
+DECLARE 
+    NOMOR INT:=0;
+BEGIN
+		FOR X IN 1..10 LOOP
+            NOMOR := NOMOR + 1;
+            DBMS_OUTPUT.PUT_LINE (X) ;
+		IF (NOMOR = 2) THEN
+            DBMS_OUTPUT.PUT_LINE (X||'COMMIT') ;
+		COMMIT;
+            NOMOR:=0;
+		ELSIF (NOMOR <> 2) THEN
+            NOMOR:=NOMOR;
+		END IF;
+	END LOOP;
+   COMMIT; 
+END;
+117.	CEK TBL LEBIH SPESIFIK
+SELECT AA.OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       TABLESPACE_NAME,
+       SEGMENT_TYPE,
+       PARTITION_NAME,
+       ROUND(MAX_SIZE/1024/1024/1024, 2) MAXSIZEGB,
+       ROUND (BYTES/1024/1024/1024, 2) SIZEGB,
+       ROUND ((BYTES/MAX_SIZE) * 100, 2) AS PCT_USAGE
+FROM DBA_SEGMENTS AA
+--DBA_TABLESPACES BB
+WHERE OWNER = 'ACMT_HISTO'
+AND SEGMENT_NAME IN ('DPM_PHOTO_HISTO_51',
+'DPM_PHOTO_HISTO_52',
+'DPM_PHOTO_HISTO_53',
+'DPM_PHOTO_HISTO_54',
+'DPM_PHOTO_HISTO_BARAT',
+'DPM_PHOTO_HISTO_TIMUR',
+'TRX_DPM_HISTO',
+'TRX_BACA_STAN_HISTO',
+'TRX_BACA_STAN_LPB'
+--'TRX_BACA_SISIPAN',
+--'TRX_VERIFIKASI_HB_HISTO',
+--'TRX_BACA_ULANG',
+--'LOG_WS_PERIDPEL_ERROR',
+--'TRX_PENATAAN_KOORDINAT',
+--'TRX_PENATAAN_RBM',
+--'TRX_KWH_LEBIH_TAGIH',
+--'TRX_RBM_BERSAMA',
+--'TRX_SISIPAN_LPB_NON',
+--'TRX_SISIPAN_LPB',
+--'TRX_HITUNG_RATA2',
+--'TRX_HITUNG_RATA2_USUL',
+--'ERRORLOGS_HP_LPB',
+--'ERRORLOGS_HP',
+--'DPM_PHOTO2',
+--'DPM_PHOTO3'
+)
+AND SEGMENT_TYPE IN ('TABLE','TABLE PARTITION')
+AND PARTITION_NAME LIKE 'BLTH_2019%'
+ORDER BY SEGMENT_NAME ASC, PARTITION_NAME ASC;
+118.	CEK TBS ACMT POKOK
+   SELECT D.STATUS STATUS
+ , D.TABLESPACE_NAME NAME
+ , D.CONTENTS TYPE
+ , D.EXTENT_MANAGEMENT EXTENT_MGT
+ , D.SEGMENT_SPACE_MANAGEMENT SEGMENT_MGT
+ , D.BIGFILE
+ , A.FILE_NAME
+ , ROUND(NVL(A.BYTES/1024/1024/1024, 0),1) TS_SIZE_GB
+ , ROUND(NVL((A.BYTES/1024/1024/1024) - NVL(F.BYTES/1024/1024/1024, 0), 1),1) USED_GB
+ , ROUND(NVL(F.BYTES/1024/1024/1024, 0),1) FREE_GB
+ , ROUND(NVL((A.BYTES/1024/1024/1024 - NVL(F.BYTES/1024/1024/1024, 0)) / (A.BYTES/1024/1024/1024) * 100, 2),1) PCT_USED_GB
+FROM 
+ SYS.DBA_TABLESPACES D
+ , ( SELECT TABLESPACE_NAME,FILE_NAME, SUM(BYTES) BYTES
+ FROM DBA_DATA_FILES
+ GROUP BY TABLESPACE_NAME,FILE_NAME
+ ) A
+ , ( SELECT TABLESPACE_NAME, SUM(BYTES) BYTES
+ FROM DBA_FREE_SPACE
+ GROUP BY TABLESPACE_NAME
+ ) F
+WHERE
+ D.TABLESPACE_NAME = A.TABLESPACE_NAME(+)
+ AND D.TABLESPACE_NAME = F.TABLESPACE_NAME(+)
+ AND D.TABLESPACE_NAME IN (SELECT DISTINCT(TABLESPACE_NAME)
+FROM DBA_SEGMENTS AA 
+WHERE OWNER = 'ACMT_HISTO'
+  AND SEGMENT_NAME IN ('DPM_PHOTO_HISTO_51',
+                       'DPM_PHOTO_HISTO_52',
+                       'DPM_PHOTO_HISTO_53',
+                       'DPM_PHOTO_HISTO_54',
+                       'DPM_PHOTO_HISTO_BARAT',
+                       'DPM_PHOTO_HISTO_TIMUR',
+                       'TRX_DPM_HISTO',
+                       'TRX_BACA_STAN_HISTO',
+                       'TRX_BACA_STAN_LPB')
+  AND SEGMENT_TYPE IN ('TABLE',
+                       'TABLE PARTITION') 
+ )
+ AND NOT (
+ D.EXTENT_MANAGEMENT LIKE 'LOCAL'
+ AND
+ D.CONTENTS LIKE 'TEMPORARY'
+ )
+UNION ALL 
+SELECT
+ D.STATUS STATUS
+ , D.TABLESPACE_NAME NAME
+ , D.CONTENTS TYPE
+ , D.EXTENT_MANAGEMENT EXTENT_MGT
+ , D.SEGMENT_SPACE_MANAGEMENT SEGMENT_MGT
+ , D.BIGFILE
+ , A.FILE_NAME
+ , ROUND(NVL(A.BYTES/1024/1024/1024, 0),1) TS_SIZE_GB
+ , ROUND(NVL(T.BYTES/1024/1024/1024, 0),1) USED_GB
+ , ROUND(NVL(A.BYTES/1024/1024/1024 - NVL(T.BYTES/1024/1024/1024,0), 0),1) FREE_GB
+ , ROUND(NVL(T.BYTES / A.BYTES * 100, 0),1) PCT_USED_GB
+FROM
+ SYS.DBA_TABLESPACES D
+ , ( SELECT TABLESPACE_NAME,FILE_NAME, SUM(BYTES) BYTES
+ FROM DBA_DATA_FILES
+ GROUP BY TABLESPACE_NAME,FILE_NAME
+ ) A
+ , ( SELECT TABLESPACE_NAME, SUM(BYTES_CACHED) BYTES
+ FROM V$TEMP_EXTENT_POOL
+ GROUP BY TABLESPACE_NAME
+ ) T
+WHERE
+ D.TABLESPACE_NAME = A.TABLESPACE_NAME(+)
+ AND D.TABLESPACE_NAME = T.TABLESPACE_NAME(+)
+ AND D.EXTENT_MANAGEMENT LIKE 'LOCAL'
+ AND D.CONTENTS LIKE 'TEMPORARY'
+ AND D.TABLESPACE_NAME IN (SELECT DISTINCT(TABLESPACE_NAME)
+FROM DBA_SEGMENTS AA 
+WHERE OWNER = 'ACMT_HISTO'
+  AND SEGMENT_NAME IN ('DPM_PHOTO_HISTO_51',
+                       'DPM_PHOTO_HISTO_52',
+                       'DPM_PHOTO_HISTO_53',
+                       'DPM_PHOTO_HISTO_54',
+                       'DPM_PHOTO_HISTO_BARAT',
+                       'DPM_PHOTO_HISTO_TIMUR',
+                       'TRX_DPM_HISTO',
+                       'TRX_BACA_STAN_HISTO',
+                       'TRX_BACA_STAN_LPB'
+                       )
+  AND SEGMENT_TYPE IN ('TABLE',
+                       'TABLE PARTITION') 
+ )
+ORDER BY PCT_USED_GB DESC;
+
+119.	CEK TBSPACE ACMT
+   SELECT D.STATUS STATUS
+ , D.TABLESPACE_NAME NAME
+ , D.CONTENTS TYPE
+ , D.EXTENT_MANAGEMENT EXTENT_MGT
+ , D.SEGMENT_SPACE_MANAGEMENT SEGMENT_MGT
+ , D.BIGFILE
+ , A.FILE_NAME
+ , ROUND(NVL(A.BYTES/1024/1024/1024, 0),1) TS_SIZE_GB
+ , ROUND(NVL((A.BYTES/1024/1024/1024) - NVL(F.BYTES/1024/1024/1024, 0), 1),1) USED_GB
+ , ROUND(NVL(F.BYTES/1024/1024/1024, 0),1) FREE_GB
+ , ROUND(NVL((A.BYTES/1024/1024/1024 - NVL(F.BYTES/1024/1024/1024, 0)) / (A.BYTES/1024/1024/1024) * 100, 2),1) PCT_USED_GB
+FROM 
+ SYS.DBA_TABLESPACES D
+ , ( SELECT TABLESPACE_NAME,FILE_NAME, SUM(BYTES) BYTES
+ FROM DBA_DATA_FILES
+ GROUP BY TABLESPACE_NAME,FILE_NAME
+ ) A
+ , ( SELECT TABLESPACE_NAME, SUM(BYTES) BYTES
+ FROM DBA_FREE_SPACE
+ GROUP BY TABLESPACE_NAME
+ ) F
+WHERE
+ D.TABLESPACE_NAME = A.TABLESPACE_NAME(+)
+ AND D.TABLESPACE_NAME = F.TABLESPACE_NAME(+)
+ AND D.TABLESPACE_NAME IN (SELECT DISTINCT(TABLESPACE_NAME)
+FROM DBA_SEGMENTS AA 
+WHERE OWNER = 'ACMT_HISTO'
+  AND SEGMENT_NAME IN ('DPM_PHOTO_HISTO_51',
+                       'DPM_PHOTO_HISTO_52',
+                       'DPM_PHOTO_HISTO_53',
+                       'DPM_PHOTO_HISTO_54',
+                       'DPM_PHOTO_HISTO_BARAT',
+                       'DPM_PHOTO_HISTO_TIMUR',
+                       'TRX_DPM_HISTO',
+                       'TRX_BACA_STAN_HISTO',
+                       'TRX_BACA_STAN_LPB',
+                       'TRX_BACA_SISIPAN',
+                       'TRX_VERIFIKASI_HB_HISTO',
+                       'TRX_BACA_ULANG',
+                       'LOG_WS_PERIDPEL_ERROR',
+                       'TRX_PENATAAN_KOORDINAT',
+                       'TRX_PENATAAN_RBM',
+                       'TRX_KWH_LEBIH_TAGIH',
+                       'TRX_RBM_BERSAMA',
+                       'TRX_SISIPAN_LPB_NON',
+                       'TRX_SISIPAN_LPB',
+                       'TRX_HITUNG_RATA2',
+                       'TRX_HITUNG_RATA2_USUL',
+                       'ERRORLOGS_HP_LPB',
+                       'ERRORLOGS_HP',
+                       'DPM_PHOTO2',
+                       'DPM_PHOTO3')
+  AND SEGMENT_TYPE IN ('TABLE',
+                       'TABLE PARTITION') 
+ )
+ AND NOT (
+ D.EXTENT_MANAGEMENT LIKE 'LOCAL'
+ AND
+ D.CONTENTS LIKE 'TEMPORARY'
+ )
+UNION ALL 
+SELECT
+ D.STATUS STATUS
+ , D.TABLESPACE_NAME NAME
+ , D.CONTENTS TYPE
+ , D.EXTENT_MANAGEMENT EXTENT_MGT
+ , D.SEGMENT_SPACE_MANAGEMENT SEGMENT_MGT
+ , D.BIGFILE
+ , A.FILE_NAME
+ , ROUND(NVL(A.BYTES/1024/1024/1024, 0),1) TS_SIZE_GB
+ , ROUND(NVL(T.BYTES/1024/1024/1024, 0),1) USED_GB
+ , ROUND(NVL(A.BYTES/1024/1024/1024 - NVL(T.BYTES/1024/1024/1024,0), 0),1) FREE_GB
+ , ROUND(NVL(T.BYTES / A.BYTES * 100, 0),1) PCT_USED_GB
+FROM
+ SYS.DBA_TABLESPACES D
+ , ( SELECT TABLESPACE_NAME,FILE_NAME, SUM(BYTES) BYTES
+ FROM DBA_DATA_FILES
+ GROUP BY TABLESPACE_NAME,FILE_NAME
+ ) A
+ , ( SELECT TABLESPACE_NAME, SUM(BYTES_CACHED) BYTES
+ FROM V$TEMP_EXTENT_POOL
+ GROUP BY TABLESPACE_NAME
+ ) T
+WHERE
+ D.TABLESPACE_NAME = A.TABLESPACE_NAME(+)
+ AND D.TABLESPACE_NAME = T.TABLESPACE_NAME(+)
+ AND D.EXTENT_MANAGEMENT LIKE 'LOCAL'
+ AND D.CONTENTS LIKE 'TEMPORARY'
+ AND D.TABLESPACE_NAME IN (SELECT DISTINCT(TABLESPACE_NAME)
+FROM DBA_SEGMENTS AA 
+WHERE OWNER = 'ACMT_HISTO'
+  AND SEGMENT_NAME IN ('DPM_PHOTO_HISTO_51',
+                       'DPM_PHOTO_HISTO_52',
+                       'DPM_PHOTO_HISTO_53',
+                       'DPM_PHOTO_HISTO_54',
+                       'DPM_PHOTO_HISTO_BARAT',
+                       'DPM_PHOTO_HISTO_TIMUR',
+                       'TRX_DPM_HISTO',
+                       'TRX_BACA_STAN_HISTO',
+                       'TRX_BACA_STAN_LPB',
+                       'TRX_BACA_SISIPAN',
+                       'TRX_VERIFIKASI_HB_HISTO',
+                       'TRX_BACA_ULANG',
+                       'LOG_WS_PERIDPEL_ERROR',
+                       'TRX_PENATAAN_KOORDINAT',
+                       'TRX_PENATAAN_RBM',
+                       'TRX_KWH_LEBIH_TAGIH',
+                       'TRX_RBM_BERSAMA',
+                       'TRX_SISIPAN_LPB_NON',
+                       'TRX_SISIPAN_LPB',
+                       'TRX_HITUNG_RATA2',
+                       'TRX_HITUNG_RATA2_USUL',
+                       'ERRORLOGS_HP_LPB',
+                       'ERRORLOGS_HP',
+                       'DPM_PHOTO2',
+                       'DPM_PHOTO3')
+  AND SEGMENT_TYPE IN ('TABLE',
+                       'TABLE PARTITION') 
+ )
+ORDER BY PCT_USED_GB DESC;
+
+
+
+
+120.	UKURAN DATAFILE DAN LOKASI
+SELECT TABLESPACE_NAME,FILE_ID,FILE_NAME,BYTES/1024/1024/1024 AS SIZEGB FROM DBA_DATA_FILES WHERE TABLESPACE_NAME IN (SELECT DISTINCT(TABLESPACE_NAME)
+FROM DBA_SEGMENTS AA 
+WHERE OWNER = 'ACMT_HISTO'
+  AND SEGMENT_NAME IN ('DPM_PHOTO_HISTO_51',
+                       'DPM_PHOTO_HISTO_52',
+                       'DPM_PHOTO_HISTO_53',
+                       'DPM_PHOTO_HISTO_54',
+                       'DPM_PHOTO_HISTO_BARAT',
+                       'DPM_PHOTO_HISTO_TIMUR',
+                       'TRX_DPM_HISTO',
+                       'TRX_BACA_STAN_HISTO',
+                       'TRX_BACA_STAN_LPB',
+                       'TRX_BACA_SISIPAN',
+                       'TRX_VERIFIKASI_HB_HISTO',
+                       'TRX_BACA_ULANG',
+                       'LOG_WS_PERIDPEL_ERROR',
+                       'TRX_PENATAAN_KOORDINAT',
+                       'TRX_PENATAAN_RBM',
+                       'TRX_KWH_LEBIH_TAGIH',
+                       'TRX_RBM_BERSAMA',
+                       'TRX_SISIPAN_LPB_NON',
+                       'TRX_SISIPAN_LPB',
+                       'TRX_HITUNG_RATA2',
+                       'TRX_HITUNG_RATA2_USUL',
+                       'ERRORLOGS_HP_LPB',
+                       'ERRORLOGS_HP',
+                       'DPM_PHOTO2',
+                       'DPM_PHOTO3')
+  AND SEGMENT_TYPE IN ('TABLE',
+                       'TABLE PARTITION'))
+ORDER BY TABLESPACE_NAME;
+121.	CEK ARCHIVELOG HISTO
+column name format a15;	
+set linesize 200
+SELECT name
+, ceil( space_limit / 1024 / 1024) SIZE_M
+,ceil( space_used  / 1024 / 1024) USED_M
+, decode( nvl( space_used, 0), 0, 0
+, ceil ( ( space_used / space_limit) * 100) ) PCT_USED
+FROM v$recovery_file_dest
+ORDER BY name;
+/
+
+ 
+SELECT name
+,    ceil( space_limit / 1024 / 1024/1024) SIZE_GB
+,    ceil( space_used  / 1024 / 1024/1024) USED_GB
+,    decode( nvl( space_used, 0),
+    0, 0
+    , ceil ( ( space_used / space_limit) * 100) ) PCT_USED
+FROM v$recovery_file_dest
+ORDER BY name
+/
+122.	COMMAND ARCHIVELOG
+Archivelog List Commands:
+list archivelog all; 
+list copy of archivelog until time 'SYSDATE-2'; 
+list copy of archivelog until time 'SYSDATE-1'; 
+
+list copy of archivelog from time 'SYSDATE-1'; 
+list copy of archivelog from time 'SYSDATE-5' until time 'SYSDATE-1'; 
+list copy of archivelog from sequence 1000; 
+list copy of archivelog until sequence 1500; 
+list copy of archivelog from sequence 9293 until sequence 9359; 
+13070 until 13075
+
+
+Archivelog Delete Commands:
+delete archivelog all;
+delete archivelog until time 'SYSDATE'; 
+delete archivelog from time 'SYSDATE-1'; 
+delete archivelog from time 'SYSDATE-5' until time 'SYSDATE-1'; 
+delete archivelog from sequence 1000; 
+delete archivelog until sequence 1500; 
+delete archivelog from sequence 1000 until sequence 1500; 
+Delete archivelog From sequence 13163 until sequence 13214;
+
+delete noprompt force archivelog until time 'SYSDATE-1';
+123.	MEMBUAT JOB JALAN PER TANGGAL 6 SETIAP BULAN
+DECLARE
+  X NUMBER;
+BEGIN
+  SYS.DBMS_JOB.SUBMIT
+    (
+      job        => X
+     ,what       => 'BEGIN 
+  BILL52.JOB_DLPD_PASKA_400600_JAM;
+  COMMIT; 
+END; 
+'
+     ,next_date  => to_date('07/06/2020 01:00:00','mm/dd/yyyy hh24:mi:ss')
+     ,interval   => 'TRUNC(LAST_DAY(SYSDATE)) + 25 + 1/24'
+     ,no_parse   => FALSE
+     ,instance  => 4
+     ,force     => TRUE
+    );
+  SYS.DBMS_OUTPUT.PUT_LINE('Job Number is: ' || to_char(x));
+END;
+
+124.	CEK UNUSABLE INDEX
+select * from dba_indexes where owner='ACMT_HISTO' and status='UNUSABLE'
+
+select * from dba_ind_partitions where index_owner='ACMT_HISTO' and status='UNUSABLE'
+125.	CEK OPEN MODE
+select NAME,open_mode,DATABASE_ROLE from v$database;
+126.	SELECT DBA_OBJECTS
+SELECT *
+FROM DBA_OBJECTS
+WHERE OWNER='ASDINWP'
+  AND OBJECT_TYPE='PROCEDURE'
+  AND OBJECT_NAME LIKE 'COUNT_%';
+
+127.	SELECT MENGGUNAKAN INDEX
+SELECT      /*+index(a IDX_DPMPHOTO_51_01)*/                              
+      IDPEL,
+       BLTH,
+       UNITUP,
+       NAMAFILE,
+       PATHDIR,
+       FILESIZE,
+       FILEPHOTO,
+       TGL_INSERT,
+       TRANSAKSIBY,
+       0 FLAG_LAYAK,
+       NULL PTGS_VALID,
+       NULL TGL_VALID,
+       0 FLAG_SESUAI,
+       NULL KODE_PESAN,
+       NULL FLAG_TO,
+       NULL KET_TO
+  FROM ACMT.DPM_PHOTO_51_X a
+ WHERE blth = v_blth AND unitup = v_unitup;
+128.	PERMISI ACMT HOUSEKEEPING
+Selamat malam, mohon ijin @MOD IT Command Center PLN untuk melakukan kegiatan rutin bulanan Archiving db ACMT start mulai jam 22.00 WIB
+rekan  sysadmin mintul untuk mematikan service untuk kegiatan ini, pukul 22.00 WiB yak, matur suwun
+129.	CEK LOBSEGMENT TABLE AND SIZE
+SELECT A.OWNER, A.TABLE_NAME, A.COLUMN_NAME, A.SEGMENT_NAME, A.TABLESPACE_NAME, ROUND(B.BYTES/1024/1024/1024,2) AS GB				
+FROM DBA_LOBS A
+JOIN DBA_SEGMENTS B ON B.SEGMENT_NAME = A.SEGMENT_NAME
+WHERE
+A.OWNER ='ACMT'
+ORDER BY GB DESC;
+130.	CEK DATABASE TABLE
+SELECT AA.OWNER,
+       SEGMENT_NAME AS NAMA_TABLE,
+       TABLESPACE_NAME,
+       SEGMENT_TYPE,
+       PARTITION_NAME,
+--       ROUND(MAX_SIZE/1024/1024/1024, 2) MAXSIZEGB,
+       ROUND (BYTES/1024/1024/1024, 2) SIZEGB,
+       TO_char(SYSDATE,'yyyymmdd') tanggal_cek
+FROM DBA_SEGMENTS AA
+WHERE OWNER NOT IN ('SYS','SYSTEM','WMSYS','DBSNMP')
+ORDER BY SIZEGB DESC;
+131.	CEK FILE BESAR DI FILESYSTEM
+find /u01 -type f -size +300000k -exec ls -lh {} \; | awk '{ print  $9 ": " "Pemilik :" $3 " Ukuran: "$5 " Dibuat pada:" $6 " "$8 }'
+
+find /u01 -type f -size +128M -exec ls -lh {} \; | awk '{ print $NF ": " $5 }'
+
+find /opt -type f -size +100000k -exec ls -lh {} \; | awk '{ print  $9 ": " "Pemilik :" $3 " Ukuran: "$5 " Dibuat pada:" $6 " "$8 }'
+
+132.	CEK OBJECT DATABASE
+SELECT A.OWNER,
+       A.OBJECT_NAME,
+       A.SUBOBJECT_NAME,
+       A.OBJECT_TYPE,
+       A.LAST_DDL_TIME,
+       A.STATUS
+FROM DBA_OBJECTS A
+WHERE OWNER = 'ACMT'
+  AND OBJECT_NAME IN ('DPM_PHOTO_51',
+                      'DPM_PHOTO_52',
+                      'DPM_PHOTO_53',
+                      'DPM_PHOTO_54',
+                      'DPM_PHOTO_BARAT',
+                      'DPM_PHOTO_TIMUR')
+ORDER BY OBJECT_NAME,
+         OBJECT_TYPE
+
+SELECT OWNER,OBJECT_NAME, OBJECT_TYPE,CREATED, LAST_DDL_TIME, STATUS FROM DBA_OBJECTS WHERE OBJECT_NAME IN 
+('BA_USER',
+'GetProsesUser',
+'TOOL_TDE',
+'PKG_REKAP_LUNAS_PTL_BP_UJL',
+'REPORT_PTL_BP_UJL');
+133.	CEK PARTISI TABEL
+SELECT A.OWNER,
+       A.OBJECT_NAME,
+       A.SUBOBJECT_NAME,
+       A.OBJECT_TYPE,
+       A.LAST_DDL_TIME,
+       A.STATUS
+FROM DBA_OBJECTS A
+WHERE OWNER = 'BILL52'
+  AND OBJECT_TYPE = 'TABLE PARTITION'
+  AND OBJECT_NAME IN (  'LAP_LK_309',
+                        'LAP_LK_309_BULANAN',
+                        'LAP_LK_309_NONPLUS',
+                        'LAP_LK_LPB_ESTIMASI',
+                        'LAP_LK_LPB_ESTIMASI_GOL',
+                        'LAP_LK_LPB_ESTIMASI_GOL_NPL',
+                        'LAP_LK_LPB_ESTIMASI_NONPLUS',
+                        'LAP_LK_PIU_PERUMUR')
+  AND SUBOBJECT_NAME IN ('THBL_2021_01',
+                         'THBL_2021_02',
+                         'THBL_2021_03',
+                         'THBL_2021_04',
+                         'THBL_2021_05',
+                         'THBL_2021_06',
+                         'THBL_2021_07',
+                         'THBL_2021_08',
+                         'THBL_2021_09',
+                         'THBL_2021_10',
+                         'THBL_2021_11',
+                         'THBL_2021_12')
+ORDER BY OBJECT_NAME,
+         SUBOBJECT_NAME
+134.	CEK PARTISI TABLE ALL NOT LIKE SYS
+SELECT J.OWNER, J.NAMA_TABLE, J.PARTISI_TERAHKIR, J.JENIS_PARTISI FROM (
+SELECT DISTINCT (M.OBJECT_NAME) AS NAMA_TABLE,M.OWNER,MAX(PARTITION_NAME) AS PARTISI_TERAHKIR, M.JENIS_PARTISI FROM (
+SELECT A.OWNER,
+       A.OBJECT_NAME,
+       A.SUBOBJECT_NAME AS PARTITION_NAME,
+       A.OBJECT_TYPE,
+       A.LAST_DDL_TIME,
+       A.STATUS,
+       S.PARTITIONING_TYPE AS JENIS_PARTISI
+FROM DBA_OBJECTS A
+JOIN DBA_PART_TABLES S ON A.OWNER = S.OWNER AND A.OBJECT_NAME = S.TABLE_NAME
+WHERE 
+    A.OWNER NOT LIKE '%SYS%'
+  AND OBJECT_TYPE = 'TABLE PARTITION'
+  ORDER BY OBJECT_NAME,
+         SUBOBJECT_NAME) M
+GROUP BY M.OBJECT_NAME, M.OWNER, M.JENIS_PARTISI
+order by M.OWNER,M.OBJECT_NAME) J
+135.	USER PRIVMGR
+privmgr
+Rum4hangker
+136.	CREATE TABLESPACE
+CREATE BIGFILE TABLESPACE VMAX_RELOCATE_TBS DATAFILE 
+  '/Data_ACMT3/datafiles/VMAX_RELOCATE_TBS.dbf' SIZE 300G AUTOEXTEND ON NEXT 1G MAXSIZE 500G
+LOGGING
+ONLINE
+EXTENT MANAGEMENT LOCAL AUTOALLOCATE
+BLOCKSIZE 8K
+SEGMENT SPACE MANAGEMENT AUTO
+FLASHBACK ON;
+
+ 
+137.	GRANT ANY TABLE TO USER
+CREATE PROCEDURE grant_select(
+    username VARCHAR2, 
+    grantee VARCHAR2)
+AS   
+BEGIN
+    FOR r IN (
+        SELECT owner, table_name 
+        FROM all_tables 
+        WHERE owner = username
+    )
+    LOOP
+        EXECUTE IMMEDIATE 
+            'GRANT SELECT ON '||r.owner||'.'||r.table_name||' to ' || grantee;
+    END LOOP;
+END;
+
+EXEC grant_select('OT','DW');
+
+OR
+
+SELECT 'grant insert, update, delete on PLNADMIN.'||object_name||' to HENDRA_RUSTAM ;' 
+  FROM dba_objects
+ WHERE object_type in ('TABLE') AND owner = 'PLNADMIN' AND status = 'VALID'
+138.	MODIFY TABLE
+ALTER TABLE VMAX_PLNHISTO.INTEGRASI_EMAP
+MODIFY
+(
+TITIK_GANGGUAN VARCHAR2(100 BYTE),
+KWH_LOST NUMBER(28,8) DEFAULT 0,
+JENIS VARCHAR2(10 BYTE) DEFAULT 0,
+AMPERE NUMBER DEFAULT 0,
+);
+139.	CEK INVALID OBJECT
+select * from dba_objects where status <> 'VALID' and owner = 'SYSMAN' ;
+140.	INVISIBLE INDEX
+ALTER INDEX EMULSION.IDX_BILLAP2T_POSTING_THBLREK INVISIBLE;
+http://www.dba-oracle.com/t_11g_new_index_features.htm
+141.	LISTING ALL INDEX
+SELECT table_name, index_name, index_type, uniqueness
+FROM all_indexes
+WHERE owner = UPPER('PLNADMIN')
+AND table_name = UPPER('FAILURE');
+142.	MEMINDAH TABLE KE PARTISI BARU
+select table_name from DBA_tables where tablespace_name='MGMT_TABLESPACE';
+
+
+set serverout on
+
+begin
+
+for i in (select table_name from DBA_tables where tablespace_name='MGMT_TABLESPACE')
+
+loop
+
+dbms_output.put_line(i.table_name);
+
+execute immediate 'alter table '||i.table_name||' move tablespace <new tablespace name>';
+
+end loop;
+
+end;
+
+/
+
+https://oracle-base.com/articles/12c/online-move-table-12cr2
+143.	MENGHAPUS FILE OS DEV NULL
+find /u01 -xdev -type f -size +100M -exec ls -lah {} \; | sort -nk 5
+find /u01 -type f -size +500M -exec ls -lh {} \; | awk '{ print  $9 ": " "Pemilik :" $3 " Ukuran: "$5 " Dibuat pada:" $6 " "$8 }'
+
+
+tar -czvf /Data_ACMT4/backup_log/heapDump_3_$(date +\%Y\%m\%d).tar.gz heapDump_3.hprof
+tar -czvf /Data_ACMT4/backup_log/heapDump_4_$(date +\%Y\%m\%d).tar.gz heapDump_4.hprof
+tar -czvf /Data_ACMT4/backup_log/heapDump_5_$(date +\%Y\%m\%d).tar.gz heapDump_5.hprof
+tar -czvf /Data_ACMT4/backup_log/heapDump_6_$(date +\%Y\%m\%d).tar.gz heapDump_6.hprof
+
+tar -czvf /Data_ACMT4/backup_log/listener_scan1_$(date +\%Y\%m\%d).tar.gz listener_scan1.log
+
+cp /dev/null heapDump_3.hprof
+cp /dev/null heapDump_4.hprof
+cp /dev/null heapDump_5.hprof
+cp /dev/null heapDump_6.hprof
+cp /dev/null listener_scan1.log
+
+
+/u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb06/listener_scan1/trace/listener_scan1.log
+
+144.	CLEAN FS CRONTAB LISTENER /HOME/ORACLE/RUN_CLEAN_FS_LISTENER_DBODSDW.SH
+[oracle@dbtpstdcdb05 trace]$ cat /home/oracle/run_clean_fs_listener_dbodsdw.sh
+#delete log listener_ib
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_ib/alert -name 'log_*' | xargs rm -f
+wait
+tar -czvf /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_ib/trace/listener_ib_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_ib/trace/listener_ib.log -P
+wait
+cp /dev/null /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_ib/trace/listener_ib.log
+wait
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_ib/trace -mtime +7 -name '*.tar.gz' | xargs rm -f
+wait
+
+#delete log listener grid
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener/alert -name 'log_*' | xargs rm -f
+wait
+tar -czvf /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener/trace/listener_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener/trace/listener.log -P
+wait
+cp /dev/null /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener/trace/listener.log
+wait
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener/trace -mtime +7 -name '*.tar.gz' | xargs rm -f
+wait
+
+
+
+#delete log listener_scan2
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan2/alert -name 'log_*' | xargs rm -f
+wait
+tar -czvf /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan2/trace/listener_scan2_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan2/trace/listener_scan2.log -P
+wait
+cp /dev/null /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan2/trace/listener_scan2.log
+wait
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan2/trace -mtime +7 -name '*.tar.gz' | xargs rm -f
+wait
+
+#delete log listener_scan1
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan1/alert -name 'log_*' | xargs rm -f
+wait
+tar -czvf /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan1/trace/listener_scan1_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan1/trace/listener_scan1.log -P
+wait
+cp /dev/null /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan1/trace/listener_scan1.log
+wait
+find /u01/app/11.2.0.4/grid/log/diag/tnslsnr/dbtpstdcdb05/listener_scan1/trace -mtime +7 -name '*.tar.gz' | xargs rm -f
+wait
+
+
+#delete log listener_dbodsdw
+find /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbodsdw/alert -name 'log_*' | xargs rm -f
+wait
+tar -czvf /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbodsdw/trace/listener_dbodsdw_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbodsdw/trace/listener_dbodsdw.log -P
+wait
+cp /dev/null /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbodsdw/trace/listener_dbodsdw.log
+wait
+find /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbodsdw/trace -mtime +7 -name '*.tar.gz' | xargs rm -f
+wait
+
+#delete log listener_dbat2lt
+find /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbat2lt/alert -name 'log_*' | xargs rm -f
+wait
+tar -czvf /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbat2lt/trace/listener_dbat2lt_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbat2lt/trace/listener_dbat2lt.log -P
+wait
+cp /dev/null /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbat2lt/trace/listener_dbat2lt.log
+wait
+find /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener_dbat2lt/trace -mtime +7 -name '*.tar.gz' | xargs rm -f
+wait
+
+
+#delete log listener
+find /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener/alert -name 'log_*' | xargs rm -f
+wait
+tar -czvf /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener/trace/listener_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener/trace/listener.log -P
+wait
+cp /dev/null /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener/trace/listener.log
+wait
+find /u01/app/oracle/diag/tnslsnr/dbtpstdcdb05/listener/trace -mtime +7 -name '*.tar.gz' | xargs rm -f
+wait
+
+echo $?
+145.	CLEAN FILE SYSTEM RDBMS HOME/ORACLE/RUN_CLEAN_FS_RDBMS_DBODSDW.SH
+#backup dan delete file log_*
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/alert -mtime +3 -name 'log_*' | xargs tar -czvf /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/alert/bkp_log_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz -P
+wait
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/alert -mtime +3 -name 'log_*' | xargs rm -f
+wait
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/alert -mtime +30 -name '*.tar.gz' | xargs rm -f
+wait
+
+#backup dan delete file cdmp_*
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace -mtime +3 -name 'cdmp_*' | xargs rm -rf
+wait
+
+
+#backup dan delete file *.trc
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace -mtime +3 -name '*.trc' | xargs tar -czvf /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/bkp_trc_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz -P
+wait
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace -mtime +3 -name '*.trc' | xargs rm -f
+wait
+
+#backup dan delete file *.trm
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace -mtime +3 -name '*.trm' | xargs tar -czvf /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/bkp_trm_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz -P
+wait
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace -mtime +3 -name '*.trm' | xargs rm -f
+wait
+
+#backup dan delete file dbrm
+tar -czvf /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/DBODSDW5_dbrm_50912_trc_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/DBODSDW5_dbrm_50912.trc -P
+wait
+cp /dev/null /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/DBODSDW5_dbrm_50912.trc
+wait
+tar -czvf /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/DBODSDW5_dbrm_50912_trm_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/DBODSDW5_dbrm_50912.trm -P
+wait
+cp /dev/null /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/DBODSDW5_dbrm_50912.trm
+wait
+
+
+#backup dan delete file *.log
+#tar -czvf /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/alert_DBODSDW5_$(date +\%Y\%m\%d_%I\%M\%p).tar.gz /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/alert_DBODSDW5.log -P
+#wait
+#cp /dev/null /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace/alert_DBODSDW5.log
+#wait
+find /u01/app/oracle/diag/rdbms/dbodsdw/DBODSDW5/trace -mtime +30 -name '*.tar.gz' | xargs rm -f
+wait
+
+echo $?
+146.	VIEW BMM ACMT
+--create or replace force view asdinwp.view_test_param as
+--select /*+full(a) parallel(a, 4)*/ * from acmt.trx_dpm a
+--where a.blth=acmt.utilsetter.getblth
+--and a.unitup=acmt.utilsetter.getunitup;
+
+begin
+acmt.utilsetter.setblth('202209');
+acmt.utilsetter.setunitup('53241');
+--acmt.utilsetter.sETTGLBACA('20220820');
+end;
+
+select * from asdinwp.view_test_param;
+
+select * from acmt.master_unitup;
+147.	COMPRESS TABLE
+
+-- bikin tabel bantu --
+
+CREATE TABLE ASDINWP.SIZE_RAW
+(
+  OWNER       VARCHAR2(30 BYTE),
+  TABLE_NAME  VARCHAR2(81 BYTE),
+  SIZE_MEG    NUMBER
+)
+TABLESPACE USERS;
+
+-- insert data ke tabel bantu 9lebih cepat dari pada create table as --
+
+insert into ASDINWP.size_raw
+SELECT 
+         owner, table_name,
+         TRUNC (SUM (bytes) / 1024 / 1024) Meg
+          FROM (SELECT segment_name table_name, owner, bytes
+            FROM dba_segments
+           WHERE segment_type IN ('TABLE', 'TABLE PARTITION','TABLE SUBPARTITION')
+           and tablespace_name='BACKUP_TEMP2'
+          UNION ALL
+          SELECT i.table_name, i.owner, s.bytes
+            FROM dba_indexes i, dba_segments s
+           WHERE     s.segment_name = i.index_name
+                 AND s.owner = i.owner
+                 AND s.segment_type IN ('INDEX', 'INDEX PARTITION')
+                 and s.tablespace_name='BACKUP_TEMP2'
+          UNION ALL
+          SELECT l.table_name, l.owner, s.bytes
+            FROM dba_lobs l, dba_segments s
+           WHERE     s.segment_name = l.segment_name
+                 AND s.owner = l.owner
+                 AND s.segment_type in ('LOBSEGMENT','LOB PARTITION')
+                 and s.tablespace_name='BACKUP_TEMP2'
+          UNION ALL
+          SELECT l.table_name, l.owner, s.bytes
+            FROM dba_lobs l, dba_segments s
+           WHERE     s.segment_name = l.index_name
+                 AND s.owner = l.owner
+                 AND s.segment_type = 'LOBINDEX'
+                 and s.tablespace_name='BACKUP_TEMP2'
+                 UNION ALL
+          SELECT l.table_name, l.owner, s.bytes
+            FROM dba_lobs l, dba_segments s
+           WHERE     s.segment_name = l.index_name
+                 AND s.owner = l.owner
+                 AND s.segment_type in( 'TYPE2 UNDO','TEMPORARY','NESTED TABLE','CLUSTER')
+                 and s.tablespace_name='BACKUP_TEMP2')
+                 --where tablespace_name='BACKUP_TEMP2'
+             GROUP BY owner, table_name
+             ORDER BY SUM (bytes) DESC;
+
+commit;
+             
+
+---- cari tabel yang besarnya spesifik -----
+-- contoh : tabel yang besarnya lebih dari sama dengan 2 GB
+
+select * from ASDINWP.size_raw where (owner, table_name) in(
+select owner, table_name from dba_tables where tablespace_name='BACKUP_TEMP2'
+and compression='DISABLED')
+and size_meg >= 1000
+order by SIZE_MEG desc;
+
+---- bangun scriptnya ----
+
+select  
+'ALTER TABLE '||owner||'.'||table_name||' move compress for query high PARALLEL 8 TABLESPACE BACKUP_TEMP2;' script
+from ASDINWP.size_raw where (owner, table_name) in(
+select owner, table_name from dba_tables where tablespace_name='BACKUP_TEMP2'
+and compression='DISABLED')
+and size_meg >= 1000
+order by SIZE_MEG desc;
+
+--- cek unusable index paska rebuild compress ---
+
+select distinct owner
+from dba_indexes where status='UNUSABLE'
+and owner not in ('SYS','SYSMAN','SYSTEM')
+
+-- kalau mau langsung di drop
+
+select 
+'DROP INDEX '||owner||'.'||index_name||';' script
+from dba_indexes 
+where status='UNUSABLE'
+and owner not in ('SYS','SYSMAN','SYSTEM');
+
+-- atau kalau mau di rebuild
+
+select 
+'ALTER INDEX '||owner||'.'||index_name||' REBUILD NOCOMPRESS PARALLEL 8 TABLESPACE BACKUP_TEMPIDX ONLINE;' script
+from dba_indexes 
+where status='UNUSABLE'
+and owner not in ('SYS','SYSMAN','SYSTEM');
+
+
+
+--- script bikin   non part
+
+select 'exec dbms_stats.gather_table_stats(ownname=>'||chr(39)||owner||chr(39)||', tabname=>'||chr(39)||table_name||chr(39)||
+', estimate_percent=>dbms_stats.auto_sample_size, method_opt=>''for all columns size auto'', cascade=> TRUE, degree=>16);'
+from ASDINWP.size_raw where size_meg >= 2000
+order by SIZE_MEG desc;
+
+148.	QUERY AUDIT
+contoh query untuk untuk audit user Admin:
+-------------------
+SELECT  
+         username,    
+         extended_timestamp,    
+         owner,    
+         obj_name,    
+         action_name    
+    FROM sys.dba_audit_trail a    
+   WHERE owner IN (SELECT USERNAME    
+                     FROM dba_users    
+                    Where ACCOUNT_STATUS = 'OPEN'    
+                          AND PROFILE IN ('DBA_PROFILE'))    
+     AND ACTION_NAME NOT IN ('SESSION REC') AND TO_CHAR (extended_timestamp, 'yyyymm') = '202105'
+     ORDER BY timestamp;
+------------------------------
+
+
+contoh query untuk untuk audit Super User:
+-----------------------------
+SELECT username,                        
+       extended_timestamp,                        
+       owner,                        
+       obj_name,                        
+       action_name                        
+FROM dba_audit_trail                        
+     WHERE owner IN (SELECT USERNAME FROM dba_users                        
+                      WHERE ACCOUNT_STATUS = 'OPEN'                        
+                       AND USERNAME IN ('SYS', 'SYSTEM', 'PUBLIC'))                        
+                       AND ACTION_NAME NOT IN ('SESSION REC')                     
+                       AND TO_CHAR (extended_timestamp, 'yyyymm') = '202106'                        
+ORDER BY timestamp;                     
+
+--------------------------------------------
+149.	GATHER TABLE CRONTAB
+[oracle@dtodcdb01 ~]$ cat /home/oracle/crontab_gather_table_dbdtoa.sh
+export ORACLE_BASE=/u01/app/oracle
+export ORACLE_HOME=/u01/app/oracle/product/11.2.0.3/dbdtoa
+export ORACLE_SID=dbdtoa1
+export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
+sqlplus "/ as sysdba"<<EOF
+set echo on lines 90 pages 1000
+spool /home/oracle/LogCrontab/crontab_gather_table_dbdtoa_$(date +\%Y\%m\%d_%I\%M\%p).log
+EXEC DBMS_STATS.gather_table_stats('GAPURA','CDCMOD_EL_POST_LOG_TRAN', ESTIMATE_PERCENT=>DBMS_STATS.AUTO_SAMPLE_SIZE, degree=>24,CASCADE=>DBMS_STATS.AUTO_CASCADE);
+EXEC DBMS_STATS.gather_table_stats('GAPURA','CDCMOD_EL_POST_TRAN_MAIN', ESTIMATE_PERCENT=>DBMS_STATS.AUTO_SAMPLE_SIZE, degree=>24,CASCADE=>DBMS_STATS.AUTO_CASCADE);
+set linesize 200;
+column owner format a10;
+column last_analyzed format a20;
+select owner, table_name, num_rows,to_char(last_analyzed,'YYYYMMDD hh24:mi:ss') as last_analyzed from dba_tab_statistics where owner='GAPURA' and table_name in ('CDCMOD_EL_POST_LOG_TRAN','CDCMOD_EL_POST_TRAN_MAIN');
+spool off
+exit;
+EOF
+150.	TABLESPACE CEK
+set pagesize 20;
+	set linesize 200;
+	SELECT
+		d.status                                            status
+	  , d.tablespace_name                                   name
+	  , round(NVL(a.bytes/1024/1024/1024, 0),2)                                     max_size_GB
+	  , round(NVL((a.bytes/1024/1024/1024) - NVL(f.bytes/1024/1024/1024, 0), 0),2)                   used_GB
+	  , round(NVL(f.bytes/1024/1024/1024, 0),2)                                     free_GB
+	  , round(NVL((NVL(f.bytes/1024/1024, 0)) / (a.bytes/1024/1024) * 100, 0),2) pct_free
+	  , round(NVL((a.bytes/1024/1024 - NVL(f.bytes/1024/1024, 0)) / (a.bytes/1024/1024) * 100, 0),2) pct_used
+	FROM 
+		sys.dba_tablespaces d
+	  , ( select tablespace_name, sum(bytes) bytes
+		  from dba_data_files
+		  group by tablespace_name
+		) a
+	  , ( select tablespace_name, sum(bytes) bytes
+		  from dba_free_space
+		  group by tablespace_name
+		) f
+	WHERE
+		  d.tablespace_name = a.tablespace_name(+)
+	  AND d.tablespace_name = f.tablespace_name(+)
+	  AND NOT (
+		d.extent_management like 'LOCAL'
+		AND
+		d.contents like 'TEMPORARY'
+	  )
+	ORDER BY pct_used desc;
+151.	INSERT ANOTHER TABLES
+DECLARE
+    CURSOR C is 
+    SELECT DISTINCT(D.NAMA),
+    D.KEL_SOURCE,
+    D.NO_TELP,
+    D.KEL_REGIONAL
+    FROM ASDINWP.TRANSAKSI_DUTA D
+    ORDER BY NAMA;
+    
+    nomor integer;
+    
+BEGIN
+    nomor :=0;
+    FOR X IN C LOOP
+
+        INSERT INTO MASTER_DUTA
+        (NAMA_DUTA,KELURAHAN,HANDPHONE,ALAMAT,NO_DUTA)
+        values (X.NAMA,X.KEL_SOURCE,X.NO_TELP,X.KEL_REGIONAL,nomor+1);
+    
+    END LOOP;
+    COMMIT;
+END;
+152.	CEK BLEVEL INDEX
+select index_name, blevel,
+decode(blevel,0,'OK BLEVEL',1,'OK BLEVEL',
+2,'OK BLEVEL',3,'OK BLEVEL',4,'OK BLEVEL','BLEVEL HIGH') OK
+from dba_indexes
+where owner='SCOTT';
+153.	CLEANSING  CRFCLUST.BDB
+cd /home/oracle
+. .grid_profile
+cd /u01/app/11.2.0.4/grid/bin (lokasi Eksekusi)
+date;./crsctl status resource ora.crf -init (mengecek Status CRF)
+date;./crsctl stop resource ora.crf -init (Mematikan CRF)
+cd /u01/app/11.2.0.4/grid/crf/db/dbtpstdrdb06/ (Lokasi File crfclust.bdb)
+cp /dev/null crfclust.bdb (Cp Dev Null * Harus dengan Root)
+date;./crsctl start resource ora.crf -init (Starting CRF)
+ 
+154.	TUNING ADVISOR
+https://dbaclass.com/article/how-to-run-sql-tuning-advisor-for-a-sql_id/
+e.	Create Tuning Task
+DECLARE
+l_sql_tune_task_id VARCHAR2(100);
+BEGIN
+l_sql_tune_task_id := DBMS_SQLTUNE.create_tuning_task (
+sql_id => '87s8z2zzpsg88',
+scope => DBMS_SQLTUNE.scope_comprehensive,
+time_limit => 500,
+task_name => '87s8z2zzpsg88_tuning_task11',
+description => 'Tuning task1 for statement 87s8z2zzpsg88');
+DBMS_OUTPUT.put_line('l_sql_tune_task_id: ' || l_sql_tune_task_id);
+END;
+/
+f.	Execute Tuning task:
+EXEC DBMS_SQLTUNE.execute_tuning_task(task_name => '87s8z2zzpsg88_tuning_task11');
+g.	Get the Tuning advisor report.
+set long 65536
+set longchunksize 65536
+set linesize 100
+select dbms_sqltune.report_tuning_task('87s8z2zzpsg88_tuning_task11') from dual;
+h.	Get list of tuning task present in database:
+SELECT TASK_NAME, STATUS FROM DBA_ADVISOR_LOG WHERE TASK_NAME ;
+i.	Drop a tuning task:
+execute dbms_sqltune.drop_tuning_task('87s8z2zzpsg88_tuning_task11');
+155.	PASSWORD HINT
+Berikut aturan penggunaan password sesuai dengan aturan password yang diberlakukan :
+1. Panjang minimal password adalah 8 karakter dan tidak lebih dari 30 karakter 
+2. Password baru tidak boleh sama dengan password terakhir.
+3. Password tidak boleh terdiri dari nama akun, atau nama akun dieja terbalik.
+4. Password tidak boleh sama dengan nama server atau nama server diimbuhkan nomer 1-100 
+5. Password tidak boleh terlalu sederhana, misal: welcome1, database1, account1, user1234, password1, oracle, oracle123, computer1, abcdefg1, or change_on_install.
+6. Password harus terdiri dari minimal 1 numeric, 1 special character, 1 uppercase, 1 lowercase
+156.	HOUSEKEEPING AP2T
+beware of this session :
+
+APLIKASI.ITKP_HEADER_TGK (25)
+
+SQL Details: 2pqpcn22mynmk
+
+SELECT 'Token ' || TGLBELI || ', Rp ' || REPLACE(TRIM(TO_CHAR(RPTAG,'999,999,999,999,999')) ,',' ,'.' )
+FROM (
+SELECT *
+FROM TABLE ( APLIKASI.ITKP_INFOTOKEN ( :B1 ) ) ORDER BY TGLBAYAR DESC, JAMBAYAR DESC )
+WHERE ROWNUM<2;
+
+-- kill 3 sqlid ini --
+
+select 'kill -9  '||b.spid||'' from v$session A, v$process B
+where B.addr=A.paddr 
+and a.sql_id in('2pqpcn22mynmk','d74hk833hzt82','03400sdgmdcrp','d6fdn1y2c0wcu','4t7w8h5a6g3pv','fthtyau0uhhzh',, '4bs0bpnsdsf5g','0a17u87cz6w1x');
+
+select 'kill -9  '||b.spid||'', A.INST_ID from Gv$session A, Gv$process B
+where B.addr=A.paddr
+and a.sql_id in('2pqpcn22mynmk','d74hk833hzt82','03400sdgmdcrp','d6fdn1y2c0wcu','4t7w8h5a6g3pv','fthtyau0uhhzh', '4bs0bpnsdsf5g','0a17u87cz6w1x')
+ORDER BY A.INST_ID;
+
+select 'kill -9  '||b.spid||'' from v$session A, v$process B
+where B.addr=A.paddr 
+and a.sql_id in('2pqpcn22mynmk','d74hk833hzt82','03400sdgmdcrp','d6fdn1y2c0wcu','4t7w8h5a6g3pv','fthtyau0uhhzh', '4bs0bpnsdsf5g','0a17u87cz6w1x');
+
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s 
+JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE S.USERNAME IN ('BILL52','AP2TWEB', APLIKASI)
+ AND S.STATUS = 'INACTIVE'
+and i.inst_id =2
+ ORDER BY i.inst_id;
+SELECT 
+B.USERNAME,
+A.INST_ID,	
+A.SID,
+B.SERIAL#,
+A.OWNER	,
+A.OBJECT,
+A.TYPE,
+B.SQL_EXEC_START,
+B.STATUS
+FROM GV$ACCESS A ,GV$SESSION B 
+WHERE A.OBJECT ='TRANSAKSI_PREPAID'
+AND A.SID =B.SID
+AND B.USERNAME NOT IN ('SYS','PUBLIC')
+AND B.USERNAME IS NOT NULL
+AND A.OWNER ='AP2TCARGO'
+AND B.STATUS ='ACTIVE'
+and s.type != 'BACKGROUND'
+order by A.INST_ID;
+
+
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE s.sid in (SELECT 
+A.SID
+FROM GV$ACCESS A ,GV$SESSION B 
+WHERE A.OBJECT ='TRANSAKSI_PREPAID'
+AND A.SID =B.SID
+AND B.USERNAME NOT IN ('SYS','PUBLIC')
+AND B.USERNAME IS NOT NULL
+AND A.OWNER ='AP2TCARGO'
+AND B.STATUS ='ACTIVE'
+)
+AND s.INST_ID = 8
+and s.type != 'BACKGROUND'
+order by s.INST_ID;
+
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;'
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE S.STATUS = 'ACTIVE'
+ and s.type != 'BACKGROUND'
+ and s.inst_id=8
+  and s.sql_id in('2pqpcn22mynmk','d74hk833hzt82','03400sdgmdcrp','d6fdn1y2c0wcu','4t7w8h5a6g3pv','fthtyau0uhhzh', '4bs0bpnsdsf5g','0a17u87cz6w1x');
+KILL SESSION NOT IN SYS
+SELECT    'alter system kill session '
+       || ''''
+       || s.SID
+       || ','
+       || SERIAL#
+       || ','
+       || '@'
+       || s.INST_ID
+       || ''''
+       || ' immediate;', S.USERNAME
+  FROM GV$SESSION s JOIN gv$instance i ON (i.inst_id = s.inst_id)
+ WHERE s.sid in 
+ (SELECT 
+A.SID
+FROM GV$ACCESS A ,GV$SESSION B 
+WHERE A.OBJECT ='TRANSAKSI_PREPAID'
+AND A.SID =B.SID
+AND A.OWNER ='BILL52'
+AND B.STATUS ='ACTIVE'
+and b.type != 'BACKGROUND'
+)
+AND s.USERNAME NOT IN ('SYS','PUBLIC','IMANBHARATA')
+AND s.USERNAME IS NOT NULL
+AND s.INST_ID = 1
+order by s.INST_ID;
+
+Rebuild tabel EMULSION.LPB_DIL_51
+
+Rebuild tabel EMULSION.LPB_DIL_52
+ 
+Rebuild tabel EMULSION.LPB_DIL_53
+
+Rebuild tabel EMULSION.LPB_DIL_54
+
+Rebuild tabel EMULSION.LPB_DIL_AP2T
+
+Rebuild tabel EMULSION.LPB_ENERGI_51
+
+Rebuild tabel EMULSION.LPB_ENERGI_52
+
+Rebuild tabel EMULSION.LPB_ENERGI_53
+
+Rebuild tabel EMULSION.LPB_ENERGI_54
+
+Rebuild tabel EMULSION.LPB_ENERGI_AP2T
+
+Rebuild tabel BILL52.DIL_SALDOBULAN
+
+Rebuild tabel BILL52.LPB_DAFTAR_BULAN_V2014
+
+Rebuild tabel AP2TCARGO.LUNAS_QA1
+
+Rebuild tabel AP2TCARGO.TRANSAKSI_PREPAID
+
+Rebuild tabel BILL52.TRANSAKSI_PREPAID
+ 
+157.	KILL -9 KURUNG BANYAK
+select  *
+from gv$session a, 
+        --gv$process b, 
+        gv$sql c 
+where --a.inst_id=b.inst_id and  
+          --a.paddr=b.addr and 
+          a.inst_id=c.inst_id and
+          a.sql_id=c.sql_id and
+          c.sql_text like '%((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((%';
+
+select  'alter system kill session '''||a.sid||','||a.serial#||',@'||a.inst_id||''' immediate;'  
+from gv$session a, 
+        --gv$process b, 
+        gv$sql c 
+where --a.inst_id=b.inst_id and  
+          --a.paddr=b.addr and 
+          a.inst_id=c.inst_id and
+          a.sql_id=c.sql_id and
+          c.sql_text like '%((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((%'
+          order by c.inst_id;
+          
+
+select 'kill -9  '||b.spid||'', A.INST_ID from Gv$session A, Gv$process B
+where B.addr=A.paddr
+and a.sid in(
+select  sid
+from gv$session a, 
+        --gv$process b, 
+        gv$sql c 
+where --a.inst_id=b.inst_id and  
+          --a.paddr=b.addr and 
+          a.inst_id=c.inst_id and
+          a.sql_id=c.sql_id and
+          c.sql_text like '%(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((('
+)
+and a.serial# in
+(
+select  serial#
+from gv$session a, 
+        --gv$process b, 
+        gv$sql c 
+where --a.inst_id=b.inst_id and  
+          --a.paddr=b.addr and 
+          a.inst_id=c.inst_id and
+          a.sql_id=c.sql_id and
+          c.sql_text like '%(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((('
+)
+ORDER BY A.INST_ID;
+158.	SELECT 
+159.	JOB FIXING
+/* Filename on companion disk: job5.sql */*
+CREATE OR REPLACE PROCEDURE job_fixer
+AS
+   /*
+   || calls DBMS_JOB.BROKEN to try and set
+   || any broken jobs to unbroken
+   */
+   
+   /* cursor selects user's broken jobs */
+   CURSOR broken_jobs_cur
+   IS
+   SELECT job
+     FROM user_jobs
+    WHERE broken = 'Y';
+    
+BEGIN
+   FOR job_rec IN broken_jobs_cur
+   LOOP
+      DBMS_JOB.BROKEN(job_rec.job,FALSE);
+   END LOOP;
+Commit;
+END job_fixer;
+
+160.	V$DIAG
+select name,value from v$diag_info where name='Diag Trace'
+161.	TERJADI PENUMPUKAN SESSION
+Kill -9 proses yang ada di local
+ps -ef|grep LOCAL
+
+	cek active session, dan inactive session
+162.	CEK ALERT JOB ERROR
+SELECT /* +parallel(a, 10) */
+    record_id,
+    to_char(originating_timestamp,'DD.MM.YYYY HH24:MI:SS'),
+    message_text 
+FROM 
+    sys.v_alertlog a
+where to_char(originating_timestamp,'DD.MM.YYYY')='19.08.2021'
+and upper(message_text) like '%J_%'
+order by originating_timestamp desc;
+163.	CLUSTER DB STOPING
+crsctl stop res ora.dbhisto.db -n dtodrdb01
+ 
+164.	CEK UKURAN SEBAGIAN FILE
+Dalam GB
+ls -lt .bkp_arch_DBDTOA_20* | awk '{tot += $5} END {tot=tot/(1024*1024*1024) ; printf("TOTAL SIZE (Gb) : %4.2f\n", tot)}' 
+Dalam Kilo Byte
+ls -lt *pola_file* | awk '{tot += $5} END {tot=tot/1024 ; printf("TOTAL SIZE (kb) : %4.2f\n", tot)}'
+165.	INSTALL OMS 13.2
+https://oracle-base.com/articles/13c/cloud-control-13cr2-installation-on-oracle-linux-6-and-7
+
+http://www.br8dba.com/tag/install-em-cloud-control-13c/
+
+https://docs.oracle.com/cd/cloud-control-13.3/EMUPG/GUID-F6CFDFAD-D742-4644-A11A-4CBB5A6E8338.htm
+prereq
+https://docs.oracle.com/cd/E73210_01/EMBSC/toc.htm
+
+
+166.	MONITORING UNDO TRANSACTION 
+
+select * from (
+SELECT usn,
+state,
+undoblockstotal "Total",
+undoblocksdone "Done",
+undoblockstotal - undoblocksdone "ToDo",
+DECODE (
+cputime,
+0, 'unknown',
+SYSDATE
++ ( ( (undoblockstotal - undoblocksdone)
+/ (undoblocksdone / cputime))
+/ 86400))
+"Estimated time to complete"
+FROM v$fast_start_transactions)
+where state='RECOVERING';
+167.	CEK UNDO TBS SESSION
+SELECT a.name,b.status , d.username , d.sid , d.serial#
+FROM v$rollname a,v$rollstat b, v$transaction c , v$session d
+WHERE a.usn = b.usn
+AND a.usn = c.xidusn
+AND c.ses_addr = d.saddr
+AND a.name IN (
+SELECT segment_name
+FROM dba_segments
+WHERE tablespace_name = 'UNDOTBS3'
+);
+168.	CEK DISK RAC UNORMAL
+date;ssh ap2tdccel01 cellcli -e list physicaldisk where status !='normal';  ssh ap2tdccel02 cellcli -e list physicaldisk where status !='normal';  ssh ap2tdccel03   cellcli -e list physicaldisk where status !='normal';  ssh ap2tdccel04 cellcli -e list physicaldisk where status !='normal';  ssh ap2tdccel05 cellcli -e list physicaldisk where status !='normal'; ssh ap2tdccel06 cellcli -e list physicaldisk where status !='normal';  ssh ap2tdccel07 cellcli -e list physicaldisk where status !='normal';
+169.	TRIGGER BLOK PROGRAM
+DROP TRIGGER SYS.BLOCK_TOOLS_FROM_PROD;
+
+CREATE OR REPLACE TRIGGER SYS.BLOCK_TOOLS_FROM_PROD
+   AFTER LOGON
+   ON DATABASE
+DISABLE
+DECLARE
+   v_prog   SYS.v_$session.program%TYPE;
+   v_user   SYS.v_$session.username%TYPE;
+   v_machine SYS.v_$session.machine%TYPE;
+   v_userpc SYS.v_$session.OSUSER%TYPE;
+BEGIN
+   SELECT username, program, machine, osuser
+     INTO v_user, v_prog, v_machine, v_userpc
+     FROM sys.v_$session
+    WHERE audsid = USERENV ('SESSIONID') AND audsid != 0 -- Don't Check SYS Connections
+                                                        AND ROWNUM = 1; -- Parallel processes will have the same AUDSID's
+
+   IF     UPPER (v_user) IN ('PLNADMIN',
+                             'APLIKASI_BANTU',
+                             'APLIKASI',
+                             'FSO',
+                             'MON_APKT',
+                             'MON_STI',
+                             'MONITOR',
+                             'MONITOR_APKT',
+                             'MON_APKT',
+                             'MON_STI',
+                             'MONITOR',
+                             'MONITOR_APKT',
+                             'BI_PMO',
+                             'CBC',
+                             'CSS123_MOBILE',
+                             'M_APKT',
+                             'MGMT_VIEW',
+                             'REPORTAPKT')
+      AND (   UPPER (v_prog) LIKE '%TOAD%'
+           OR UPPER (v_prog) LIKE '%T.O.A.D%'
+           OR                                                          -- Toad
+             UPPER (v_prog) LIKE '%KODOK%'
+	   OR                                                          -- terjemahan Toad
+             UPPER (v_prog) LIKE '%SQLNAV%'
+           OR                                                 -- SQL Navigator
+             UPPER (v_prog) LIKE '%SQLPLUS%'
+           OR                                                      -- SQL PLUS
+             UPPER (v_prog) LIKE '%PLSQLDEV%'
+           OR                                               -- PLSQL Developer
+             UPPER (v_prog) LIKE '%DEV%'
+           OR                                          -- ORACLE SQL Developer
+             UPPER (v_prog) LIKE '%DBFORGE%'
+           OR                                                -- DBFORGE Studio
+             UPPER (v_prog) LIKE '%NAVICAT%'
+           OR                                                       -- Navicat
+             UPPER (v_prog) LIKE '%BUSOBJ%'
+           OR                                              -- Business Objects
+             UPPER (v_prog) LIKE '%EXCEL%')                -- MS-Excel plug-in
+      OR UPPER (v_machine) LIKE '%ICONPLN\BUDI%'
+--      OR UPPER (v_userpc) LIKE '%IGA_PC%'
+      OR UPPER (v_userpc) LIKE '%budi.setiawan%'
+   THEN
+      RAISE_APPLICATION_ERROR (
+         -20000,
+         'Dilarang login pake development tools. Maaf.');
+   END IF;
+END;
+/
+170.	SET DATE TIME MANUALY
+date --set="Mon Nov 15 12:13:55 WIB 2021"
+171.	SET DATE TIME USING NTP
+vi /etc/ntp.conf
+
+restrict 10.14.158.72 mask 255.255.255.255 nomodify notrap noquery
+server 10.14.158.72 prefer iburst burst minpoll 4 maxpoll 4
+
+service ntpd status
+service ntpd restart
+
+172.	MONITORING SQL
+SELECT /*+monitor*/ /*HP02*/ DECODE (NAMA,
+                 '55', 'BALI',
+                 '54', 'DKI',
+                 '53', 'JAWA BARAT',
+                 '52', 'JAWA TENGAH',
+                 '51', 'JAWA TIMUR',
+                 '23', 'KALIMANTAN TIMUR',
+                 '43', 'NUSA TENGGARA TIMUR',
+                 '12', 'SUMATRA UTARA',
+                 '22', 'KALIMANTAN SELATAN',
+                 '44', 'NUSA TENGGARA BARAT',
+                 '13', 'SUMATRA BARAT',
+                 '32', 'SULAWESI SELATAN',
+                 '16', 'BANGKA BELITUNG',
+                 '17', 'LAMPUNG',
+                 '18', 'RIAU_KEPRI',
+                 '21', 'KALIMANTAN BARAT',
+                 '31', 'SULAWESI UTARA',
+                 '11', 'ACEH',
+                 '42', 'PAPUA',
+                 '14', 'S2JB',
+                 '41', 'MALUKU',
+                 '15', 'BATAM',
+                 '25', 'TARAKAN')
+            AS NAMA,
+         UPJ,
+         unitup,
+         SUM (PLG) AS PLG,
+         SUM (LEMBAR) AS LEMBAR,
+         SUM (PTL) AS PTL,
+         SUM (PPN) AS PPN,
+         SUM (BPJU) AS BPJU,
+         SUM (MAT) AS MAT,
+         SUM (ANGSURAN) AS ANGSURAN,
+         SUM (TAGIHAN) AS TAGIHAN
+    FROM (  SELECT  /*+full(a) parallel(a, 4)*/ a.KD_DIST AS NAMA,
+                   b.nama_area AS UPJ,
+                   a.KD_DIST unitup,
+                   SUM (a.PELANGGAN) AS PLG,
+                   SUM (A.LEMBAR) AS LEMBAR,
+                   SUM (a.rpptl) AS PTL,
+                   SUM (a.rpppn) AS PPN,
+                   SUM (a.rpbpju) AS BPJU,
+                   SUM (a.rpmat) AS MAT,
+                   SUM (a.rp_angsuran) AS ANGSURAN,
+                   SUM (a.rptag) AS TAGIHAN
+              FROM EIS.rekap_prepaid a, OLAP.master_unit b
+             WHERE     a.TGLBAYAR BETWEEN '20210801' AND '20210830'
+                   AND a.unitup = b.unitup
+                   AND tgl_rekon IS NOT NULL
+                   AND a.KD_DIST = '53'
+                   AND a.kd_dist NOT IN ('15', '25')
+          GROUP BY a.KD_DIST, b.nama_area)
+GROUP BY NAMA, UPJ, UNITUP
+ORDER BY NAMA, UPJ;
+
+
+select sql_fulltext, sql_id from v$sql where sql_text like '%/*HP02*/%' and sql_text not like'%like%';
+
+select plan_table_output from table (dbms_xplan.display_cursor(‘7961a75hg6kr2’));
+
+SELECT *
+FROM   v$sql_monitor where sql_text like '%/*HP01*/%'
+
+select
+DBMS_SQLTUNE.REPORT_SQL_MONITOR(
+   sql_id=>'261psj6320jr3',
+   report_level=>'TYPICAL',
+   type=>'TEXT')
+from dual;
+173.	MELIHAT PASSWORD LINUX
+date;chage -l oracle
+174.	PERINTAH CEK REDO LOG
+SQL> col member format a50
+SQL> select GROUP#,TYPE,MEMBER from v$logfile;
+
+select group#, status from v$log;
+
+alter database drop logfile group 1;
+alter database add logfile group 1
+('/home/oracle/app/oracle/oradata/orcl/redo01.log') size 10M reuse;
+
+alter database drop logfile group 3;
+alter database add logfile group 3
+('/home/oracle/app/oracle/oradata/orcl/redo03.log') size 10M reuse;
+
+alter system switch logfile;
+alter system checkpoint;
+alter database drop logfile group 2;
+alter database add logfile group 2
+('/home/oracle/app/oracle/oradata/orcl/redo03.log') size 10M reuse;
+select group#, bytes/(1024*1024*1024) "Size (GB)" from v$log;
+175.	REDOLOG 2
+SQL> column REDOLOG_FILE_NAME format a50
+SQL> SELECT
+ a.GROUP#,
+ a.THREAD#,
+ a.SEQUENCE#,
+ a.ARCHIVED,
+ a.STATUS,
+ b.MEMBER AS REDOLOG_FILE_NAME,
+ (a.BYTES/1024/1024) AS SIZE_MB
+FROM v$log a
+JOIN v$logfile b ON a.Group#=b.Group#
+ORDER BY a.GROUP#
+176.	MELIHAT LOKASI LOG
+Show parameter background_dump
+177.	REBALANCE CELL
+col path format a40
+col name format a30
+col failgroup format a30
+set linesize 200
+select group_number, name from v$asm_diskgroup;
+
+select inst_id,group_number,failgroup,mount_status,count(*) from gv$asm_disk
+group by inst_id,group_number,failgroup,mount_status
+date; cellcli -e list griddisk attributes name, status, asmdeactivationoutcome
+
+set linesize 200
+select to_char(sysdate,'yyyy-mm-dd: hh24:mm:ss') as Tanggal from dual;
+select * from gv$asm_operation;
+
+date; cellcli -e list physicaldisk 20:1 detail
+
+cellcli -e list physicaldisk detail
+- Find the "name" associated to this LUN using the following syntax
+# cellcli -e list lun attributes name where id=20:1
+# cellcli -e list lun attributes name where id=20:11
+
+- Find the celldisk created for this lun (physicaldisk)
+# cellcli -e list celldisk where lun=0_1
+# cellcli -e list celldisk where lun=0_11
+
+- Find the griddisks created for this celldisk
+# cellcli -e list griddisk where celldisk=CD_01_dtodrcl02
+# cellcli -e list griddisk where celldisk=CD_11_dtodrcl03
+
+Execute following on any db node connecting to the ASM instance:
+ SQL> select name, substr(path,1,50) , mount_status, header_status, state from gv$asm_disk where name in ('DATA_DTODR_CD_01_dtodrcl02','RECO_DTODR_CD_01_dtodrcl02');
+
+SQL> select name, substr(path,1,50) , mount_status, header_status, state from gv$asm_disk where name in ('DATA_DTODR_CD_11_dtodrcl03','DBFS_DG_CD_11_dtodrcl03','RECO_DTODR_CD_11_dtodrcl03');
+
+
+178.	CRONTAB CLEAR_CACHE.SH
+#clearcache
+* */1 * * * /root/clearcache.sh
+>> jalan setiap 30 menit
+#!/bin/sh
+sync; echo 3 > /proc/sys/vm/drop_caches
+179.	CEK TABLE PARTISI
+SELECT J.OWNER, J.NAMA_TABLE, J.PARTISI_TERAHKIR FROM (
+SELECT DISTINCT (M.OBJECT_NAME) AS NAMA_TABLE,M.OWNER,MAX(PARTITION_NAME) AS PARTISI_TERAHKIR FROM (
+SELECT A.OWNER,
+       A.OBJECT_NAME,
+       A.SUBOBJECT_NAME AS PARTITION_NAME,
+       A.OBJECT_TYPE,
+       A.LAST_DDL_TIME,
+       A.STATUS
+FROM DBA_OBJECTS A
+WHERE 
+    OWNER NOT LIKE '%SYS%'
+  AND OBJECT_TYPE = 'TABLE PARTITION'
+  ORDER BY OBJECT_NAME,
+         SUBOBJECT_NAME) M
+GROUP BY M.OBJECT_NAME, M.OWNER
+order by M.OWNER,M.OBJECT_NAME) J
+180.	CEK UPPER BOUND TABLE PARTISI
+select table_owner,table_name,
+high_value
+from
+all_tab_partitions
+where table_name = 'TRANSAKSIMASTER'
+and partition_name = 'TRANS2022_08';
+181.	LISTING TABLE JOB EXPDP
+SELECT 'DROP TABLE ' || o.OWNER || '.' || o.OBJECT_NAME || ' PURGE;'
+FROM dba_objects o, dba_datapump_jobs j
+WHERE o.owner=j.owner_name
+AND o.object_name=j.job_name
+AND j.state='NOT RUNNING'
+ORDER BY o.OBJECT_NAME ;
+182.	GET DDL SOME OBJECT
+set long 10000
+select
+dbms_metadata.get_ddl(object_type=>'TABLE', name=>'TAMPUNG_APKT', schema=>'ASDINWP')
+from dual;
+ 
+ 
+183.	CEK LONGOPS QUERY
+SELECT SID, SERIAL#,USERNAME,SQL_ID,OPNAME, CONTEXT, SOFAR, TOTALWORK,TIME_REMAINING,ELAPSED_SECONDS,ROUND(SOFAR/TOTALWORK*100,2) "%_COMPLETE" 
+FROM V$SESSION_LONGOPS 
+WHERE OPNAME NOT LIKE '%aggregate%' 
+AND TOTALWORK != 0 
+AND SOFAR <> TOTALWORK;
+184.	CEK SQL_MONITORED
+SELECT 
+SID,
+INST_ID,
+SESSION_SERIAL# as SERIAL,
+USERNAME,MODULE,
+SQL_ID,
+STATUS,
+SQL_EXEC_START,
+ROUND(ELAPSED_TIME/1000000,2) as ELAPSED_TIME_SECOND,
+ROUND(CPU_TIME/1000000,2) as CPU_TIME_SECOND,
+SQL_TEXT 
+FROM GV$SQL_MONITOR 
+WHERE STATUS NOT LIKE 'DONE%'
+ORDER BY CPU_TIME DESC;
+185.	SED REPLACE TEXT
+sed -i 's/old-text/new-text/g' input.txt
+
+https://www.cyberciti.biz/faq/how-to-use-sed-to-find-and-replace-text-in-files-in-linux-unix-shell/
+
+
+186.	REKON 
+Cek, tgl , kdpp, userid tersebut sudah bersih apa belum
+
+select /+use_invisible_indexes index(a IDX_TRANSAKSIPREPAIDN_004)/ * FROM olap.transaksi_prepaid a
+       WHERE tglbayar BETWEEN '20220428' AND '20220428'
+         AND tgl_rekon IS NULL
+         AND user_rekon IS NULL
+         AND unsold IS NULL
+         AND userid = '011CA01'
+         AND kdpp LIKE substr('0110000011CA01',1,14)
+         AND refnum IS NOT NULL;
+187.	REMOVE TARGET AGENT
+./emcli get_targets | grep hostnamenode
+
+set pagesize 999;
+set linesize 999;
+column TARGET_NAME format a60;
+column TARGET_TYPE format a40;
+select TARGET_NAME,TARGET_TYPE from mgmt_targets where target_name like '%hostnamenode1%';
+
+./emcli delete_target -name="output_target_name" -type="output_type" -delete_monitored_targets -async
+188.	CEK PORT LINUX
+netstat -an | grep 4900
+189.	RESTART CROND SERVICE
+systemctl status crond.service
+systemctl stop crond.service
+systemctl start crond.service
+190.	TNS EX
+DBDTOA_RAC =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = dbpasc-gdl-scan)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = dbdtoa)
+    )
+  )
+
+  
+DBDTOA_RAC=
+  (DESCRIPTION=
+    (ADDRESS_LIST=
+      (LOAD_BALANCE=on)
+      (ADDRESS=
+        (PROTOCOL=TCP)
+        (HOST=10.71.1.24)
+        (PORT=1521)
+      )
+      (ADDRESS=
+        (PROTOCOL=TCP)
+        (HOST=10.71.1.27)
+        (PORT=1521)
+      )
+      (ADDRESS=
+        (PROTOCOL=TCP)
+        (HOST=10.71.1.38)
+        (PORT=1521)
+      )
+    )
+    (CONNECT_DATA=
+      (SERVER=dedicated)
+      (SERVICE_NAME=dbdtoa)
+    )
+  )
+191.	SELECT FULL PARALLEL
+SELECT /*+full(a) parallel(a, 8)*/ FROM TABLE XXX a
+192.	CEK SNAPSHOT DATABASE
+set lines 100 pages 999;
+
+select snap_id,
+  snap_level,
+  to_char(begin_interval_time, 'dd/mm/yy hh24:mi:ss') begin
+from
+   dba_hist_snapshot
+order by 1;
+193.	PDAMTKR
+[oracle@PDAMTKR2 ~]$ ls -altrh *.sql*
+-rw-rw-r-- 1 oracle oracle 1.5K Oct 10 12:32 cek_tbs.sql
+-rw-rw-r-- 1 oracle oracle 2.6K Oct 11 18:12 ceklist_harian.sql
+-rw-rw-r-- 1 oracle oracle 2.8K Oct 11 18:28 cek_lock_session.sql
+-rw-rw-r-- 1 oracle oracle  297 Oct 11 18:32 cek_session_all.sql
+-rw-rw-r-- 1 oracle oracle  320 Oct 11 18:35 kill_session_lock.sql
+194.	CEK PENGGUNAAN SGA
+select round(used.bytes /1024/1024 ,2) used_mb
+, round(free.bytes /1024/1024 ,2) free_mb
+, round(tot.bytes /1024/1024 ,2) total_mb
+from (select sum(bytes) bytes
+from v$sgastat
+where name != 'free memory') used
+, (select sum(bytes) bytes
+from v$sgastat
+where name = 'free memory') free
+, (select sum(bytes) bytes
+from v$sgastat) tot ;
+195.	CEK POOL MEMORY
+Select POOL, Round(bytes/1024/1024,0) Free_Memory_In_MB From V$sgastat Where Name Like '%free memory%';
+196.	CEK SGA
+SELECT sum(value)/1024/1024 "TOTAL SGA (MB)" FROM v$sga;
+197.	CEK PGA
+https://smarttechways.com/tag/total-pga-memory-used-by-process/
+
+SELECT ROUND(SUM(pga_used_mem)/(1024*1024),2) PGA_USED_MB FROM v$process;
+
+-- Pga used memory for all process
+SELECT ROUND(SUM(pga_used_mem)/(1024*1024),2) PGA_USED_MB FROM v$process;
+
+-- PGA used max memory for all process
+select ROUND(SUM(pga_max_mem)/(1024*1024),2) PGA_USED_MB FROM v$process;
+
+-- For memory allocation total by process
+SELECT ROUND(SUM(pga_used_mem)/(1024*1024),2) max,
+ROUND(SUM(pga_alloc_mem)/(1024*1024),2) alloc,
+ROUND(SUM(pga_used_mem)/(1024*1024),2) used,
+ROUND(SUM(pga_freeable_mem)/(1024*1024),2) free
+FROM V$PROCESS;
+
+-- Check PGA Allocation for each process
+SELECT spid, program,
+ROUND(SUM(pga_used_mem)/(1024*1024),2) max,
+ROUND(SUM(pga_alloc_mem)/(1024*1024),2) alloc,
+ROUND(SUM(pga_used_mem)/(1024*1024),2) used,
+ROUND(SUM(pga_freeable_mem)/(1024*1024),2) free 
+GROUP BY spid, program
+FROM V$PROCESS;
+
+198.	MAX SESSION HISTORY EVER
+select sessions_highwater from v$license;
+select INST_ID,sessions_highwater from gv$license;
+199.	CEK FITUR ORACLE 
+select * from DBA_FEATURE_USAGE_STATISTICS;
+200.	CEK SESSION SEKARANG
+(select 'sessions', current_utilization, limit_value from v$resource_limit where resource_name='sessions')
+union
+(select 'processes', current_utilization, limit_value from v$resource_limit where resource_name='processes')
+union
+(select 'transactions', current_utilization, limit_value from v$resource_limit where resource_name='transactions');
+201.	CEK RECOVER BLOK
+SELECT inst_id,usn,
+state,
+undoblockstotal "Total",
+undoblocksdone "Done",
+undoblockstotal - undoblocksdone "ToDo",
+DECODE (
+cputime,
+0, 'unknown',
+SYSDATE
++ ( ( (undoblockstotal - undoblocksdone)
+/ (undoblocksdone / cputime))
+/ 86400))
+"Estimated time to complete"
+FROM gv$fast_start_transactions
+where state='RECOVERING';
+202.	ERROR SSH REDHAT 9
+error :
+ssh_dispatch_run_fatal: Connection to 10.14.159.71 port 22: error in libcrypto
+
+error :
+Unable to negotiate with 10.14.159.71 port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss
+
+
+[root@dbmaster ssh]# cat /etc/ssh/ssh_config
+1. #add line
+
+KexAlgorithms diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1
+HostKeyAlgorithms ssh-rsa
+PubkeyAcceptedKeyTypes ssh-rsa
+
+2. update default cripto -key
+
+[root@dbmaster ssh]# update-crypto-policies --set DEFAULT:SHA1
+Setting system policy to DEFAULT:SHA1
+Note: System-wide crypto policies are applied on application start-up.
+It is recommended to restart the system for the change of policies
+to fully take place.
+
+Di redhat9 mendukung rsa2, dikarenakan versinya berbeda, jika ingin melakukan ssh ke versi dibawahnya harus dijalankan 2 step diatas
+
+sumber:
+https://access.redhat.com/solutions/6816771
+ 
+TUNNING DAY
+1.	RETRY RATIO
+SELECT r.value/e.value "HASIL RETRY RATION" 
+FROM v$Sysstat r, v$sysstat e 
+where r.name='redo buffer allocation retries' AND e.name='redo entries';
+Semakin tinggi valuenya maka menandakan retry dari session menulis ke Log_buffer tinggi dan tidak bagus
+2.	MENGHITUNG DB BUFFER CACHE HIT RATIO
+SELECT 1- ((physical.value-direct.value-lobs.value)/logical.value) "NILAI BUFFER HIT RATIO" 
+	FROM 
+	v$sysstat direct, 
+	v$sysstat physical, 
+	v$sysstat lobs, 
+	v$sysstat logical 
+	WHERE physical.name='physical reads' 
+	AND direct.name='physical reads direct' 
+	AND lobs.name='physical reads direct (lob)' 
+	AND logical.name='session logical reads';
+
+total pencarian data yang berhasil ditemukan di db buffer
+=========================================================x100%
+total pencarian data
+●	Jika valuenya mendekati 100 artinya:
+		a. performance makin baik
+		b. banyak pencarian yg berhasil dilakukan tanpa perlu baca disk (disk i/o rendah)
+●	Guideline oracle : minimal 90%
+3.	GET HITRATIO
+col namespace format a15
+col gethitratio format a15
+col pinhitration format a15
+col invalidations format 9999
+col reloads format 9999
+
+SET PAGESIZE 1000
+
+SELECT namespace, 
+LPAD(ROUND(gethitratio*100,2)||'%',10,' ') AS gethitratio, 
+LPAD(ROUND(pinhitratio*100,2)||'%',10,' ') AS pinhitratio, 
+reloads, invalidations 
+FROM v$librarycache;
+
+●	Semakin mendekati 100%, makin baik
+●	Guidance dari oracle, minimal 90%
+●	Jika kurang dari 90%, maka perlu dilakukan tuning
+4.	CEK LARGEPOOL / FREE MEMORY
+SELECT pool,name,bytes/(1024*1024) "ukuran (MB)" FROM v$sgastat WHERE pool IN ('java pool', 'large pool')
+Semakin banyak free yang ditampilkan maka artinya masih lega penggunaan memorynya
+5.	CEK BLOCK USE
+ 
+6.	CEK ROWCHAIN
+ 
+@$ORACLE_HOME/rdbms/admin/utlchain.sql
+desc chained_rows;
+
+analyze table sempit list chained rows into chained_rows;
+select count(*) from chained_rows;
+
+truncate table chained_rows;
+analyze table lega list chained rows into chained_rows;
+select count(*) from chained_rows;
+
+7.	GENERATE ADDM REPORT
+a.	[oracle@emap2tdrc ~]$ cd $ORACLE_HOME/rdbms/admin
+b.	SQL> @addmrpt.sql
+c.	Enter value for begin_snap: 74080
+d.	Enter value for end_snap: 74057
+8.	GENERATE AWR
+a.	[oracle@emap2tdrc ~]$ cd $ORACLE_HOME/rdbms/admin
+b.	[oracle@emap2tdrc admin]$ sqlplus / as sysdba
+c.	SQL> @awrrpt.sql
+d.	Enter value for report_type:<html>
+e.	Enter value for num_days: 7
+f.	Enter value for begin_snap: 73961
+g.	Enter value for end_snap: 74119
+h.	Report written to awrrpt_1_73961_74119.html
+9.	GENERATE ASH
+a.	[oracle@emap2tdrc ~]$ cd $ORACLE_HOME/rdbms/admin
+b.	[oracle@emap2tdrc admin]$ sqlplus / as sysdba
+c.	SQL> @ashrpt.sql
+d.	Enter value for report_type:<html>
+e.	Enter value for begin_time: 01:00:00
+f.	Enter value for duration: 13:00:00
+g.	Report written to ashrpt_1_.html
+10.	ADRCI
+a.	$ adrci
+b.	show base
+c.	show alert
+d.	This will purge data older than 600 minutes.
+1.	adrci> purge -age 600 -type ALERT
+2.	adrci> purge -age 600 -type TRACE
+3.	adrci> purge -age 600 -type incident
+4.	adrci> purge -age 10080 -type cdump
+
+https://dbaclass.com/article/useful-adrci-commands-oracle/
+
+ 
+RAC
+1.	COMMAND RAC
+crsctl add       - add a resource, type or other entity
+       crsctl backup    - back up voting disk for CSS
+       crsctl check     - check a service, resource or other entity
+       crsctl config    - output autostart configuration
+       crsctl debug     - obtain or modify debug state
+       crsctl delete    - delete a resource, type or other entity
+       crsctl disable   - disable autostart
+       crsctl discover  - discover DHCP server
+       crsctl enable    - enable autostart
+       crsctl get       - get an entity value
+       crsctl getperm   - get entity permissions
+       crsctl lsmodules - list debug modules
+       crsctl modify    - modify a resource, type or other entity
+       crsctl query     - query service state
+       crsctl pin       - Pin the nodes in the nodelist
+       crsctl relocate  - relocate a resource, server or other entity
+       crsctl replace   - replaces the location of voting files
+       crsctl release   - release a DHCP lease
+       crsctl request   - request a DHCP lease
+       crsctl setperm   - set entity permissions
+       crsctl set       - set an entity value
+       crsctl start     - start a resource, server or other entity
+       crsctl status    - get status of a resource or other entity
+       crsctl stop      - stop a resource, server or other entity
+       crsctl unpin     - unpin the nodes in the nodelist
+       crsctl unset     - unset a entity value, restoring its default
+https://satya-racdba.blogspot.com/2010/01/crsctl-commands.html
+https://dbaclass.com/article/useful-srvctl-commands/
+
+2.	ADDING INSTANCE
+[oracle@ap2tdrdb07 ~]$ . .grid_profile
+[oracle@ap2tdrdb07 ~]$ srvctl add database -d ap2tdrx42  -o '/u01/app/oracle/product/11.2.0.3.0/dbhome_1' -n ap2tdrx42 -p '+DG_DATA/AP2T/spfileap2t.ora' -s mount -t immediate -y automatic
+[oracle@ap2tdrdb07 ~]$ srvctl add instance -d ap2tdrx42 -i ap2t1 -n dbtpstdcdb07
+[oracle@ap2tdrdb07 ~]$ ./srvctl add instance -d ap2tdrx42 -i ap2t2 -n dbtpstdcdb08
+
+[oracle@ap2tdrdb07 ~]$ ./srvctl config database -d ap2tdrx42
+
+Kemudian Jalankan config dbhisto Yang telah disetting
+[oracle@ap2tdrdb07 ~]$ srvctl start database -d ap2tdrx42
+ 
+3.	FAILOVER
+ 
+set linesize 200
+col username format a15
+col machine format a30
+SELECT INST_ID, username, sid, serial#,failover_method, failed_over, machine from gv$session where username = 'TEST_USER01';
+4.	START UNSUPORTED
+crsctl stop res ora.dbdtoa.db -n gdl-neptunus-db1 -unsupported
+crsctl stop res ora.dbdtoa.db -n gdl-neptunus-db2 -unsupported
+crsctl stop res ora.dbdtoa.db -n gdl-neptunus-db3 -unsupported
+
+crsctl start res ora.dbdtoa.db -n gdl-neptunus-db1 -unsupported
+crsctl start res ora.dbdtoa.db -n gdl-neptunus-db2 -unsupported
+crsctl start res ora.dbdtoa.db -n gdl-neptunus-db3 -unsupported
+5.	CEK IPSCAN
+[grid@gdl-neptunus-db1 ~]$ . .grid_profile
+[grid@gdl-neptunus-db1 ~]$ srvctl config scan
+SCAN name: dbpasc-gdl-scan, Network: 1
+Subnet IPv4: 10.71.1.0/255.255.255.0/bond0, static
+Subnet IPv6:
+SCAN 1 IPv4 VIP: 10.71.1.26
+SCAN VIP is enabled.
+SCAN 2 IPv4 VIP: 10.71.1.29
+SCAN VIP is enabled.
+SCAN 3 IPv4 VIP: 10.71.1.40
+SCAN VIP is enabled.
+[grid@gdl-neptunus-db1 ~]$
+[grid@gdl-neptunus-db1 ~]$
+[grid@gdl-neptunus-db1 ~]$
+[grid@gdl-neptunus-db1 ~]$
+[grid@gdl-neptunus-db1 ~]$ nslookup dbpasc-gdl-scan
+Server:         10.71.1.216
+Address:        10.71.1.216#53
+
+Name:   dbpasc-gdl-scan.iconpln.co.id
+Address: 10.71.1.40
+Name:   dbpasc-gdl-scan.iconpln.co.id
+Address: 10.71.1.26
+Name:   dbpasc-gdl-scan.iconpln.co.id
+Address: 10.71.1.29
+
+[grid@gdl-neptunus-db1 ~]$
+6.	CEK PREDICTIVE CELL FAILURE
+cellcli -e list physicaldisk
+/opt/MegaRAID/MegaCli/MegaCli64 -pdlist -a0 | grep -iE "slot|predictive|firmware"
+7.	CHECKING IP CLUSTER
+https://emersontech.com.br/en/checking-network-ips-rac/
+
+
+DAFTAR PUSTAKA
+1.	TOP SQL REMOTE CEK
+https://adipt.blogspot.com/2021/08/sqls-collection-for-remote-screen.html
+ 
+POSTGRESQL
+1.	MONITORING SESSION
+1. Select pid, usename, application_name, backend_start, state_change, state,query from pg_stat_activity where pid in 
+2. Select pid from pg_locks where mode like '%Exclusive%');
+SELECT pg_cancel_backend(36264);
