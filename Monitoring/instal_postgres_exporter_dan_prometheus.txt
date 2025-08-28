@@ -10,7 +10,7 @@ PostgreSQL -> Postgres Exporter (mengumpulkan metrik) -> Prometheus (menyimpan m
 1. download postgres_exporter
 https://github.com/prometheus-community/postgres_exporter/releases
 
-2. Extract installer di media
+2. Extract installer
 tar xvf postgres_exporter_v0.5.1_linux-amd64.tar.gz
 
 3. Buat direktori postgres_exporter
@@ -56,3 +56,63 @@ sudo systemctl daemon-reload
 sudo systemctl enable postgres_exporter
 sudo systemctl start postgres_exporter
 sudo systemctl status postgres_exporter
+
+
+=======
+1. download prometheus
+https://prometheus.io/download
+
+2. Extract installer
+tar -xvf prometheus-3.6.0-rc.0.linux-amd64.tar.gz
+
+3. Buat user sistem dengan nama 'prometheus'
+sudo useradd --system --no-create-home --shell /bin/false prometheus
+
+4. Buat direktori untuk konfigurasi dan data Prometheus
+sudo mkdir /etc/prometheus
+sudo mkdir /var/lib/prometheus
+
+5. Masuk ke direktori hasil ekstrak dan copy File Konfigurasi dan Binary
+cd prometheus-3.6.0-rc.0.linux-amd64
+cp prometheus /usr/local/bin/
+cp promtool /usr/local/bin/
+cp prometheus.yml /etc/prometheus/
+
+6. Berikan kepemilikan direktori konfigurasi kepada user prometheus
+sudo chown -R prometheus:prometheus /etc/prometheus/
+
+7. Berikan kepemilikan direktori data kepada user prometheus
+sudo chown prometheus:prometheus /var/lib/prometheus/
+
+8. Buatkan service prometheus
+nano /etc/systemd/system/prometheus.service
+
+[Unit]
+Description=Prometheus Time Series Collection and Processing Server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+    --config.file /etc/prometheus/prometheus.yml \
+    --storage.tsdb.path /var/lib/prometheus/
+
+[Install]
+WantedBy=multi-user.target
+
+
+9. Cheking service
+systemctl daemon-reload
+systemctl start prometheus
+systemctl enable prometheus
+systemctl status prometheus
+
+10. Konfigurasi firewall (option)
+sudo ufw allow 9090/tcp
+
+FINISH
+http://ALAMAT_IP_SERVER_ANDA:9090
+http://192.168.56.102:9090
