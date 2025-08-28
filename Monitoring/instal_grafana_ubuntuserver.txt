@@ -1,0 +1,29 @@
+sudo apt update
+sudo apt upgrade -y
+
+sudo apt install -y apt-transport-https software-properties-common wget
+
+sudo mkdir -p /etc/apt/keyrings/
+
+wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+
+sudo apt update
+sudo apt install grafana
+
+systemctl start grafana-server
+systemctl enable grafana-server
+systemctl status grafana-server
+
+Grafana berjalan di port 3000. Anda perlu membuka port ini di firewall agar dapat diakses dari luar serve
+
+sudo ufw allow 3000/tcp
+
+http://<IP_SERVER_ANDA>:3000
+http://192.168.56.102:3000
+
+username : admin
+password : admin
+
+FINISH
