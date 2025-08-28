@@ -1,0 +1,58 @@
+untuk memonitor PostgreSQL di Grafana, Anda memerlukan jembatan antara keduanya. 
+Grafana sendiri tidak langsung mengambil data dari PostgreSQL, 
+melainkan dari sebuah time-series database seperti Prometheus.
+
+Alur kerjanya secara umum adalah sebagai berikut:
+PostgreSQL -> Postgres Exporter (mengumpulkan metrik) -> Prometheus (menyimpan metrik) -> Grafana (memvisualisasikan metrik).
+
+=== postgres_exporter ======
+
+1. download postgres_exporter
+https://github.com/prometheus-community/postgres_exporter/releases
+
+2. Extract installer di media
+tar xvf postgres_exporter_v0.5.1_linux-amd64.tar.gz
+
+3. Buat direktori postgres_exporter
+mkdir /opt/postgres_exporter 
+
+4. copy file ke local bin dan folder exporter
+cd /media/postgres_exporter_v0.5.1_linux-amd64
+sudo cp postgres_exporter /usr/local/bin
+sudo cp postgres_exporter /opt/postgres_exporter
+
+5. Create Exporter User
+sudo useradd -M -r -s /sbin/nologin postgres_exporter
+sudo chown postgres_exporter:postgres_exporter /usr/local/bin/postgres_exporter
+
+6. Buat env
+cd /opt/postgres_exporter 
+sudo vi postgres_exporter.env
+DATA_SOURCE_NAME="postgresql://(user):(password)@(IP SERVER):(PORT DB)/(nama_database)?sslmode=disable" 
+
+DATA_SOURCE_NAME="postgresql://monitoring:welcome1@192.168.109.19:5432/BAG_PROD_NEW?sslmode=disable"
+
+7. Create Service Exporter
+vi /etc/systemd/system/postgres_exporter.service
+
+[Unit]
+Description=Prometheus exporter for PostgreSQL
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=postgres_exporter
+Group=postgres_exporter
+WorkingDirectory=/opt/postgres_exporter
+EnvironmentFile=/opt/postgres_exporter/postgres_exporter.env
+ExecStart=/opt/postgres_exporter/postgres_exporter --web.listen-address=:9187 --web.telemetry-path=/metrics
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+8. Cheking service
+sudo systemctl daemon-reload
+sudo systemctl enable postgres_exporter
+sudo systemctl start postgres_exporter
+sudo systemctl status postgres_exporter
