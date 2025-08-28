@@ -1,0 +1,29 @@
+===
+Berikut ini alur pesangan dasbord postgres di grafana
+
+1. Buka grafana http://ALAMAT_IP_SERVER:3000)
+
+2. klik ikon roda gigi Administration -> Data sources
+
+3. Klik tombol Add data source
+
+4. Pilih Prometheus dari daftar yang muncul.
+
+5. Pada halaman konfigurasi, di bagian Prometheus server URL, 
+masukkan alamat server Prometheus Anda. Jika terinstal di mesin yang sama, 
+cukup gunakan: http://localhost(ip yang dipasang prometheus):9090. 
+
+6. klik tombol Save & test. Anda akan melihat notifikasi hijau yang menandakan koneksi berhasil.
+
+7. Di menu utama Grafana, navigasi ke Dashboards.
+
+8. Klik tombol New di pojok kanan atas, lalu pilih Import.
+
+9. Di kolom Import via grafana.com, masukkan ID 9628. Ini adalah ID untuk dasbor "PostgreSQL Database" 
+yang sangat populer dan lengkap. 
+
+10. Buka link https://grafana.com/grafana/dashboards/9628-postgresql-database
+selanjutnya copy clipboard json atau download json lalu copy paste di "IMPORT VIA DASBOARD JSON MODEL"
+setelah itu klik "LOAD"
+
+"MAKA AKAN TAMPIL AWALAN (DEFAULT) DASBOARD POSTGRESQL DI GRAFANA"
