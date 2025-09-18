@@ -1,0 +1,39 @@
+1. Extract installer di media
+tar xvf node_exporter-1.3.1.linux-amd64.tar
+
+2. Buat direktori postgres_exporter
+mkdir /opt/node_exporter 
+
+2. copy file ke local bin dan folder exporter
+cd /media/postgres_exporter_v0.5.1_linux-amd64
+sudo cp node_exporter /usr/local/bin
+sudo cp node_exporter /opt/postgres_exporter
+
+3. Create Exporter User
+sudo useradd -M -r -s /sbin/nologin node_exporter
+sudo chown node_exporter:node_exporter /usr/local/bin/node_exporter
+
+5. Create Service Exporter
+vi /etc/systemd/system/node_exporter.service
+
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+
+7. Cheking service
+sudo systemctl daemon-reload
+sudo systemctl enable node_exporter
+sudo systemctl start node_exporter
+sudo systemctl status node_exporter
