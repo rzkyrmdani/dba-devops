@@ -13,7 +13,7 @@ apt install mysql-server mysql-client -y
 sudo systemctl enable mysql
 sudo systemctl start mysql
 
-- Amankan instalasi
+- Amankan instalasi dan buat password root mysql
 sudo mysql_secure_installation
 
 ===== allow remote mariadb/mysql =========
