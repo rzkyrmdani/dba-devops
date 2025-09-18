@@ -1,5 +1,22 @@
+===================== Install MySQL ================================
 
-===== allow remote mariadb =========
+- download repo dan install repo
+
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.33-1_all.deb
+sudo dpkg -i mysql-apt-config_0.8.33-1_all.deb
+
+- Update package list dan Install MySQL server + client
+
+apt update
+apt install mysql-server mysql-client -y
+
+sudo systemctl enable mysql
+sudo systemctl start mysql
+
+- Amankan instalasi
+sudo mysql_secure_installation
+
+===== allow remote mariadb/mysql =========
 
 - vi /etc/mysql/mariadb.conf.d/50-server.cnf
 
