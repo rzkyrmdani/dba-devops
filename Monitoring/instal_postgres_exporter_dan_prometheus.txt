@@ -58,7 +58,9 @@ sudo systemctl start postgres_exporter
 sudo systemctl status postgres_exporter
 
 
-=======
+=============================================================================================================================
+
+
 1. download prometheus
 https://prometheus.io/download
 
