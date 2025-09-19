@@ -16,20 +16,24 @@ sudo systemctl start mysql
 - Amankan instalasi dan buat password root mysql
 sudo mysql_secure_installation
 
-===== allow remote mariadb/mysql =========
+===== allow remote mysql =========
 
-- vi /etc/mysql/mariadb.conf.d/50-server.cnf
+- vi /etc/mysql/mysql.conf.d/mysqld.cnf
 
 ganti bind-address            = 127.0.0.1
 jadi ini bind-address            = 0.0.0.0
 
-- selanjutnya
+atau jika tidak ada tambahkan saja ip yang ingin di allow contoh
+bind-address = 0.0.0.0
 
-systemctl restart mariadb
+- selanjutnya
+systemctl status mysql
+systemctl restart mysql
+systemctl status mysql
 
 - buat user root dengan persen(%) agar connect ke semua ip 
 
-CREATE USER 'root'@'%' IDENTIFIED BY 'Welcome1';
+CREATE USER 'root'@'%' IDENTIFIED BY 'Welcome@1234';
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
 FLUSH PRIVILEGES;
 
@@ -41,3 +45,12 @@ ufw status
 *jika firewall mati abaikan selanjutnya
 
 - coba remote pakai tools seperti navicat dll
+
+- "BILA ADA ERROR Public Key Retrieval is not allowed"
+
+opsi 1
+alter user dengan mysql_native_password
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'Welcome@1234';
+
+opsi 2
+allowPublicKeyRetrieval=true di navicat atau dbeaver
