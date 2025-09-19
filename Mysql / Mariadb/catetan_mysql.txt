@@ -54,3 +54,5 @@ ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'Welcome@1234';
 
 opsi 2
 allowPublicKeyRetrieval=true di navicat atau dbeaver
+
+
