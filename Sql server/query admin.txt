@@ -162,6 +162,12 @@ JOIN sys.master_files f ON d.database_id = f.database_id
 GROUP BY d.name
 ORDER BY TotalSizeMB DESC;
 
+
+-----------------------------cek port sql server ------------------------------
+
+SELECT     local_net_address AS IP,    local_tcp_port AS PortFROM sys.dm_exec_connectionsWHERE session_id = @@SPID;
+
+
 -----------------------------cek tablespace
 SELECT     
     db.name AS database_name,
