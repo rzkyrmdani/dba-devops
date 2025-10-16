@@ -1,0 +1,185 @@
+PEMBUATAN AVAILABILITY GROUP SQL SERVER
+
+1. Matikan firewall atau allow port 5022 (port untuk AV)
+
+2. Backup Restore No Recovery
+
+    - Backup di PRIMARY
+
+ALTER DATABASE (NAMA DB) SET RECOVERY FULL;
+GO
+
+BACKUP DATABASE (NAMA DB)  TO DISK = '/var/opt/mssql/data/TestDB_full.bak' WITH INIT;
+BACKUP LOG (NAMA DB)  TO DISK = '/var/opt/mssql/data/TestDB_log.trn' WITH INIT;
+GO
+
+copy file backup ke server SECONDARY
+
+    - Restore di SECONDARY
+
+RESTORE DATABASE [DB_SILM_EM]
+FROM DISK = 'C:\Backup\DB_SILM_EM.bak'
+WITH 
+    MOVE 'DB_SILM_PLN_Data' TO 'D:\DATABASE\DB_SILM_EM.mdf',
+    MOVE 'DB_SILM_PLN_Log'  TO 'D:\DATABASE\DB_SILM_EM_log.ldf',
+    NORECOVERY,
+    REPLACE,
+    STATS = 10;
+GO
+RESTORE LOG [DB_SILM_EM]
+FROM DISK = 'C:\Backup\DB_SILM_EM.trn'
+WITH NORECOVERY, STATS = 10;
+GO
+
+3. Pembuatan Master Key dan Sertifikat untuk Autentikasi Endpoint AG
+
+PRIMARY
+
+--  Gunakan database Master
+USE master;
+GO
+
+--  Buat Database Master Key (diperlukan untuk melindungi kunci privat sertifikat)
+-- GANTI 'SandiKuatAnda123!' dengan sandi yang sangat aman dan simpan baik-baik!
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Plnpusat@2025!'; 
+GO
+
+-- Buat Sertifikat untuk Autentikasi Endpoint AG
+CREATE CERTIFICATE AG_Cert
+   WITH SUBJECT = 'AG Certificate for SQL HA';
+GO
+
+-- Cadangkan Sertifikat ke File .cer (Kunci Publik) dan .pvk (Kunci Privat)
+-- Pastikan folder 'C:\AG_Certs\' sudah ada dan SQL Server memiliki izin akses.
+BACKUP CERTIFICATE AG_Cert 
+   TO FILE = 'C:\Backup\AG_Cert.cer' 
+   WITH PRIVATE KEY (
+      FILE = 'C:\Backup\AG_Cert.pvk',
+      -- Gunakan sandi yang sama dengan yang Anda gunakan untuk MASTER KEY
+      ENCRYPTION BY PASSWORD = 'Plnpusat@2025!' 
+   );
+GO
+
+-- Periksa apakah sudah berhasil dibuat dan dicadangkan
+SELECT name, pvt_key_encryption_type_desc
+FROM sys.certificates
+WHERE name = 'AG_Cert';
+GO
+
+- Setelah dibuat Sertifikat Autentikasi Endpoint AG file nya copy ke server SECONDARY
+
+Pembuatan di SECONDARY
+
+-- Gunakan database Master
+USE master;
+GO
+
+-- Buat Database Master Key (jika belum ada di secondary replica ini)
+-- GANTI 'SandiKuatAnda123!' dengan sandi yang SAMA dengan yang digunakan di primary replica!
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Plnpusat@2025!'; 
+GO
+
+-- Buat Sertifikat di Secondary Replica
+-- Ambil dari file yang disalin dari Primary Replica
+CREATE CERTIFICATE AG_Cert
+   FROM FILE = 'C:\Backup\AG_Cert.cer' 
+   WITH PRIVATE KEY (
+      FILE = 'C:\Backup\AG_Cert.pvk',
+      -- Sandi ini adalah sandi yang melindungi kunci privat saat dicadangkan (langkah 4 di script primary)
+      DECRYPTION BY PASSWORD = 'Plnpusat@2025!'
+   );
+GO
+
+-- Periksa apakah sudah berhasil dibuat
+SELECT name, pvt_key_encryption_type_desc
+FROM sys.certificates
+WHERE name = 'AG_Cert';
+GO
+
+4. Tahap selanjutnya buat ENDPOINT 
+
+PRIMARY dan SECONDARY
+
+CREATE ENDPOINT [Hadr_endpoint]
+    AS TCP (LISTENER_PORT = 5022)
+    FOR DATABASE_MIRRORING (
+        ROLE = ALL,
+        AUTHENTICATION = CERTIFICATE AG_Cert,
+        ENCRYPTION = REQUIRED ALGORITHM AES
+    );
+GO
+ALTER ENDPOINT [Hadr_endpoint] STATE = STARTED;
+GO
+
+--- Cek di kedua server setelah pembuatan endpoint
+
+SELECT name, state_desc, role_desc, type_desc, protocol_desc, is_encryption_enabled
+FROM sys.database_mirroring_endpoints;
+
+5.	Berikutnya buat Availability Group di server PRIMARY
+
+CREATE AVAILABILITY GROUP [AG_SILM]
+    WITH (CLUSTER_TYPE = NONE)
+    FOR DATABASE [DB_SILM_EM]
+    REPLICA ON
+        N'SILM-SRV-DB\RDBSILM' WITH (
+            ENDPOINT_URL = N'TCP://10.1.49.16:5022',
+            AVAILABILITY_MODE = SYNCHRONOUS_COMMIT,
+            FAILOVER_MODE = MANUAL,
+            SEEDING_MODE = AUTOMATIC,
+            SECONDARY_ROLE(ALLOW_CONNECTIONS = ALL)
+        ),
+        N'SILM-DB-SQL\RDBSILM' WITH (
+            ENDPOINT_URL = N'TCP://10.1.49.18:5022',
+            AVAILABILITY_MODE = SYNCHRONOUS_COMMIT,
+            FAILOVER_MODE = MANUAL,
+            SEEDING_MODE = AUTOMATIC,
+            SECONDARY_ROLE(ALLOW_CONNECTIONS = ALL)
+        );
+GO
+
+6.	Setelah berhasil join-kan SECONDARY ke PRIMARY
+
+ALTER AVAILABILITY GROUP [AG_SILM] JOIN WITH (CLUSTER_TYPE = NONE);
+ALTER DATABASE [DB_SILM_EM] SET HADR AVAILABILITY GROUP = [AG_SILM];
+GO
+
+7.	Buat SECONDARY jadi READ_ONLY
+
+ALTER AVAILABILITY GROUP [AG_SILM]
+ 	 MODIFY REPLICA ON
+ 	 N'SILM-DB-SQL\RDBSILM' WITH (SECONDARY_ROLE (ALLOW_CONNECTIONS = READ_ONLY));
+ GO
+
+ALTER AVAILABILITY GROUP [AG_SILM]
+ 	 MODIFY REPLICA ON
+ 	 N'SILM-SRV-DB\RDBSILM' WITH (SECONDARY_ROLE (ALLOW_CONNECTIONS = READ_ONLY));
+ GO
+
+
+8.	Cek status replica
+
+SELECT 
+    DB_NAME(drs.database_id) AS DatabaseName,
+    drs.is_primary_replica,
+    drs.synchronization_state_desc,
+    drs.synchronization_health_desc,
+    drs.log_send_queue_size,
+    drs.redo_queue_size,
+    drs.last_commit_time
+FROM sys.dm_hadr_database_replica_states drs;
+
+SELECT 
+    ag.name AS [AG_Name],
+    ar.replica_server_name AS [Replica_Name],
+    ar.availability_mode_desc AS [Availability_Mode],
+    ar.failover_mode_desc AS [Failover_Mode],
+    ar.secondary_role_allow_connections_desc AS [Readable_Secondary],
+    ar.session_timeout AS [Timeout],
+    ars.role_desc AS [Current_Role]
+FROM sys.availability_groups ag
+JOIN sys.availability_replicas ar
+    ON ag.group_id = ar.group_id
+JOIN sys.dm_hadr_availability_replica_states ars
+    ON ar.replica_id = ars.replica_id;
+
