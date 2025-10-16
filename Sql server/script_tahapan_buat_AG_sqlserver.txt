@@ -1,4 +1,4 @@
-PEMBUATAN AVAILABILITY GROUP SQL SERVER
+--- PEMBUATAN AVAILABILITY GROUP SQL SERVER ---
 
 1. Matikan firewall atau allow port 5022 (port untuk AV)
 
