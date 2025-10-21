@@ -184,6 +184,55 @@ JOIN sys.dm_hadr_availability_replica_states ars
     ON ar.replica_id = ars.replica_id;
 
 =========================================== JIKA UNTUK CLUSTER_TYPE ==============================================
+
+---- Tahap Pembuatan Cluster di windows (PRIMARY dan SECONDARY) via powershell
+
+(Lakukan test ping di kedua server, pastikan saling memanggil dan firewall di allow atau di matikan dulu)
+
+---- Jika gagal ping buat ip dan hostname di kedua server
+    C:\Windows\System32\drivers\etc\hosts
+    192.168.56.163 WIN-AI8QO1LDIKV
+    192.168.56.167 WIN-LMJJ6V4DD2D
+
+---- lakukan installasi cluster di kedua server
+
+Install-WindowsFeature Failover-Clustering -IncludeManagementTools
+
+--- lakukan test di kedua server
+
+Test-Cluster -Node WIN-AI8QO1LDIKV(NAMA HOSTNAME), WIN-LMJJ6V4DD2D(NAMA HOSTNAME)
+
+--- pastikan ip 200 kosong. jika kosong maka RTO
+ping 192.168.56.200 (ip untuk pembuatan Cluster virtual di salah 1 server yg ingin dibuat)
+
+--- Buat cluster di salah satu server (PRIMARY atau SECONDARY)
+    
+    New-Cluster `
+    -Name CLUSTERSQLTEST `
+    -Node WIN-AI8QO1LDIKV, WIN-LMJJ6V4DD2D `
+    -StaticAddress 192.168.56.200 `
+    -NoStorage `
+    -AdministrativeAccessPoint DNS
+
+Penjelasan:
+-Name → nama cluster (bebas)
+-Node → dua server
+-StaticAddress → IP virtual cluster
+-NoStorage → karena kita tidak pakai shared disk
+-AdministrativeAccessPoint DNS → paling aman, gunakan DNS mode (tanpa AD objek
+
+---- Cek cluster dan Pastikan kedua server bisa baca status cluster
+    
+    Get-Cluster
+    Get-ClusterNode
+    Get-ClusterNetwork
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+JIKA TELAH SELESAI PEMBUATAN CLUSTER SELANJUTNYA PEMBUATAN ENDPOINT, AVAILABILITY GROUP DAN TEST FAILOVER
+------------------------------------------------------------------------------------------------------------------------------
+
 ---- Buat ENDPOINT
 
 PRIMARY dan SECONDARY
