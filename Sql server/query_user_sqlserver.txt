@@ -1,0 +1,100 @@
+USE master;
+GO
+SET NOCOUNT ON;
+
+DECLARE @sql NVARCHAR(MAX) = N'';
+DECLARE @crlf CHAR(2) = CHAR(13) + CHAR(10);
+
+-- ==============================================
+-- 1️⃣ Backup semua LOGIN (SQL + Windows)
+-- ==============================================
+SELECT @sql +=
+'-- ==============================================' + @crlf +
+'-- Login: [' + sp.name + ']' + @crlf +
+'-- ==============================================' + @crlf +
+'CREATE LOGIN [' + sp.name + '] ' +
+CASE 
+    WHEN sp.type_desc = 'SQL_LOGIN' 
+        THEN 'WITH PASSWORD = ' + CONVERT(NVARCHAR(MAX), sl.password_hash, 1) + 
+             ' HASHED, CHECK_POLICY = ' + 
+             CASE WHEN sl.is_policy_checked = 1 THEN 'ON' ELSE 'OFF' END + 
+             ', CHECK_EXPIRATION = ' + 
+             CASE WHEN sl.is_expiration_checked = 1 THEN 'ON' ELSE 'OFF' END + ';'
+    WHEN sp.type_desc = 'WINDOWS_LOGIN' THEN 'FROM WINDOWS;'
+    WHEN sp.type_desc = 'WINDOWS_GROUP' THEN 'FROM WINDOWS;'
+END + @crlf +
+'ALTER LOGIN [' + sp.name + '] ENABLE;' + @crlf +
+'GO' + @crlf + @crlf
+FROM sys.server_principals sp
+LEFT JOIN sys.sql_logins sl ON sp.principal_id = sl.principal_id
+WHERE sp.type IN ('S', 'U', 'G')  -- SQL_LOGIN, WINDOWS_LOGIN, WINDOWS_GROUP
+  AND sp.name NOT LIKE '##%'      -- abaikan login sistem
+  AND sp.name NOT IN ('sa');      -- opsional: abaikan login sa
+
+-- ==============================================
+-- 2️⃣ Backup Server Role Membership
+-- ==============================================
+SET @sql += '-- ==============================================' + @crlf +
+'-- SERVER ROLE MEMBERSHIPS' + @crlf +
+'-- ==============================================' + @crlf;
+
+SELECT @sql += 
+'EXEC sp_addsrvrolemember @loginame = N''' + m.name + ''', @rolename = N''' + r.name + ''';' + @crlf
+FROM sys.server_role_members rm
+JOIN sys.server_principals r ON rm.role_principal_id = r.principal_id
+JOIN sys.server_principals m ON rm.member_principal_id = m.principal_id
+WHERE m.type IN ('S', 'U', 'G')
+  AND m.name NOT LIKE '##%';
+
+-- ==============================================
+-- 3️⃣ Backup Server-level Permissions
+-- ==============================================
+SET @sql += '-- ==============================================' + @crlf +
+'-- SERVER PERMISSIONS' + @crlf +
+'-- ==============================================' + @crlf;
+
+SELECT @sql += 
+'GRANT ' + permission_name + ' TO [' + sp.name + '];' + @crlf
+FROM sys.server_permissions p
+JOIN sys.server_principals sp ON p.grantee_principal_id = sp.principal_id
+WHERE sp.type IN ('S', 'U', 'G')
+  AND sp.name NOT LIKE '##%';
+
+-- ==============================================
+-- 4️⃣ Tampilkan Hasil Script
+-- ==============================================
+PRINT @sql;
+
+
+================================================================================================================================================================================
+JIKA DIATAS HANYA KELUAR SCRIPT CREATE LOGIN SAJA TIDAK ADA BACKUP ROLE DAN BACKUP PERMISSIONS
+================================================================================================================================================================================
+
+Backup Role Membership (Server Roles)
+
+-- ==============================================
+-- SERVER ROLE MEMBERSHIPS
+-- ==============================================
+SELECT 
+    'EXEC sp_addsrvrolemember @loginame = N''' + m.name + ''', @rolename = N''' + r.name + ''';' AS ScriptRole
+FROM sys.server_role_members rm
+JOIN sys.server_principals r ON rm.role_principal_id = r.principal_id
+JOIN sys.server_principals m ON rm.member_principal_id = m.principal_id
+WHERE m.type IN ('S', 'U', 'G')
+  AND m.name NOT LIKE '##%';
+
+Backup Server-Level Permissions
+
+-- ==============================================
+-- SERVER-LEVEL PERMISSIONS (FIXED COLLATION)
+-- ==============================================
+SELECT 
+    'GRANT ' + p.permission_name COLLATE DATABASE_DEFAULT + 
+    ' TO [' + sp.name COLLATE DATABASE_DEFAULT + '];' AS ScriptPermission
+FROM sys.server_permissions p
+JOIN sys.server_principals sp 
+    ON p.grantee_principal_id = sp.principal_id
+WHERE sp.type IN ('S', 'U', 'G')
+  AND sp.name NOT LIKE '##%';
+
+
