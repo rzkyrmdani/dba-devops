@@ -9,22 +9,21 @@ DECLARE @crlf CHAR(2) = CHAR(13) + CHAR(10);
 -- 1️⃣ Backup semua LOGIN (SQL + Windows)
 -- ==============================================
 SELECT @sql +=
-'-- ==============================================' + @crlf +
-'-- Login: [' + sp.name + ']' + @crlf +
-'-- ==============================================' + @crlf +
-'CREATE LOGIN [' + sp.name + '] ' +
+N'-- ==============================================' + @crlf +
+N'-- Login: [' + sp.name COLLATE DATABASE_DEFAULT + N']' + @crlf +
+N'-- ==============================================' + @crlf +
+N'CREATE LOGIN [' + sp.name COLLATE DATABASE_DEFAULT + N'] ' +
 CASE 
     WHEN sp.type_desc = 'SQL_LOGIN' 
-        THEN 'WITH PASSWORD = ' + CONVERT(NVARCHAR(MAX), sl.password_hash, 1) + 
-             ' HASHED, CHECK_POLICY = ' + 
-             CASE WHEN sl.is_policy_checked = 1 THEN 'ON' ELSE 'OFF' END + 
-             ', CHECK_EXPIRATION = ' + 
-             CASE WHEN sl.is_expiration_checked = 1 THEN 'ON' ELSE 'OFF' END + ';'
-    WHEN sp.type_desc = 'WINDOWS_LOGIN' THEN 'FROM WINDOWS;'
-    WHEN sp.type_desc = 'WINDOWS_GROUP' THEN 'FROM WINDOWS;'
+        THEN N'WITH PASSWORD = ' + CONVERT(NVARCHAR(MAX), sl.password_hash, 1) + 
+             N' HASHED, CHECK_POLICY = ' + 
+             CASE WHEN sl.is_policy_checked = 1 THEN N'ON' ELSE N'OFF' END + 
+             N', CHECK_EXPIRATION = ' + 
+             CASE WHEN sl.is_expiration_checked = 1 THEN N'ON' ELSE N'OFF' END + N';'
+    WHEN sp.type_desc IN ('WINDOWS_LOGIN', 'WINDOWS_GROUP') THEN N'FROM WINDOWS;'
 END + @crlf +
-'ALTER LOGIN [' + sp.name + '] ENABLE;' + @crlf +
-'GO' + @crlf + @crlf
+N'ALTER LOGIN [' + sp.name COLLATE DATABASE_DEFAULT + N'] ENABLE;' + @crlf +
+N'GO' + @crlf + @crlf
 FROM sys.server_principals sp
 LEFT JOIN sys.sql_logins sl ON sp.principal_id = sl.principal_id
 WHERE sp.type IN ('S', 'U', 'G')  -- SQL_LOGIN, WINDOWS_LOGIN, WINDOWS_GROUP
@@ -34,12 +33,13 @@ WHERE sp.type IN ('S', 'U', 'G')  -- SQL_LOGIN, WINDOWS_LOGIN, WINDOWS_GROUP
 -- ==============================================
 -- 2️⃣ Backup Server Role Membership
 -- ==============================================
-SET @sql += '-- ==============================================' + @crlf +
-'-- SERVER ROLE MEMBERSHIPS' + @crlf +
-'-- ==============================================' + @crlf;
+SET @sql += N'-- ==============================================' + @crlf +
+N'-- SERVER ROLE MEMBERSHIPS' + @crlf +
+N'-- ==============================================' + @crlf;
 
 SELECT @sql += 
-'EXEC sp_addsrvrolemember @loginame = N''' + m.name + ''', @rolename = N''' + r.name + ''';' + @crlf
+N'EXEC sp_addsrvrolemember @loginame = N''' + m.name COLLATE DATABASE_DEFAULT + 
+N''', @rolename = N''' + r.name COLLATE DATABASE_DEFAULT + N''';' + @crlf
 FROM sys.server_role_members rm
 JOIN sys.server_principals r ON rm.role_principal_id = r.principal_id
 JOIN sys.server_principals m ON rm.member_principal_id = m.principal_id
@@ -49,12 +49,13 @@ WHERE m.type IN ('S', 'U', 'G')
 -- ==============================================
 -- 3️⃣ Backup Server-level Permissions
 -- ==============================================
-SET @sql += '-- ==============================================' + @crlf +
-'-- SERVER PERMISSIONS' + @crlf +
-'-- ==============================================' + @crlf;
+SET @sql += N'-- ==============================================' + @crlf +
+N'-- SERVER PERMISSIONS' + @crlf +
+N'-- ==============================================' + @crlf;
 
 SELECT @sql += 
-'GRANT ' + permission_name + ' TO [' + sp.name + '];' + @crlf
+N'GRANT ' + permission_name COLLATE DATABASE_DEFAULT + 
+N' TO [' + sp.name COLLATE DATABASE_DEFAULT + N'];' + @crlf
 FROM sys.server_permissions p
 JOIN sys.server_principals sp ON p.grantee_principal_id = sp.principal_id
 WHERE sp.type IN ('S', 'U', 'G')
@@ -63,7 +64,8 @@ WHERE sp.type IN ('S', 'U', 'G')
 -- ==============================================
 -- 4️⃣ Tampilkan Hasil Script
 -- ==============================================
-PRINT @sql;
+SELECT @sql AS BackupScript;
+
 
 
 ================================================================================================================================================================================
