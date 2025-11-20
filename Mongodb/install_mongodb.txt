@@ -2,8 +2,8 @@
 
 ---- install mongodb di rocky linux ----
 
-Mongodb version 4.4 jika error Karena CPU Anda tidak punya AVX, maka SEMUA versi MongoDB resmi (5, 6, 7) akan crash Illegal Instruction
-maka install mongodb versi 4.4
+Mongodb version 4.4 jika error Karena CPU Anda tidak punya AVX, maka SEMUA versi MongoDB resmi (5, 6, 7) 
+akan crash Illegal Instruction maka install mongodb versi 4.4
 
 1. Hapus MongoDB sebelumnya:
 sudo dnf remove -y mongodb-org*
