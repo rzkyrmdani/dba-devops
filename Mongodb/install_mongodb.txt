@@ -1,0 +1,30 @@
+============================================= INSTALL MONGODB =================================
+
+---- install mongodb di rocky linux ----
+
+Mongodb version 4.4 jika error Karena CPU Anda tidak punya AVX, maka SEMUA versi MongoDB resmi (5, 6, 7) akan crash Illegal Instruction
+maka install mongodb versi 4.4
+
+1. Hapus MongoDB sebelumnya:
+sudo dnf remove -y mongodb-org*
+sudo rm -f /etc/yum.repos.d/mongodb-org-*.repo
+
+2. Tambahkan repo MongoDB 4.4:
+sudo tee /etc/yum.repos.d/mongodb-org-4.4.repo <<EOF
+[mongodb-org-4.4]
+name=MongoDB 4.4 Repository
+baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/4.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+EOF
+
+3. Install MongoDB 4.4:
+sudo dnf install -y mongodb-org
+
+4. Cek service mongodb
+sudo systemctl enable --now mongod
+systemctl status mongod
+
+5. Cek versi mongodb
+mongod --version
