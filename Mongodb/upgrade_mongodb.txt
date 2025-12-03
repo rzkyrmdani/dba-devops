@@ -3,9 +3,20 @@
 
 ---------Berikut ini upgrade mongodb dari 4 ke 7 dengan bertahap --> 4 -> 5 -> 6 -> 7
 
----- pertama dari mongodb 4 ke mongodb 5
+============== pertama dari mongodb 4 ke mongodb 5 =======================================
 
-- Tambahkan repo MongoDB 5.0 untuk Rocky Linux / RHEL8
+1. PASTIKAN DATABASE BACKUP DAHULU
+
+---- *PASTIKAN BACKUP DATABASE TERLEBIH DAHULU
+
+- Backup MongoDB
+mongodump --out /backup/mongodb/backup_$(date +%F_%H-%M-%S)
+
+- Backup MongoDB memakai autentikasi (username/password)
+mongodump --username root --password "welcome12345" --authenticationDatabase admin \
+          --out /backup/mongodb/backup_$(date +%F_%H-%M-%S)
+
+2. TAMBAHKAN REPO MONGODB 5.0 untuk Rocky Linux / RHEL8
 
 sudo tee /etc/yum.repos.d/mongodb-org-5.0.repo <<EOF
 [mongodb-org-5.0]
@@ -16,23 +27,23 @@ enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-5.0.asc
 EOF
 
-- Install paket server 5.0
+3. INSTALL PAKET SERVER 5.0
 
 sudo yum install -y mongodb-org-server-5.0.31 mongodb-org-mongos-5.0.31 mongodb-org-shell-5.0.31 mongodb-org-tools-5.0.31
 
-- Stop MongoDB versi 4.4
+4. MATIKAN SERVICE MONGODB VERSI 4
 
 sudo systemctl stop mongod
 
-- Remove MongoDB 4.4 SERVER (AMAN, DATA TIDAK DIHAPUS)
+5. Remove MongoDB 4.4 SERVER (AMAN, DATA TIDAK DIHAPUS)
 
 sudo yum remove -y mongodb-org-server-4.4.29 mongodb-org-mongos-4.4.29 mongodb-org-shell-4.4.29 mongodb-org-tools-4.4.29
 
-- Start MongoDB 5.0
+6. Hidupkan Service MongoDB 5.0
 
 sudo systemctl start mongod
 
-- Verifikasi versi
+7. Cek version database mongodb
 
 mongod --version
 
@@ -74,4 +85,104 @@ switched to db admin
 
 *JIKA SUKSES MAKA AKAN MUNCULKAN OK 1
 
+
+====================== SELANJUTNYA UPGRADE DARI MONGODB VERSI 5 ke 6 ============================
+
+1 BACKUP
+
+---- *PASTIKAN BACKUP DATABASE TERLEBIH DAHULU
+
+opsi 1
+
+- Backup MongoDB
+mongodump --out /backup/mongodb/backup_$(date +%F_%H-%M-%S)
+
+- Backup MongoDB memakai autentikasi (username/password)
+mongodump --username root --password "welcome12345" --authenticationDatabase admin \
+          --out /backup/mongodb/backup_$(date +%F_%H-%M-%S)
+
+opsi 2
+
+- Matikan service database
+systemctl stop mongod
+systemctl status mongod
+
+- Backup full data direktori
+cp -a /var/lib/mongo /var/lib/mongo-backup-before-6
+
+- Hidupkan kembali service database
+systemctl status mongod
+systemctl start mongod
+
+2. Disable & remove paket MongoDB 5.0
+
+- Matikan service database
+systemctl stop mongod
+
+- uninstall mongodb versi 5
+sudo yum erase -y mongodb-org mongodb-org-server mongodb-org-shell mongodb-org-mongos mongodb-org-tools
+
+3. Tambahkan MongoDB 6.0 Repository
+
+- buat repo baru mongodb versi 6
+
+sudo tee /etc/yum.repos.d/mongodb-org-6.0.repo <<EOF
+[mongodb-org-6.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/6.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-6.0.asc
+EOF
+
+4. Install MongoDB 6.0
+
+sudo yum install -y mongodb-org
+
+5. Start MongoDB 6.0
+
+systemctl status mongod
+systemctl start mongod
+systemctl enable mongod
+
+6. Cek version database mongodb
+
+mongod --version
+
+output = 
+db version v6.0.26
+Build Info: {
+    "version": "6.0.26",
+    "gitVersion": "0c4ec4b6005f75582ce208fc800f09f561b6c2e8",
+    "openSSLVersion": "OpenSSL 1.1.1k  25 Mar 2021",
+    "modules": [],
+    "allocator": "tcmalloc",
+    "environment": {
+        "distmod": "rhel80",
+        "distarch": "x86_64",
+        "target_arch": "x86_64"
+    }
+}
+
+
+7. Cek status database
+
+mongosh --username root --authenticationDatabase admin
+password : welcome12345
+
+db.runCommand({ serverStatus: 1 })
+
+***PASTIKAN TIDAK ADA error
+
+8. Set Feature Compatibility Version (FCV) ke 6.0
+
+*** WAJIB (kalau tidak, upgrade ke 7.0 nanti gagal)
+
+mongosh --username root --authenticationDatabase admin
+password : welcome12345
+
+use admin
+db.adminCommand({ setFeatureCompatibilityVersion: "6.0" })
+
+***PASTIKAN OUTPUT HARUS OK : 1
 
