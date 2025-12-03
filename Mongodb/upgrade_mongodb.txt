@@ -54,7 +54,8 @@ Build Info: {
 ------- *MONGODB VERSI 5 BERHASIL DIINSTALL
 
 - Setelah MongoDB 5.0 berjalan stabil
-wajib set Feature Compatibility Version (FCV)
+wajib set Feature Compatibility Version (FCV) 
+--> untuk alasannya kenapa wajib di set ada di file FCV (Feature Compatibility Version)
 
 (masuk sebagai root)
 

@@ -1,0 +1,16 @@
+
+Feature Compatibility Version (FCV) di MongoDB
+
+Apa itu FCV (Feature Compatibility Version)?
+FCV = level fitur yang diizinkan MongoDB untuk digunakan setelah upgrade.
+
+MongoDB selalu menjaga backward compatibility setelah upgrade, agar database tetap dapat berjalan
+tanpa merusak data. Namun MongoDB tidak otomatis mengaktifkan fitur baru sampai Anda mengatur FCV
+secara manual.
+
+Kenapa FCV perlu diset?
+Saat Anda upgrade MongoDB dari 4.4 → 5.0:
+ - Binary server sudah versi 5.0
+ - Tetapi FCV masih diset ke 4.4
+
+Contoh hasilnya:
