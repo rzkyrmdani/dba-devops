@@ -14,3 +14,85 @@ Saat Anda upgrade MongoDB dari 4.4 → 5.0:
  - Tetapi FCV masih diset ke 4.4
 
 Contoh hasilnya:
+mongod --version = 5.0
+FCV = 4.4
+
+Artinya:
+MongoDB berjalan dalam mode compatibility
+Server 5.0 berpura-pura menjadi 4.4 supaya tetap bisa membaca data lama secara aman.
+
+Fitur-fitur baru 5.0 tidak aktif
+
+    Misalnya:
+    - Time-series collection improvements
+    - Versioned API
+    - Online archival changes
+    - Resharding improvements
+    - Aggregation pipeline fitur baru
+
+Format data internal tidak di-upgrade
+    Data file dan metadata masih dalam format 4.4.
+
+Apa dampaknya kalau FCV tidak diset?
+    
+    1. Anda tidak bisa upgrade ke MongoDB 6.0
+
+    Karena syaratnya:
+        MongoDB 6.0 hanya bisa di-upgrade dari:
+        5.0 dengan FCV = 5.0
+        Jika FCV masih 4.4, upgrade akan gagal.
+    
+    2. Risiko korupsi metadata bila menggunakan fitur 5.0
+    Server 5.0 tidak akan menjaga kompatibilitas jika Anda coba pakai fitur 5.0 tanpa FCV 5.0.
+
+    3. Beberapa query dan fitur akan gagal
+    Contoh:
+        Index versioning baru tidak aktif
+        Perubahan behaviour aggregation
+        Time-series compression 5.0 tidak aktif
+        Change streams di cluster tertentu tidak jalan
+    
+    4. Anda akan berada di "limbo mode"
+    Server sudah 5.0 tetapi tetap berjalan mode lama → tidak stabil untuk jangka panjang.
+
+Kenapa MongoDB tidak otomatis set FCV?
+    Karena:
+
+        1. MongoDB ingin memastikan database stabil setelah upgrade
+        2. Memberi kesempatan untuk rollback ke versi lama tanpa merusak data
+        3. Memberi admin waktu mengecek log / aplikasi sebelum commit final
+
+FCV adalah "commit upgrade".
+
+Apa yang terjadi ketika FCV diset ke 5.0?
+
+Saat menjalankan: db.adminCommand({ setFeatureCompatibilityVersion: "5.0" })
+
+    MongoDB akan:
+
+    1. Mengupgrade metadata internal
+
+        Termasuk:
+           - system.version
+           - cluster settings
+           - collection metadata
+
+    2. Mengaktifkan fitur server versi 5.0
+
+    3. Menonaktifkan backward compatibility ke 4.4
+    Tidak bisa lagi downgrading.
+
+    4. Mengizinkan upgrade ke 6.0 dan 7.0
+
+Apakah ada downtime ketika menjalankan command tersebut?
+Tidak. Perintah FCV berjalan online, tidak restart, tidak lock collection.
+
+Kapan wajib menjalankan FCV?
+Segera setelah:
+    1. Paket MongoDB 5.0 terinstall
+    2. Server berhasil start
+    3. Anda yakin sistem berjalan normal
+
+JADI KESIMPULANNYA :
+    FCV --> Tidak diset Maka dampaknya tidak bisa upgrade, fitur 5.0 tidak aktif, risk mode
+    FCV --> Diset 5.0 Maka dampaknya Database fully upgraded, aman untuk naik ke versi berikutnya
