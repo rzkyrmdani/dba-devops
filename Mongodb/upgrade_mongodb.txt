@@ -186,3 +186,81 @@ db.adminCommand({ setFeatureCompatibilityVersion: "6.0" })
 
 ***PASTIKAN OUTPUT HARUS OK : 1
 
+
+
+====================== SELANJUTNYA UPGRADE DARI MONGODB VERSI 5 ke 6 ============================
+
+1. CEK VERSI DATABASE MONGODB
+mongod --version
+
+Pastikan output version 6.0.x.
+
+2. Set Feature Compatibility Version (FCV) ke 6.0
+mongosh --username root --authenticationDatabase admin
+password : welcome12345
+
+db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 }) --> jalankan ini maka akan
+{ featureCompatibilityVersion: { version: '6.0' }, ok: 1 } ----> munculkan output ini
+
+3. MATIKAN SERVICE
+systemctl stop mongod
+systemctl status mongod
+
+4. REMOVE PAKET MONGODB 6 (AMAN, TIDAK MENGHAPUS DATA)
+yum remove -y mongodb-org-server-6.0.26 \
+              mongodb-org-mongos-6.0.26 \
+              mongodb-org-shell-6.0.26 \
+              mongodb-org-tools-6.0.26 \
+              mongodb-org-database-6.0.26 \
+              mongodb-org-database-tools-extra-6.0.26
+
+
+5. TAMBAH REPOSITORY MONGODB 7.0
+nano /etc/yum.repos.d/mongodb-org-7.0.repo
+
+[mongodb-org-7.0]
+name=MongoDB 7.0 Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/7.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
+
+6. UPGRADE KE MONGODB 7.0
+yum install -y mongodb-org
+
+7. CEK VERSI BINARY
+
+mongod --version
+db version v7.0.26
+Build Info: {
+    "version": "7.0.26",
+    "gitVersion": "715b3bbc6c34cecc42ffc77ef77d24f71e240e94",
+    "openSSLVersion": "OpenSSL 3.2.2 4 Jun 2024",
+    "modules": [],
+    "allocator": "tcmalloc",
+    "environment": {
+        "distmod": "rhel90",
+        "distarch": "x86_64",
+        "target_arch": "x86_64"
+    }
+}
+
+
+8. HIDUPKAN SERVICE
+systemctl start mongod
+systemctl status mongod
+
+
+9. SET FCV 
+mongosh --username root --authenticationDatabase admin
+
+admin> db.adminCommand({ setFeatureCompatibilityVersion: "7.0", confirm: true }
+
+admin> db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })
+
+
+10. MASUK MONGOSH & CEK VERSI
+ mongosh --username root --authenticationDatabase admin
+Enter password: ************
+test> db.version()
+7.0.26
