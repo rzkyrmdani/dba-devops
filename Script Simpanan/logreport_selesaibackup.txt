@@ -1,0 +1,72 @@
+param(
+    [string]$Status      = "FAILED",
+    [string]$StartTime   = "",
+    [string]$EndTime     = "",
+    [string]$Description = "",
+    [string]$Size        = "-",
+    [string]$Method      = "SQLSERVER"
+)
+
+# ==============================
+# KONFIGURASI
+# ==============================
+$Database = "SMARTER"
+
+$PSCP     = "C:\Program Files\PuTTY\pscp.exe"
+$SCP_IP   = "10.14.152.62"
+$SCP_PORT = 6969
+$SCP_USER = "icon"
+$SCP_PASS = "R4in!Sc0mFOrT1nG"
+$SCP_DIR  = "/Backup_Database/Database/report_db/smarter"
+
+$TempDir = "$env:TEMP\sqlserver_report"
+if (!(Test-Path $TempDir)) { New-Item -ItemType Directory -Path $TempDir | Out-Null }
+
+# ==============================
+# TIME
+# ==============================
+$StartDT = if ($StartTime) { [datetime]::ParseExact($StartTime,"yyyy-MM-dd_HH:mm:ss",$null) } else { Get-Date }
+$EndDT   = if ($EndTime)   { [datetime]::ParseExact($EndTime,"yyyy-MM-dd_HH:mm:ss",$null) } else { Get-Date }
+$Duration = New-TimeSpan $StartDT $EndDT
+
+# ==============================
+# LOG FILE
+# ==============================
+$DateStr = Get-Date -Format "dd-MM-yyyy"
+$LogFile = Join-Path $TempDir "$DateStr`_$Database.log"
+
+$Log = @"
+========================================
+Backup SQL Server Report
+========================================
+Status      : $Status
+Database    : $Database
+Description : $Description
+Start       : $($StartDT.ToString("dd-MM-yyyy HH:mm:ss"))
+End         : $($EndDT.ToString("dd-MM-yyyy HH:mm:ss"))
+Duration    : $($Duration.ToString("hh\:mm\:ss"))
+Size        : $Size
+Method      : $Method
+
+Generated   : $(Get-Date -Format "dd-MM-yyyy HH:mm:ss")
+========================================
+"@
+
+$Log | Out-File $LogFile -Encoding UTF8 -Force
+
+# ==============================
+# UPLOAD LOG
+# ==============================
+& "$PSCP" `
+  -P $SCP_PORT `
+  -pw $SCP_PASS `
+  "$LogFile" `
+  ("{0}@{1}:{2}" -f $SCP_USER, $SCP_IP, $SCP_DIR)
+
+if ($LASTEXITCODE -eq 0) {
+    Remove-Item $LogFile -Force
+    Write-Host "[SUCCESS] Log terkirim ke server"
+} else {
+    Write-Host "[ERROR] Upload log gagal"
+    exit 1
+}
