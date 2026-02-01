@@ -1,0 +1,9 @@
+
+
+packed instalasi postgresql
+
+postgresql15-15.15-4PGDG.rhel7.x86_64.rpm -----> untuk akses & administrasi database dari command line masuk ke server db (wajib)
+postgresql15-contrib-15.15-4PGDG.rhel7.x86_64.rpm -----> untuk ekstension postgresql kaya pg_statment dll (wajib/option)
+postgresql15-libs-15.15-4PGDG.rhel7.x86_64.rpm ----> instalasi postgrenya tanpa ini postgresql tidak jalan (wajib)
+postgresql15-server-15.15-4PGDG.rhel7.x86_64.rpm -----> mesin dbnya (wajib)
+
